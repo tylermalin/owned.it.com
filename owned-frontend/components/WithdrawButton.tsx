@@ -30,7 +30,7 @@ export function WithdrawButton() {
     };
 
     const isLoading = isPending || isConfirming;
-    const hasBalance = balance && balance > BigInt(0);
+    const hasBalance = balance && (balance as bigint) > BigInt(0);
 
     return (
         <button
