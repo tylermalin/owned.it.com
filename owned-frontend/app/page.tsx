@@ -143,11 +143,11 @@ export default function Home() {
                 <h3 className="text-3xl font-bold">Editorial Checkout</h3>
                 <p className="text-lg text-muted-foreground font-medium">A high-conversion checkout experience that looks like a luxury magazine. Optimized for trust.</p>
               </div>
-              <div className="w-full md:w-1/2 aspect-square bg-slate-50 rounded-2xl overflow-hidden border border-border shadow-sm">
+              <div className="w-full md:w-1/2 aspect-[16/9] bg-slate-50 rounded-2xl overflow-hidden border border-border shadow-sm relative">
                 <img
-                  src="/assets/checkout_preview.png"
-                  alt="Editorial Checkout Preview"
-                  className="w-full h-full object-cover"
+                  src="/assets/dashboard_preview.png"
+                  alt="Platform Dashboard Preview"
+                  className="w-full h-full object-cover object-top"
                 />
               </div>
             </div>
