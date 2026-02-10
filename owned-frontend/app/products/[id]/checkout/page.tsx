@@ -207,12 +207,10 @@ export default function CheckoutPage() {
         <div className="min-h-screen bg-slate-50 py-20 px-6">
             <div className="max-w-2xl mx-auto">
                 <div className="bg-white rounded-[3.5rem] shadow-saas border border-border overflow-hidden">
-                    {/* Header */}
                     <div className="p-10 border-b border-border bg-slate-50/50 flex justify-between items-center">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center font-black text-white italic">O</div>
-                            <span className="font-extrabold tracking-tighter text-xl text-foreground">OWNED.</span>
-                        </div>
+                        <Link href="/" className="flex items-center">
+                            <img src="/assets/logo.png" alt="OWNED" className="h-8 w-auto hover:brightness-110 transition-all" />
+                        </Link>
                         <ConnectButton />
                     </div>
 
@@ -293,6 +291,6 @@ export default function CheckoutPage() {
                     </Link>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
