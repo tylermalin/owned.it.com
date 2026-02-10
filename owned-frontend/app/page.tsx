@@ -145,8 +145,8 @@ export default function Home() {
               </div>
               <div className="w-full md:w-1/2 aspect-[16/9] bg-slate-50 rounded-2xl overflow-hidden border border-border shadow-sm relative">
                 <img
-                  src="/assets/dashboard_preview.png"
-                  alt="Platform Dashboard Preview"
+                  src="/assets/checkout_preview.png"
+                  alt="Editorial Checkout Preview"
                   className="w-full h-full object-cover object-top"
                 />
               </div>
