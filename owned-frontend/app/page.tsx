@@ -8,8 +8,8 @@ export default function Home() {
       <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
           <div className="flex items-center gap-8">
-            <Link href="/" className="text-xl font-bold tracking-tight text-primary">
-              OWNED
+            <Link href="/" className="flex items-center">
+              <img src="/assets/logo.png" alt="OWNED" className="h-8 w-auto hover:scale-105 transition-transform" />
             </Link>
             <div className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
               <Link href="#features" className="hover:text-foreground transition-colors">Features</Link>
@@ -69,8 +69,12 @@ export default function Home() {
                 <div className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
                 <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
               </div>
-              <div className="aspect-[16/9] bg-slate-50 flex items-center justify-center">
-                <div className="text-muted-foreground font-medium text-lg">Platform Dashboard Preview</div>
+              <div className="aspect-[16/9] bg-slate-50 relative overflow-hidden">
+                <img
+                  src="/assets/dashboard_preview.png"
+                  alt="Platform Dashboard Preview"
+                  className="w-full h-full object-cover object-top"
+                />
               </div>
             </div>
             {/* Floating elements */}
@@ -139,7 +143,13 @@ export default function Home() {
                 <h3 className="text-3xl font-bold">Editorial Checkout</h3>
                 <p className="text-lg text-muted-foreground font-medium">A high-conversion checkout experience that looks like a luxury magazine. Optimized for trust.</p>
               </div>
-              <div className="w-full md:w-1/2 aspect-square bg-muted rounded-2xl" />
+              <div className="w-full md:w-1/2 aspect-square bg-slate-50 rounded-2xl overflow-hidden border border-border shadow-sm">
+                <img
+                  src="/assets/checkout_preview.png"
+                  alt="Editorial Checkout Preview"
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -192,7 +202,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="py-20 border-t border-border">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
-          <p className="text-primary font-bold text-xl">OWNED</p>
+          <img src="/assets/logo.png" alt="OWNED" className="h-6 w-auto opacity-80" />
           <div className="flex gap-8 text-sm font-medium text-muted-foreground">
             <Link href="#">Twitter</Link>
             <Link href="#">Discord</Link>
