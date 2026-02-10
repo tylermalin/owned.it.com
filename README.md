@@ -66,6 +66,12 @@ npm run dev
 
 ---
 
+## 🚀 Deployment
+
+For detailed instructions on hosting the dashboard on Vercel, see the [Deployment Guide](./DEPLOYMENT.md).
+
+---
+
 ## 📜 Principles
 
 - **Monetization first, audience second**: Own your revenue stream.
