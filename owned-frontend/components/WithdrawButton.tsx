@@ -22,7 +22,7 @@ export function WithdrawButton() {
     }, [error]);
 
     const handleWithdraw = () => {
-        if (!balance || balance === 0n) {
+        if (!balance || balance === BigInt(0)) {
             toast.error('No balance to withdraw');
             return;
         }
@@ -30,7 +30,7 @@ export function WithdrawButton() {
     };
 
     const isLoading = isPending || isConfirming;
-    const hasBalance = balance && balance > 0n;
+    const hasBalance = balance && balance > BigInt(0);
 
     return (
         <button
