@@ -208,8 +208,8 @@ export default function CheckoutPage() {
             <div className="max-w-2xl mx-auto">
                 <div className="bg-white rounded-[3.5rem] shadow-saas border border-border overflow-hidden">
                     <div className="p-10 border-b border-border bg-slate-50/50 flex justify-between items-center">
-                        <Link href="/" className="flex items-center">
-                            <img src="/assets/logo.png" alt="OWNED" className="h-8 w-auto hover:brightness-110 transition-all" />
+                        <Link href="/" className="flex items-center py-2 px-4">
+                            <img src="/assets/logo.png" alt="OWNED" className="h-14 w-auto hover:brightness-110 transition-all" />
                         </Link>
                         <ConnectButton />
                     </div>

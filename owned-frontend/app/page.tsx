@@ -8,8 +8,8 @@ export default function Home() {
       <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
           <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center">
-              <img src="/assets/logo.png" alt="OWNED" className="h-8 w-auto hover:scale-105 transition-transform" />
+            <Link href="/" className="flex items-center py-2">
+              <img src="/assets/logo.png" alt="OWNED" className="h-16 w-auto hover:scale-105 transition-transform" />
             </Link>
             <div className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
               <Link href="#features" className="hover:text-foreground transition-colors">Features</Link>
@@ -202,7 +202,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="py-20 border-t border-border">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
-          <img src="/assets/logo.png" alt="OWNED" className="h-6 w-auto opacity-80" />
+          <img src="/assets/logo.png" alt="OWNED" className="h-12 w-auto opacity-80" />
           <div className="flex gap-8 text-sm font-medium text-muted-foreground">
             <Link href="#">Twitter</Link>
             <Link href="#">Discord</Link>

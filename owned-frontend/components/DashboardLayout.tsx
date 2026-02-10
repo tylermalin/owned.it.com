@@ -94,8 +94,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <div className="min-h-screen bg-slate-50/50 flex">
             {/* Sidebar */}
             <aside className="w-72 bg-white border-r border-border sticky top-0 h-screen flex flex-col p-6 space-y-10">
-                <Link href="/" className="px-6 py-2">
-                    <img src="/assets/logo.png" alt="OWNED" className="h-8 w-auto hover:brightness-110 transition-all" />
+                <Link href="/" className="px-6 py-4">
+                    <img src="/assets/logo.png" alt="OWNED" className="h-14 w-auto hover:brightness-110 transition-all" />
                 </Link>
 
                 <nav className="flex-1 space-y-2">
