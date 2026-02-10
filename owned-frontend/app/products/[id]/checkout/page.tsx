@@ -207,7 +207,7 @@ export default function CheckoutPage() {
         <div className="min-h-screen bg-slate-50 py-20 px-6">
             <div className="max-w-2xl mx-auto">
                 <div className="bg-white rounded-[3.5rem] shadow-saas border border-border overflow-hidden">
-                    <div className="p-10 border-b border-border bg-slate-50/50 flex justify-between items-center">
+                    <div className="px-10 py-[10px] border-b border-border bg-slate-50/50 flex justify-between items-center">
                         <Link href="/" className="flex items-center py-2 px-4">
                             <img src="/assets/logo.png" alt="OWNED" className="w-[150px] h-[150px] object-contain hover:brightness-110 transition-all" />
                         </Link>
