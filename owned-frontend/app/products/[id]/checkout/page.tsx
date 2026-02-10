@@ -209,7 +209,7 @@ export default function CheckoutPage() {
                 <div className="bg-white rounded-[3.5rem] shadow-saas border border-border overflow-hidden">
                     <div className="p-10 border-b border-border bg-slate-50/50 flex justify-between items-center">
                         <Link href="/" className="flex items-center py-2 px-4">
-                            <img src="/assets/logo.png" alt="OWNED" className="h-14 w-auto hover:brightness-110 transition-all" />
+                            <img src="/assets/logo.png" alt="OWNED" className="w-[150px] h-[150px] object-contain hover:brightness-110 transition-all" />
                         </Link>
                         <ConnectButton />
                     </div>

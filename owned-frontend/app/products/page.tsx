@@ -12,7 +12,7 @@ export default function ProductsPage() {
             <header className="bg-white border-b border-border sticky top-0 z-50 backdrop-blur-md bg-white/80">
                 <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
                     <Link href="/" className="py-2">
-                        <img src="/assets/logo.png" alt="OWNED" className="h-14 w-auto hover:scale-105 transition-transform" />
+                        <img src="/assets/logo.png" alt="OWNED" className="w-[150px] h-[150px] object-contain hover:scale-105 transition-transform" />
                     </Link>
                     <ConnectButton />
                 </div>
