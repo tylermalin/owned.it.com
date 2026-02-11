@@ -3,6 +3,13 @@ import Link from 'next/link';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
+  title: "OWNED IT - Stack sats, not subscriptions",
+  description: "Crypto-native creator commerce. Get paid onchain without platform risk.",
+  openGraph: {
+    title: "OWNED IT",
+    description: "Sell your knowledge direct to your audience.",
+    images: ["https://ownedit.xyz/assets/logo.png"],
+  },
   other: {
     'base:app_id': '698bc660f5cfc733257240f2',
   },
