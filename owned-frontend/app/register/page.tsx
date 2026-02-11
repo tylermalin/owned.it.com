@@ -1,16 +1,53 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Check, Star, Users, BarChart3 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, Check, Star, Users, BarChart3, Loader2 } from 'lucide-react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useAccount } from 'wagmi';
+import { useSubscribePro } from '@/lib/registryHooks';
+import toast from 'react-hot-toast';
 
 export default function RegisterPage() {
+    const router = useRouter();
+    const { isConnected } = useAccount();
+    const { subscribe, isApprovePending, isApproveSuccess, isActionPending, isActionSuccess, actionHash, actionError } = useSubscribePro();
+
     const [formData, setFormData] = useState({
         storeName: '',
         email: '',
         socialHandle: ''
     });
+
+    useEffect(() => {
+        if (isActionSuccess) {
+            toast.success('Subscription activated! 7-day trial started.');
+            setTimeout(() => router.push('/dashboard'), 3000);
+        }
+    }, [isActionSuccess, router]);
+
+    useEffect(() => {
+        if (actionError) {
+            toast.error('Activation failed: ' + (actionError.message || 'Unknown error'));
+        }
+    }, [actionError]);
+
+    const handleSubscribe = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!isConnected) {
+            toast.error('Please connect your wallet first');
+            return;
+        }
+        subscribe();
+    };
+
+    const isPending = isApprovePending || isActionPending;
+    const buttonText = isApprovePending
+        ? 'Approving USDC...'
+        : isActionPending
+            ? 'Activating...'
+            : 'Activate Pro Access';
 
     return (
         <div className="min-h-screen bg-slate-50/50 flex flex-col font-sans">
@@ -85,7 +122,7 @@ export default function RegisterPage() {
                             <p className="text-base text-muted-foreground font-medium">No platform risk. Cancel anytime. Still own your contracts.</p>
                         </div>
 
-                        <form className="relative space-y-8">
+                        <form onSubmit={handleSubscribe} className="relative space-y-8">
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Proposed Store Name</label>
                                 <input
@@ -94,6 +131,7 @@ export default function RegisterPage() {
                                     className="w-full px-8 py-5 rounded-3xl bg-slate-50 border border-border text-foreground font-bold placeholder:text-muted-foreground/30 focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all text-lg"
                                     value={formData.storeName}
                                     onChange={(e) => setFormData({ ...formData, storeName: e.target.value })}
+                                    required
                                 />
                             </div>
 
@@ -105,6 +143,7 @@ export default function RegisterPage() {
                                     className="w-full px-8 py-5 rounded-3xl bg-slate-50 border border-border text-foreground font-bold placeholder:text-muted-foreground/30 focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all text-lg"
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    required
                                 />
                             </div>
 
@@ -124,15 +163,26 @@ export default function RegisterPage() {
 
                             <div className="pt-6 space-y-4">
                                 <button
-                                    type="button"
-                                    disabled={!formData.storeName || !formData.email}
-                                    className="w-full py-7 bg-primary text-primary-foreground rounded-[2.5rem] font-black uppercase tracking-[0.4em] text-sm shadow-saas hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 disabled:scale-100 shadow-primary/20"
+                                    type="submit"
+                                    disabled={!formData.storeName || !formData.email || isPending}
+                                    className="w-full py-7 bg-primary text-primary-foreground rounded-[2.5rem] font-black uppercase tracking-[0.4em] text-sm shadow-saas hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 disabled:scale-100 shadow-primary/20 flex items-center justify-center gap-4"
                                 >
-                                    Activate Pro Access
+                                    {isPending && <Loader2 className="w-5 h-5 animate-spin" />}
+                                    {buttonText}
                                 </button>
+
+                                {actionHash && (
+                                    <p className="text-[10px] text-center text-muted-foreground font-bold uppercase tracking-wider italic">
+                                        Escrow initiated: <a href={`https://sepolia.basescan.org/tx/${actionHash}`} target="_blank" rel="noopener noreferrer" className="text-primary underline">View on Basescan</a>
+                                    </p>
+                                )}
+
                                 <p className="text-[10px] text-center text-muted-foreground font-bold uppercase tracking-wider">
                                     $9 / MONTH AFTER TRIAL · BILLED ONCHAIN
                                 </p>
+                                <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 text-[10px] font-bold text-emerald-700 uppercase tracking-widest text-center">
+                                    7-Day Free Trial hold in escrow
+                                </div>
                             </div>
                         </form>
                     </div>

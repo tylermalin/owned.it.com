@@ -9,7 +9,13 @@ export const DEMO_METADATA: Record<number, ProductMetadata> = {
         callToAction: "BOOK SESSION",
         thumbnailStyle: "callout",
         productType: "coaching",
-        price: "250.00"
+        price: "250.00",
+        salePoints: [
+            "60-minute intensive 1:1 strategy deep-dive",
+            "Custom roadmap and execution plan included",
+            "Direct followup support via encrypted channel",
+            "Lifetime access to session recordings"
+        ]
     },
     2: {
         name: "AI Prompt Guide",
@@ -19,7 +25,13 @@ export const DEMO_METADATA: Record<number, ProductMetadata> = {
         callToAction: "GET ACCESS",
         thumbnailStyle: "button",
         productType: "digital",
-        price: "49.00"
+        price: "49.00",
+        salePoints: [
+            "200+ battle-tested prompts for high-growth startups",
+            "Ready-to-use templates for operations and marketing",
+            "Updated monthly with the latest LLM optimizations",
+            "Blockchain-verified ownership of the guide"
+        ]
     },
     3: {
         name: "I Owned It (Official Audio)",
@@ -30,6 +42,12 @@ export const DEMO_METADATA: Record<number, ProductMetadata> = {
         thumbnailStyle: "button",
         productType: "digital",
         price: "1.00",
+        salePoints: [
+            "High-fidelity lossless .mp3 master",
+            "Exclusive ownership rights to the anthem",
+            "Special Collector's Badge in the app",
+            "Early access to upcoming releases"
+        ],
         digitalFileHash: "song-hash-placeholder"
     },
     4: {
@@ -39,8 +57,14 @@ export const DEMO_METADATA: Record<number, ProductMetadata> = {
         image: "/assets/product_ai_agent.png",
         callToAction: "DEPLOY AGENT",
         thumbnailStyle: "button",
-        productType: "digital",
+        productType: "agent",
         price: "250.00",
+        salePoints: [
+            "Autonomous processing of complex enterprise bills",
+            "Direct integration with major ERP systems",
+            "99.9% accuracy compared to manual audit",
+            "Drastically reduce time-to-payment"
+        ],
         redirectUrl: "https://ownedit.xyz/billing-agent"
     },
     5: {
@@ -50,7 +74,13 @@ export const DEMO_METADATA: Record<number, ProductMetadata> = {
         image: "/assets/product_conference.png",
         callToAction: "BUY TICKET",
         thumbnailStyle: "button",
-        productType: "digital",
-        price: "150.00"
+        productType: "ticket",
+        price: "150.00",
+        salePoints: [
+            "Full physical access to the 2026 conference",
+            "Networking lunch with industry leaders",
+            "Limited edition physical merch pack",
+            "NFT-gate to the digital twin event"
+        ]
     }
 };

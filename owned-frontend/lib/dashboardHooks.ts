@@ -31,6 +31,60 @@ export function useAddProduct() {
     };
 }
 
+export function useUpdateProduct() {
+    const { data: hash, writeContract, isPending, error } = useWriteContract();
+
+    const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+        hash,
+    });
+
+    const updateProduct = (productId: number, priceUSD: string, ipfsHash: string, maxSupply: number) => {
+        const priceInUSDC = parseUSDC(priceUSD);
+
+        writeContract({
+            address: CREATOR_STORE_ADDRESS,
+            abi: CreatorStoreABI,
+            functionName: 'updateProduct',
+            args: [BigInt(productId), priceInUSDC, ipfsHash, BigInt(maxSupply)],
+        });
+    };
+
+    return {
+        updateProduct,
+        isPending,
+        isConfirming,
+        isSuccess,
+        error,
+        hash,
+    };
+}
+
+export function useDeactivateProduct() {
+    const { data: hash, writeContract, isPending, error } = useWriteContract();
+
+    const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+        hash,
+    });
+
+    const deactivateProduct = (productId: number) => {
+        writeContract({
+            address: CREATOR_STORE_ADDRESS,
+            abi: CreatorStoreABI,
+            functionName: 'setProductActive',
+            args: [BigInt(productId), false],
+        });
+    };
+
+    return {
+        deactivateProduct,
+        isPending,
+        isConfirming,
+        isSuccess,
+        error,
+        hash,
+    };
+}
+
 export function useWithdrawCreator() {
     const { data: hash, writeContract, isPending, error } = useWriteContract();
 

@@ -18,6 +18,14 @@ export interface ProductMetadata {
     digitalFileHash?: string;
     redirectUrl?: string;
     requiredInfo?: string[];
+    salePoints?: string[];
+    socialLinks?: {
+        twitter?: string;
+        website?: string;
+        blog?: string;
+        instagram?: string;
+        github?: string;
+    };
     attributes?: Array<{
         trait_type: string;
         value: string;

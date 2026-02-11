@@ -1,16 +1,53 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Rocket, Shield, Zap } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, Rocket, Shield, Zap, Loader2 } from 'lucide-react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useAccount } from 'wagmi';
+import { useDeployStore } from '@/lib/registryHooks';
+import toast from 'react-hot-toast';
 
 export default function DeployPage() {
+    const router = useRouter();
+    const { isConnected } = useAccount();
+    const { deploy, isApprovePending, isApproveSuccess, isActionPending, isActionSuccess, actionHash, actionError } = useDeployStore();
+
     const [formData, setFormData] = useState({
         storeName: '',
         slug: '',
         email: ''
     });
+
+    useEffect(() => {
+        if (isActionSuccess) {
+            toast.success('Store deployed successfully!');
+            setTimeout(() => router.push('/dashboard'), 3000);
+        }
+    }, [isActionSuccess, router]);
+
+    useEffect(() => {
+        if (actionError) {
+            toast.error('Deployment failed: ' + (actionError.message || 'Unknown error'));
+        }
+    }, [actionError]);
+
+    const handleDeploy = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!isConnected) {
+            toast.error('Please connect your wallet first');
+            return;
+        }
+        deploy();
+    };
+
+    const isPending = isApprovePending || isActionPending;
+    const buttonText = isApprovePending
+        ? 'Approving USDC...'
+        : isActionPending
+            ? 'Deploying Store...'
+            : `Deploy Store ($299)`;
 
     return (
         <div className="min-h-screen bg-slate-50/50 flex flex-col">
@@ -83,7 +120,7 @@ export default function DeployPage() {
                             <p className="text-sm text-muted-foreground font-medium">Enter your details to prepare the deployment.</p>
                         </div>
 
-                        <form className="space-y-6">
+                        <form onSubmit={handleDeploy} className="space-y-6">
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Store Name</label>
                                 <input
@@ -92,6 +129,7 @@ export default function DeployPage() {
                                     className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-border text-foreground font-bold placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                                     value={formData.storeName}
                                     onChange={(e) => setFormData({ ...formData, storeName: e.target.value })}
+                                    required
                                 />
                             </div>
 
@@ -105,6 +143,7 @@ export default function DeployPage() {
                                         className="flex-1 px-6 py-4 rounded-2xl bg-slate-50 border border-border text-foreground font-bold placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                                         value={formData.slug}
                                         onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
+                                        required
                                     />
                                 </div>
                             </div>
@@ -117,19 +156,27 @@ export default function DeployPage() {
                                     className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-border text-foreground font-bold placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    required
                                 />
                             </div>
 
                             <button
-                                type="button"
-                                disabled={!formData.storeName || !formData.slug || !formData.email}
-                                className="w-full py-6 bg-primary text-primary-foreground rounded-3xl font-black uppercase tracking-[0.3em] text-sm shadow-saas hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100 shadow-primary/20 mt-4"
+                                type="submit"
+                                disabled={!formData.storeName || !formData.slug || !formData.email || isPending}
+                                className="w-full py-6 bg-primary text-primary-foreground rounded-3xl font-black uppercase tracking-[0.3em] text-sm shadow-saas hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100 shadow-primary/20 mt-4 flex items-center justify-center gap-3"
                             >
-                                Deploy Store ($299)
+                                {isPending && <Loader2 className="w-5 h-5 animate-spin" />}
+                                {buttonText}
                             </button>
 
+                            {actionHash && (
+                                <p className="text-[10px] text-center text-muted-foreground font-bold uppercase tracking-wider italic">
+                                    Transaction confirmed: <a href={`https://sepolia.basescan.org/tx/${actionHash}`} target="_blank" rel="noopener noreferrer" className="text-primary underline">View on Basescan</a>
+                                </p>
+                            )}
+
                             <p className="text-[10px] text-center text-muted-foreground font-bold uppercase tracking-wider italic">
-                                Deployment takes ~2 minutes once confirmed.
+                                {isActionPending ? 'Deployment in progress...' : 'Deployment takes ~2 minutes once confirmed.'}
                             </p>
                         </form>
                     </div>

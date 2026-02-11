@@ -1,6 +1,8 @@
-import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { Nav } from '@/components/Nav';
 import Link from 'next/link';
 import { Metadata } from 'next';
+
+// Crypto-native creator commerce. Get paid onchain without platform risk.
 
 export const metadata: Metadata = {
   title: "OWNED IT - Stack sats, not subscriptions",
@@ -31,23 +33,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background selection:bg-primary/20">
       {/* Nav */}
-      <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-border">
-        <div className="max-w-7xl mx-auto px-6 py-[10px] flex justify-between items-center">
-          <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center py-2">
-              <img src="/assets/logo.png" alt="OWNED" className="w-[120px] h-[120px] object-contain hover:scale-105 transition-transform" />
-            </Link>
-            <div className="hidden md:flex items-center gap-8 text-sm font-bold uppercase tracking-widest text-muted-foreground">
-              <Link href="/products" className="hover:text-primary transition-colors">Marketplace</Link>
-              <Link href="#features" className="hover:text-primary transition-colors">Features</Link>
-              <Link href="/pricing" className="hover:text-primary transition-colors text-primary">Pricing</Link>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <ConnectButton />
-          </div>
-        </div>
-      </nav>
+      <Nav />
 
       {/* Hero Section */}
       <main className="relative pt-48 pb-32 overflow-hidden">

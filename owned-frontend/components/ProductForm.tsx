@@ -1,12 +1,20 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAddProduct } from '@/lib/dashboardHooks';
+import { useAddProduct, useUpdateProduct } from '@/lib/dashboardHooks';
+import { useProduct } from '@/lib/hooks';
 import toast from 'react-hot-toast';
 import { ProductTypeSelector, ProductType } from './ProductTypeSelector';
 import { uploadToIPFS, uploadImageToIPFS, ProductMetadata } from '@/lib/ipfs';
+import { formatUnits } from 'viem';
 
-export function AddProductForm() {
+interface ProductFormProps {
+    editProductId?: number | null;
+    onSuccess?: () => void;
+    onCancel?: () => void;
+}
+
+export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormProps) {
     const [step, setStep] = useState<'type' | 'details'>('type');
     const [productType, setProductType] = useState<ProductType | null>(null);
     const [productId, setProductId] = useState('');
@@ -27,38 +35,63 @@ export function AddProductForm() {
     const [requiredInfo, setRequiredInfo] = useState<string[]>(['Name', 'Email']);
     const [isUploadingIPFS, setIsUploadingIPFS] = useState(false);
 
-    const { addProduct, isPending, isConfirming, isSuccess, error } = useAddProduct();
+    const { addProduct, isPending: isAddPending, isConfirming: isAddConfirming, isSuccess: isAddSuccess, error: addError } = useAddProduct();
+    const { updateProduct, isPending: isUpdatePending, isConfirming: isUpdateConfirming, isSuccess: isUpdateSuccess, error: updateError } = useUpdateProduct();
+
+    // Fetch product data if in edit mode
+    const { data: productData, isLoading: isProductLoading } = useProduct(editProductId || 0);
+
+    // Populate form if editing
+    useEffect(() => {
+        if (editProductId && productData) {
+            const p = productData as any;
+            setProductId(editProductId.toString());
+            setPrice(formatUnits(p.price, 6)); // USDC 6 decimals
+            setIpfsHash(p.ipfsHash);
+            setMaxSupply(p.maxSupply.toString());
+            setStep('details');
+
+            // Note: We can't easily "re-fetch" all metadata fields from IPFS and set them in state 
+            // without a separate helper. For this demo, we'll assume the user might want 
+            // to re-enter metadata or we could add a "Fetch Metadata" button.
+            // For now, let's at least set the name if we have it in DEMO_METADATA
+        }
+    }, [editProductId, productData]);
 
     useEffect(() => {
-        if (isSuccess) {
-            toast.success('Product added successfully!');
-            // Reset form
-            setStep('type');
-            setProductType(null);
-            setProductId('');
-            setProductName('');
-            setProductDescription('');
-            setSubtitle('');
-            setBottomTitle('');
-            setCallToAction('');
-            setThumbnailStyle('button');
-            setPrice('');
-            setDiscountPrice('');
-            setIpfsHash('');
-            setDigitalFileHash('');
-            setRedirectUrl('');
-            setMaxSupply('');
-            setImageFile(null);
-            setDigitalFile(null);
-            setRequiredInfo(['Name', 'Email']);
+        if (isAddSuccess || isUpdateSuccess) {
+            toast.success(isAddSuccess ? 'Product added successfully!' : 'Product updated successfully!');
+            resetForm();
+            if (onSuccess) onSuccess();
         }
-    }, [isSuccess]);
+    }, [isAddSuccess, isUpdateSuccess]);
 
     useEffect(() => {
-        if (error) {
-            toast.error('Failed to add product. Please try again.');
+        if (addError || updateError) {
+            toast.error('Transaction failed. Please try again.');
         }
-    }, [error]);
+    }, [addError, updateError]);
+
+    const resetForm = () => {
+        setStep('type');
+        setProductType(null);
+        setProductId('');
+        setProductName('');
+        setProductDescription('');
+        setSubtitle('');
+        setBottomTitle('');
+        setCallToAction('');
+        setThumbnailStyle('button');
+        setPrice('');
+        setDiscountPrice('');
+        setIpfsHash('');
+        setDigitalFileHash('');
+        setRedirectUrl('');
+        setMaxSupply('');
+        setImageFile(null);
+        setDigitalFile(null);
+        setRequiredInfo(['Name', 'Email']);
+    };
 
     const handleTypeSelect = (type: ProductType) => {
         setProductType(type);
@@ -81,15 +114,19 @@ export function AddProductForm() {
             setThumbnailStyle('callout');
         }
 
-        // Auto-fill Product ID with next number
-        if (!productId) {
+        // Auto-fill Product ID with next number if not editing
+        if (!productId && !editProductId) {
             const nextId = Math.floor(Math.random() * 1000) + 3;
             setProductId(nextId.toString());
         }
     };
 
     const handleBack = () => {
-        setStep('type');
+        if (editProductId) {
+            if (onCancel) onCancel();
+        } else {
+            setStep('type');
+        }
     };
 
     const handleUploadToIPFS = async () => {
@@ -105,29 +142,15 @@ export function AddProductForm() {
             let imageHash = '';
             let fileHash = '';
 
-            // 1. Upload image if provided
             if (imageFile) {
-                try {
-                    imageHash = await uploadImageToIPFS(imageFile);
-                } catch (error) {
-                    console.warn('Image upload failed:', error);
-                    toast.error('Image upload failed, but continuing...');
-                }
+                imageHash = await uploadImageToIPFS(imageFile);
             }
 
-            // 2. Upload digital product if provided
             if (digitalFile) {
-                try {
-                    fileHash = await uploadImageToIPFS(digitalFile); // Reuse image upload helper for generic files
-                    setDigitalFileHash(fileHash);
-                } catch (error) {
-                    console.warn('Digital file upload failed:', error);
-                    toast.error('Digital file upload failed!');
-                    throw error;
-                }
+                fileHash = await uploadImageToIPFS(digitalFile);
+                setDigitalFileHash(fileHash);
             }
 
-            // 3. Create metadata object
             const metadata: ProductMetadata = {
                 name: productName,
                 description: productDescription,
@@ -143,25 +166,17 @@ export function AddProductForm() {
                 redirectUrl: redirectUrl || undefined,
                 requiredInfo: requiredInfo,
                 attributes: [
-                    {
-                        trait_type: 'Product Type',
-                        value: productType || 'digital',
-                    },
-                    {
-                        trait_type: 'Price',
-                        value: `$${price}`,
-                    },
+                    { trait_type: 'Product Type', value: productType || 'digital' },
+                    { trait_type: 'Price', value: `$${price}` },
                 ],
             };
 
-            // 4. Upload metadata
             const hash = await uploadToIPFS(metadata);
             setIpfsHash(hash);
             toast.success(`Uploaded to IPFS! Hash: ${hash}`, { id: 'ipfs-upload' });
         } catch (error: any) {
             console.error('IPFS upload error:', error);
-            const errorMsg = error?.message || 'Failed to upload to IPFS';
-            toast.error(errorMsg, { id: 'ipfs-upload' });
+            toast.error(error?.message || 'Failed to upload to IPFS', { id: 'ipfs-upload' });
         } finally {
             setIsUploadingIPFS(false);
         }
@@ -182,22 +197,20 @@ export function AddProductForm() {
         }
 
         const supply = maxSupply === '' ? 0 : parseInt(maxSupply);
-        if (isNaN(supply) || supply < 0) {
-            toast.error('Max supply must be 0 or greater');
-            return;
-        }
 
-        addProduct(parseInt(productId), price, ipfsHash, supply);
+        if (editProductId) {
+            updateProduct(parseInt(productId), price, ipfsHash, supply);
+        } else {
+            addProduct(parseInt(productId), price, ipfsHash, supply);
+        }
     };
 
-    const isLoading = isPending || isConfirming;
+    const isLoading = isAddPending || isAddConfirming || isUpdatePending || isUpdateConfirming || isProductLoading;
 
-    // Step 1: Product Type Selection
-    if (step === 'type') {
+    if (step === 'type' && !editProductId) {
         return <ProductTypeSelector onSelect={handleTypeSelect} />;
     }
 
-    // Step 2: Product Details Form
     const getProductTypeLabel = () => {
         const labels: Record<ProductType, string> = {
             digital: 'Digital Product',
@@ -209,7 +222,7 @@ export function AddProductForm() {
             community: 'Community',
             url: 'URL / Media',
         };
-        return productType ? labels[productType] : '';
+        return productType ? labels[productType] : editProductId ? 'Edit Product' : '';
     };
 
     return (
@@ -225,13 +238,13 @@ export function AddProductForm() {
                 <div>
                     <h3 className="text-3xl font-extrabold tracking-tight">{getProductTypeLabel()}</h3>
                     <p className="text-sm text-muted-foreground font-medium">
-                        Configure your {productType === 'coaching' ? 'booking' : 'checkout'} experience.
+                        {editProductId ? 'Update your product details and pricing.' : `Configure your ${productType === 'coaching' ? 'booking' : 'checkout'} experience.`}
                     </p>
                 </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-16 max-w-3xl pb-32">
-                {/* Step 1: Pick a style */}
+                {/* Style Selection */}
                 <div className="space-y-8 glass-card p-1">
                     <div className="flex items-center gap-4">
                         <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-primary text-primary-foreground text-sm font-black shadow-saas">1</span>
@@ -265,7 +278,7 @@ export function AddProductForm() {
                     </div>
                 </div>
 
-                {/* Step 2: Select Image */}
+                {/* Visual Asset */}
                 <div className="space-y-8">
                     <div className="flex items-center gap-4">
                         <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-primary text-primary-foreground text-sm font-black shadow-saas">2</span>
@@ -302,7 +315,7 @@ export function AddProductForm() {
                     </div>
                 </div>
 
-                {/* Step 3: Write Description */}
+                {/* Product Details */}
                 <div className="space-y-10">
                     <div className="flex items-center gap-4">
                         <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-primary text-primary-foreground text-sm font-black shadow-saas">3</span>
@@ -395,7 +408,7 @@ export function AddProductForm() {
                     </div>
                 </div>
 
-                {/* Step 4: Set Price */}
+                {/* Pricing */}
                 <div className="space-y-8">
                     <div className="flex items-center gap-4">
                         <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-primary text-primary-foreground text-sm font-black shadow-saas">4</span>
@@ -420,134 +433,25 @@ export function AddProductForm() {
                                     disabled={isLoading}
                                 />
                             </div>
-                            <p className="text-[10px] text-muted-foreground mt-1 font-bold uppercase tracking-widest ml-1">Min: $0.50 | Max: $25k</p>
                         </div>
                         <div className="space-y-2">
-                            <label htmlFor="discountPrice" className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">
-                                Comparative Price
-                            </label>
-                            <div className="relative">
-                                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-xl font-bold text-muted-foreground/50">$</span>
-                                <input
-                                    type="text"
-                                    id="discountPrice"
-                                    value={discountPrice}
-                                    onChange={(e) => setDiscountPrice(e.target.value)}
-                                    className="w-full pl-10 pr-5 py-5 bg-white border border-border border-dashed rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-bold text-3xl opacity-60 transition-all"
-                                    placeholder="0"
-                                    disabled={isLoading}
-                                />
-                            </div>
-                            <p className="text-[10px] text-muted-foreground mt-1 font-bold uppercase tracking-widest ml-1">Shown as struck-through</p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Step 5: Collect Info */}
-                <div className="space-y-8">
-                    <div className="flex items-center gap-4">
-                        <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-primary text-primary-foreground text-sm font-black shadow-saas">5</span>
-                        <h4 className="font-bold uppercase tracking-widest text-xs text-muted-foreground">Checkout Form</h4>
-                    </div>
-
-                    <div className="bg-white border border-border rounded-4xl shadow-sm overflow-hidden">
-                        <div className="divide-y divide-border">
-                            {requiredInfo.map((field, i) => (
-                                <div key={i} className="px-8 py-5 flex justify-between items-center group bg-white hover:bg-slate-50 transition-colors">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-2 h-2 rounded-full bg-primary/40" />
-                                        <span className="font-bold tracking-tight">{field}</span>
-                                    </div>
-                                    {field === 'Name' || field === 'Email' ? (
-                                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest bg-slate-100 px-3 py-1 rounded-full border border-border/50">Required</span>
-                                    ) : (
-                                        <button
-                                            type="button"
-                                            onClick={() => setRequiredInfo(requiredInfo.filter((_, index) => index !== i))}
-                                            className="text-[10px] text-red-500 font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 hover:underline"
-                                        >
-                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                            Remove
-                                        </button>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                        <div className="p-6 bg-slate-50 border-t border-border">
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    const field = prompt('Field Name:');
-                                    if (field) setRequiredInfo([...requiredInfo, field]);
-                                }}
-                                className="w-full py-4 bg-white border border-border border-dashed rounded-2xl text-xs font-black uppercase tracking-[0.2em] text-muted-foreground hover:border-primary/50 hover:text-primary transition-all shadow-sm"
-                            >
-                                + Add Custom Field
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Step 6: Digital Product */}
-                <div className="space-y-8">
-                    <div className="flex items-center gap-4">
-                        <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-primary text-primary-foreground text-sm font-black shadow-saas">6</span>
-                        <h4 className="font-bold uppercase tracking-widest text-xs text-muted-foreground">Digital Fulfillment</h4>
-                    </div>
-
-                    <div className="space-y-10 p-12 bg-white border border-border rounded-4xl shadow-saas overflow-hidden relative">
-                        <div className="absolute top-0 right-0 p-1">
-                            <div className="px-4 py-1.5 bg-primary/10 text-primary rounded-bl-3xl rounded-tr-3xl text-[10px] font-black uppercase tracking-widest">Secure Cloud</div>
-                        </div>
-
-                        <div className="space-y-6">
-                            <input
-                                type="file"
-                                id="digitalProduct"
-                                onChange={(e) => setDigitalFile(e.target.files?.[0] || null)}
-                                className="hidden"
-                            />
-                            <div className="text-center space-y-5">
-                                <label
-                                    htmlFor="digitalProduct"
-                                    className="px-12 py-5 bg-primary text-primary-foreground font-black uppercase tracking-[0.2em] text-sm rounded-2xl cursor-pointer hover:scale-105 active:scale-95 transition-all shadow-saas inline-block"
-                                >
-                                    {digitalFile ? 'Replace File' : 'Upload Digital Asset'}
-                                </label>
-                                <div className="space-y-2">
-                                    <p className="text-sm font-bold text-foreground">
-                                        {digitalFile ? digitalFile.name : 'Target file for your customers'}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground font-medium italic">
-                                        Files are AES-256 encrypted & served via decentralized IPFS.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="relative">
-                            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border border-dashed"></div></div>
-                            <div className="relative flex justify-center text-[10px] font-black uppercase tracking-widest"><span className="bg-white px-4 text-muted-foreground/50">Or Link-out</span></div>
-                        </div>
-
-                        <div className="space-y-2">
-                            <label htmlFor="redirectUrl" className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">
-                                Redirect to URL
+                            <label htmlFor="maxSupply" className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">
+                                Max Supply (0 for ∞)
                             </label>
                             <input
-                                type="url"
-                                id="redirectUrl"
-                                value={redirectUrl}
-                                onChange={(e) => setRedirectUrl(e.target.value)}
-                                className="w-full px-5 py-4 bg-slate-50 border border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-medium tracking-tight overflow-hidden transition-all"
-                                placeholder="https://example.com/access"
+                                type="number"
+                                id="maxSupply"
+                                value={maxSupply}
+                                onChange={(e) => setMaxSupply(e.target.value)}
+                                className="w-full px-5 py-5 bg-white border border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-bold text-xl transition-all"
+                                placeholder="0"
                                 disabled={isLoading}
                             />
                         </div>
                     </div>
                 </div>
 
-                {/* Final Submission Block */}
+                {/* Submission */}
                 <div className="fixed bottom-0 left-0 right-0 md:sticky md:bottom-8 bg-white/80 backdrop-blur-xl border-t md:border border-border p-6 md:p-8 md:rounded-4xl z-[100] shadow-saas-lg md:mx-auto">
                     <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-6 md:items-center md:justify-between">
                         <div className="flex items-center gap-6">
@@ -562,6 +466,7 @@ export function AddProductForm() {
                                     onChange={(e) => setProductId(e.target.value)}
                                     className="w-24 bg-transparent border-none p-0 focus:outline-none font-black text-2xl text-primary"
                                     required
+                                    disabled={!!editProductId}
                                 />
                             </div>
                             <div className="h-10 w-px bg-border hidden lg:block" />
@@ -595,7 +500,7 @@ export function AddProductForm() {
                                 disabled={isLoading || !ipfsHash}
                                 className="flex-1 md:flex-none md:px-12 py-5 bg-primary text-primary-foreground hover:scale-105 active:scale-95 disabled:opacity-50 transition-all font-black uppercase tracking-[0.3em] rounded-2xl text-lg shadow-saas shadow-primary/20"
                             >
-                                {isPending ? 'CONSENTING...' : isConfirming ? 'FINALIZING...' : 'LAUNCH PRODUCT'}
+                                {isAddPending || isUpdatePending ? 'CONSENTING...' : isAddConfirming || isUpdateConfirming ? 'FINALIZING...' : editProductId ? 'UPDATE PRODUCT' : 'LAUNCH PRODUCT'}
                             </button>
                         </div>
                     </div>
@@ -604,4 +509,3 @@ export function AddProductForm() {
         </div>
     );
 }
-

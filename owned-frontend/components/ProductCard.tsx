@@ -8,6 +8,19 @@ import Link from 'next/link';
 import { getIPFSGatewayUrl, ProductMetadata } from '@/lib/ipfs';
 
 import { DEMO_METADATA } from '@/lib/demo';
+import {
+    Download,
+    Ticket,
+    Bot,
+    Video,
+    Music,
+    Users,
+    ExternalLink,
+    CheckCircle2,
+    Calendar,
+    Globe,
+    LayoutDashboard
+} from 'lucide-react';
 
 interface ProductCardProps {
     productId: number;
@@ -72,6 +85,43 @@ export function ProductCard({ productId }: ProductCardProps) {
     const image = metadata?.image ? getIPFSGatewayUrl(metadata.image.replace('ipfs://', '')) : null;
     const style = metadata?.thumbnailStyle || 'button';
     const displayImage = metadata?.image?.startsWith('/') ? metadata.image : image;
+    const productType = metadata?.productType || 'digital';
+
+    const getCategoryIcon = () => {
+        switch (productType.toLowerCase()) {
+            case 'digital':
+            case 'content':
+                return <Download className="w-3.5 h-3.5" />;
+            case 'ticket':
+            case 'event':
+                return <Ticket className="w-3.5 h-3.5" />;
+            case 'agent':
+            case 'ai':
+                return <Bot className="w-3.5 h-3.5" />;
+            case 'video':
+                return <Video className="w-3.5 h-3.5" />;
+            case 'music':
+            case 'audio':
+                return <Music className="w-3.5 h-3.5" />;
+            case 'coaching':
+            case 'mentorship':
+            case 'consulting':
+                return <Users className="w-3.5 h-3.5" />;
+            default:
+                return <Download className="w-3.5 h-3.5" />;
+        }
+    };
+
+    const getCategoryLabel = () => {
+        switch (productType.toLowerCase()) {
+            case 'digital': return 'Digital Download';
+            case 'ticket': return 'Event Ticket';
+            case 'agent': return 'AI Agent';
+            case 'coaching': return '1:1 Session';
+            case 'music': return 'Original Audio';
+            default: return productType.charAt(0).toUpperCase() + productType.slice(1);
+        }
+    };
 
     if (style === 'callout') {
         return (
@@ -102,6 +152,14 @@ export function ProductCard({ productId }: ProductCardProps) {
                         <h3 className="text-4xl font-extrabold tracking-tight text-foreground lg:text-5xl">
                             {title}
                         </h3>
+                        <div className="flex items-center justify-center gap-1.5 pt-2">
+                            <span className="p-1.5 bg-primary/10 rounded-lg text-primary">
+                                {getCategoryIcon()}
+                            </span>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                                {getCategoryLabel()}
+                            </span>
+                        </div>
                     </div>
 
                     <div className="pt-4">
@@ -143,6 +201,12 @@ export function ProductCard({ productId }: ProductCardProps) {
                         />
                         <div className="absolute top-3 right-3 text-[10px] font-bold bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-muted-foreground shadow-sm">
                             #{productId}
+                        </div>
+                        <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg shadow-sm border border-border/50">
+                            <span className="text-primary">{getCategoryIcon()}</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                                {getCategoryLabel()}
+                            </span>
                         </div>
                     </div>
                 )}

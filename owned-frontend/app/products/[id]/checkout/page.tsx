@@ -10,6 +10,13 @@ import { useAccount } from 'wagmi';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { DEMO_METADATA } from '@/lib/demo';
+import {
+    CheckCircle2,
+    ShieldCheck,
+    Lock,
+    Zap,
+    LayoutDashboard
+} from 'lucide-react';
 
 const DEMO_METADATA_LOCAL: Record<number, ProductMetadata> = {
     // Keep internal local overrides if any, but otherwise use lib/demo
@@ -198,7 +205,18 @@ export default function CheckoutPage() {
                         <Link href="/" className="flex items-center py-2 px-4">
                             <img src="/assets/logo.png" alt="OWNED" className="w-[150px] h-[150px] object-contain hover:brightness-110 transition-all" />
                         </Link>
-                        <ConnectButton />
+                        <div className="flex items-center gap-4">
+                            {isConnected && (
+                                <Link
+                                    href="/dashboard"
+                                    className="hidden md:flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 text-slate-900 rounded-xl text-xs font-bold border border-border transition-all"
+                                >
+                                    <LayoutDashboard className="w-4 h-4" />
+                                    DASHBOARD
+                                </Link>
+                            )}
+                            <ConnectButton />
+                        </div>
                     </div>
 
                     <div className="p-12 space-y-12">
@@ -218,73 +236,87 @@ export default function CheckoutPage() {
                                 <h1 className="text-5xl font-extrabold tracking-tight text-foreground leading-tight">{title}</h1>
                                 {subtitle && <p className="text-xl text-muted-foreground font-medium italic">{subtitle}</p>}
                             </div>
-                            <div className="prose prose-slate max-w-none">
-                                <p className="text-lg text-muted-foreground leading-relaxed">{description}</p>
-                            </div>
+                            <p className="text-lg text-muted-foreground leading-relaxed">{description}</p>
                         </div>
 
-                        {/* Checkout Form Card */}
-                        <div className="bg-slate-50 border border-border rounded-[2.5rem] p-10 space-y-8">
-                            <div className="flex items-center justify-between">
-                                <h2 className="text-2xl font-bold tracking-tight">{bottomTitle}</h2>
-                                <div className="text-right">
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-50">Final Price</p>
-                                    <p className="text-3xl font-black italic tracking-tighter text-primary">{formatUSDC(price)} USDC</p>
-                                </div>
-                            </div>
-
-                            <form onSubmit={handlePurchase} className="space-y-6">
-                                <div className="space-y-4">
-                                    {Object.keys(customerInfo).map((field) => (
-                                        <div key={field} className="space-y-2">
-                                            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">{field}</label>
-                                            <input
-                                                type={field.toLowerCase() === 'email' ? 'email' : 'text'}
-                                                className="w-full px-6 py-4 bg-white border border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-medium text-lg transition-all"
-                                                placeholder={`Enter your ${field.toLowerCase()}...`}
-                                                value={customerInfo[field]}
-                                                onChange={(e) => handleInfoChange(field, e.target.value)}
-                                                required
-                                            />
+                        {/* Sale Points / Benefit Language */}
+                        {metadata?.salePoints && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6">
+                                {metadata.salePoints.map((point, i) => (
+                                    <div key={i} className="flex items-start gap-3 bg-white border border-border p-4 rounded-2xl shadow-sm hover:border-primary/20 transition-all group">
+                                        <div className="p-1 bg-primary/10 rounded-lg text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                                            <CheckCircle2 className="w-4 h-4" />
                                         </div>
-                                    ))}
-                                </div>
-
-                                <button
-                                    type="submit"
-                                    disabled={isPending || isConfirming}
-                                    className="w-full px-12 py-6 bg-primary text-primary-foreground font-black uppercase tracking-[0.3em] rounded-3xl text-xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 transition-all shadow-saas shadow-primary/20"
-                                >
-                                    {isPending || isConfirming
-                                        ? 'CONFIRMING...'
-                                        : ctaText.toUpperCase()}
-                                </button>
-                                <p className="text-[10px] text-center text-muted-foreground font-bold uppercase tracking-widest">
-                                    Secured Checkout via Base Network
-                                </p>
-                            </form>
-                        </div>
-
-                        {/* Footer / Trust */}
-                        <div className="pt-4 flex flex-col items-center gap-6">
-                            <div className="flex items-center gap-8 opacity-40 grayscale hover:grayscale-0 transition-all">
-                                <div className="text-xs font-black uppercase tracking-widest">Base L2</div>
-                                <div className="text-xs font-black uppercase tracking-widest">USDC Verified</div>
-                                <div className="text-xs font-black uppercase tracking-widest">AES Encrypted</div>
+                                        <p className="text-sm font-bold text-slate-700 leading-tight">
+                                            {point}
+                                        </p>
+                                    </div>
+                                ))}
                             </div>
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] text-center max-w-sm leading-relaxed">
-                                This transaction is recorded permanently. Your access key is minted as a blockchain-verified Proof NFT.
-                            </p>
+                        )}
+                    </div>
+
+                    {/* Checkout Form Card */}
+                    <div className="bg-slate-50 border border-border rounded-[2.5rem] p-10 space-y-8">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-2xl font-bold tracking-tight">{bottomTitle}</h2>
+                            <div className="text-right">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-50">Final Price</p>
+                                <p className="text-3xl font-black italic tracking-tighter text-primary">{formatUSDC(price)} USDC</p>
+                            </div>
                         </div>
+
+                        <form onSubmit={handlePurchase} className="space-y-6">
+                            <div className="space-y-4">
+                                {Object.keys(customerInfo).map((field) => (
+                                    <div key={field} className="space-y-2">
+                                        <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">{field}</label>
+                                        <input
+                                            type={field.toLowerCase() === 'email' ? 'email' : 'text'}
+                                            className="w-full px-6 py-4 bg-white border border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-medium text-lg transition-all"
+                                            placeholder={`Enter your ${field.toLowerCase()}...`}
+                                            value={customerInfo[field]}
+                                            onChange={(e) => handleInfoChange(field, e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={isPending || isConfirming}
+                                className="w-full px-12 py-6 bg-primary text-primary-foreground font-black uppercase tracking-[0.3em] rounded-3xl text-xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 transition-all shadow-saas shadow-primary/20"
+                            >
+                                {isPending || isConfirming
+                                    ? 'CONFIRMING...'
+                                    : ctaText.toUpperCase()}
+                            </button>
+                            <p className="text-[10px] text-center text-muted-foreground font-bold uppercase tracking-widest">
+                                Secured Checkout via Base Network
+                            </p>
+                        </form>
+                    </div>
+
+                    {/* Footer / Trust */}
+                    <div className="pt-4 flex flex-col items-center gap-6">
+                        <div className="flex items-center gap-8 opacity-40 grayscale hover:grayscale-0 transition-all">
+                            <div className="text-xs font-black uppercase tracking-widest">Base L2</div>
+                            <div className="text-xs font-black uppercase tracking-widest">USDC Verified</div>
+                            <div className="text-xs font-black uppercase tracking-widest">AES Encrypted</div>
+                        </div>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] text-center max-w-sm leading-relaxed">
+                            This transaction is recorded permanently. Your access key is minted as a blockchain-verified Proof NFT.
+                        </p>
                     </div>
                 </div>
-
-                <div className="mt-12 text-center">
-                    <Link href="/products" className="text-sm font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest">
-                        ← Back to Explore
-                    </Link>
-                </div>
             </div>
-        </div >
+
+            <div className="mt-12 text-center">
+                <Link href="/products" className="text-sm font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest">
+                    ← Back to Explore
+                </Link>
+            </div>
+        </div>
     );
 }

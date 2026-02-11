@@ -1,6 +1,14 @@
-import { ConnectButton } from '@rainbow-me/rainbowkit';
+'use client';
+
+import { Nav } from '@/components/Nav';
 import { ProductCard } from '@/components/ProductCard';
 import Link from 'next/link';
+import {
+    Twitter,
+    Globe,
+    MessageSquare,
+    ArrowRight
+} from 'lucide-react';
 
 export default function ProductsPage() {
     // Show all five products
@@ -8,21 +16,7 @@ export default function ProductsPage() {
 
     return (
         <div className="min-h-screen bg-slate-50/50">
-            {/* Header */}
-            <header className="bg-white/80 border-b border-border sticky top-0 z-50 backdrop-blur-md">
-                <div className="max-w-7xl mx-auto px-6 py-[10px] flex justify-between items-center">
-                    <div className="flex items-center gap-8">
-                        <Link href="/" className="flex items-center py-2">
-                            <img src="/assets/logo.png" alt="OWNED" className="w-[120px] h-[120px] object-contain hover:scale-105 transition-transform" />
-                        </Link>
-                        <nav className="hidden md:flex items-center gap-8">
-                            <Link href="/products" className="text-sm font-bold uppercase tracking-widest text-primary">Marketplace</Link>
-                            <Link href="/pricing" className="text-sm font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">Pricing</Link>
-                        </nav>
-                    </div>
-                    <ConnectButton />
-                </div>
-            </header>
+            <Nav />
 
             {/* Products Grid */}
             <main className="max-w-7xl mx-auto px-6 py-20">
@@ -39,6 +33,22 @@ export default function ProductsPage() {
                                 <p className="text-lg text-muted-foreground font-medium max-w-xl leading-relaxed">
                                     Welcome to the official OWNED IT storefront. Here you'll find a curated selection of digital assets, tools, and services designed for the sovereign creator.
                                 </p>
+
+                                <div className="flex items-center gap-4 pt-4">
+                                    <Link href="https://x.com/tylermalin" target="_blank" className="p-3 bg-slate-50 rounded-2xl border border-border hover:border-primary/30 hover:bg-white text-muted-foreground hover:text-primary transition-all group">
+                                        <Twitter className="w-5 h-5" />
+                                    </Link>
+                                    <Link href="https://tylermalin.com" target="_blank" className="p-3 bg-slate-50 rounded-2xl border border-border hover:border-primary/30 hover:bg-white text-muted-foreground hover:text-primary transition-all">
+                                        <Globe className="w-5 h-5" />
+                                    </Link>
+                                    <Link href="https://blog.ownedit.xyz" target="_blank" className="p-3 bg-slate-50 rounded-2xl border border-border hover:border-primary/30 hover:bg-white text-muted-foreground hover:text-primary transition-all">
+                                        <MessageSquare className="w-5 h-5" />
+                                    </Link>
+                                    <div className="h-6 w-px bg-border mx-2" />
+                                    <Link href="/deploy" className="flex items-center gap-2 px-6 py-3 bg-primary/5 hover:bg-primary/10 text-primary rounded-2xl border border-primary/10 text-[10px] font-black uppercase tracking-widest transition-all">
+                                        OWN AUDIENCE <ArrowRight className="w-3 h-3 text-primary/50" />
+                                    </Link>
+                                </div>
                             </div>
                         </div>
                         <div className="w-48 h-48 rounded-[3rem] overflow-hidden border-4 border-white shadow-saas">
