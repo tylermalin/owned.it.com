@@ -251,6 +251,39 @@ export default function Home() {
         </div>
       </section>
 
+      {/* What can I sell section */}
+      <section className="py-32 bg-slate-50/50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-24 space-y-4">
+            <h2 className="text-5xl md:text-6xl font-black tracking-tight italic text-foreground">What can I sell?</h2>
+            <p className="text-xl text-muted-foreground font-medium tracking-wide italic">Digital sovereignty for every type of creator.</p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-8 mb-24">
+            {[
+              "Courses", "Digital Goods", "Memberships", "Tickets",
+              "Songs", "Videos", "AI Prompts", "AI Agents",
+              "CopyTrade Access", "Consulting", "Merch", "And More"
+            ].map((item, idx) => (
+              <div key={idx} className="bg-white p-6 md:p-8 rounded-3xl border border-border shadow-sm flex items-center justify-center text-center group hover:border-primary hover:shadow-saas transition-all">
+                <span className="text-sm font-black uppercase tracking-widest text-muted-foreground group-hover:text-primary transition-colors">{item}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-primary/5 rounded-[4rem] p-12 md:p-16 border border-primary/10 text-center space-y-8 max-w-4xl mx-auto">
+            <p className="text-2xl text-foreground font-medium italic">"Need ideas? Start your journey with the ultimate creator resource."</p>
+            <Link
+              href="/products"
+              className="inline-block px-12 py-6 bg-foreground text-background rounded-3xl font-black uppercase tracking-[0.3em] text-sm shadow-saas hover:scale-105 active:scale-95 transition-all"
+            >
+              Grab the Definitive Guidebook
+            </Link>
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/60">Now available on the store</p>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="py-20 border-t border-border bg-white mt-12">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
