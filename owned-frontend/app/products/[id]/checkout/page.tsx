@@ -9,28 +9,10 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+import { DEMO_METADATA } from '@/lib/demo';
 
-const DEMO_METADATA: Record<number, ProductMetadata> = {
-    1: {
-        name: "1:1 Strategy Session with Me",
-        subtitle: "High-Impact Coaching for Founders",
-        description: "Unlock your startup's potential with a personalized 60-minute strategy session. We'll dive deep into your roadmap, product-market fit, and growth bottlenecks to define clear, actionable next steps.",
-        image: "/demo/coaching_call.png",
-        callToAction: "BOOK SESSION",
-        thumbnailStyle: "callout",
-        productType: "coaching",
-        price: "250.00"
-    },
-    2: {
-        name: "The Startup AI Prompt Guide",
-        subtitle: "Master Generative AI Workflows",
-        description: "200+ high-performance prompts for startup founders. Includes templates for automated operations, rapid prototyping, and viral marketing campaigns. Save 20+ hours a week.",
-        image: "/demo/ai_prompt_guide.png",
-        callToAction: "GET ACCESS",
-        thumbnailStyle: "button",
-        productType: "digital",
-        price: "49.00"
-    }
+const DEMO_METADATA_LOCAL: Record<number, ProductMetadata> = {
+    // Keep internal local overrides if any, but otherwise use lib/demo
 };
 
 export default function CheckoutPage() {
@@ -216,12 +198,19 @@ export default function CheckoutPage() {
 
                     <div className="p-12 space-y-12">
                         {/* Product Info */}
-                        <div className="space-y-6 text-center">
+                        <div className="space-y-8 text-center">
                             <div className="inline-block px-4 py-1.5 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-[0.2em] rounded-full border border-primary/10">
                                 Official Product Launch
                             </div>
-                            <div className="space-y-2">
-                                <h1 className="text-5xl font-extrabold tracking-tight text-foreground">{title}</h1>
+
+                            {displayImage && (
+                                <div className="max-w-md mx-auto aspect-square rounded-[2.5rem] overflow-hidden border border-border shadow-saas hover:scale-[1.02] transition-transform duration-500">
+                                    <img src={displayImage} className="w-full h-full object-cover" alt={title} />
+                                </div>
+                            )}
+
+                            <div className="space-y-3">
+                                <h1 className="text-5xl font-extrabold tracking-tight text-foreground leading-tight">{title}</h1>
                                 {subtitle && <p className="text-xl text-muted-foreground font-medium italic">{subtitle}</p>}
                             </div>
                             <div className="prose prose-slate max-w-none">

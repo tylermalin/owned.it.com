@@ -7,28 +7,7 @@ import { useAccount } from 'wagmi';
 import Link from 'next/link';
 import { getIPFSGatewayUrl, ProductMetadata } from '@/lib/ipfs';
 
-const DEMO_METADATA: Record<number, ProductMetadata> = {
-    1: {
-        name: "1:1 Strategy Session with Me",
-        subtitle: "High-Impact Coaching for Founders",
-        description: "Unlock your startup's potential with a personalized 60-minute strategy session. We'll dive deep into your roadmap, product-market fit, and growth bottlenecks to define clear, actionable next steps.",
-        image: "/demo/coaching_call.png",
-        callToAction: "BOOK SESSION",
-        thumbnailStyle: "callout",
-        productType: "coaching",
-        price: "250.00"
-    },
-    2: {
-        name: "The Startup AI Prompt Guide",
-        subtitle: "Master Generative AI Workflows",
-        description: "200+ high-performance prompts for startup founders. Includes templates for automated operations, rapid prototyping, and viral marketing campaigns. Save 20+ hours a week.",
-        image: "/demo/ai_prompt_guide.png",
-        callToAction: "GET ACCESS",
-        thumbnailStyle: "button",
-        productType: "digital",
-        price: "49.00"
-    }
-};
+import { DEMO_METADATA } from '@/lib/demo';
 
 interface ProductCardProps {
     productId: number;

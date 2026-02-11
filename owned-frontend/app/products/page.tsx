@@ -3,8 +3,8 @@ import { ProductCard } from '@/components/ProductCard';
 import Link from 'next/link';
 
 export default function ProductsPage() {
-    // Show both products
-    const productIds = [1, 2];
+    // Show all five products
+    const productIds = [1, 2, 3, 4, 5];
 
     return (
         <div className="min-h-screen bg-slate-50/50">
@@ -20,14 +20,31 @@ export default function ProductsPage() {
 
             {/* Products Grid */}
             <main className="max-w-7xl mx-auto px-6 py-20">
-                <div className="mb-16 text-center space-y-4">
-                    <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest">
-                        Marketplace
+                <div className="mb-20 space-y-12">
+                    {/* Store Info */}
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-12 bg-white p-12 rounded-[3.5rem] border border-border shadow-saas">
+                        <div className="flex-1 space-y-6">
+                            <div className="inline-block px-4 py-1.5 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-[0.2em] rounded-full border border-primary/10">
+                                Verified Creator Store
+                            </div>
+                            <div className="space-y-4">
+                                <h2 className="text-5xl font-black tracking-tight">Tyler Malin</h2>
+                                <h1 className="text-2xl font-bold text-muted-foreground italic">OWNED IT Official Store</h1>
+                                <p className="text-lg text-muted-foreground font-medium max-w-xl leading-relaxed">
+                                    Welcome to the official OWNED IT storefront. Here you'll find a curated selection of digital assets, tools, and services designed for the sovereign creator.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="w-48 h-48 rounded-[3rem] overflow-hidden border-4 border-white shadow-saas">
+                            <img src="/assets/logo.png" alt="Tyler Malin" className="w-full h-full object-cover" />
+                        </div>
                     </div>
-                    <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">Available Products</h1>
-                    <p className="text-lg text-muted-foreground font-medium max-w-2xl mx-auto">
-                        Discover knowledge and tools from your favorite creators. Secure checkout via USDC on Base.
-                    </p>
+
+                    {/* Catalog Header */}
+                    <div className="text-center space-y-4">
+                        <h3 className="text-3xl font-extrabold tracking-tight">Product Catalog</h3>
+                        <p className="text-muted-foreground font-medium">Verify your ownership of these exclusive assets on Base.</p>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
