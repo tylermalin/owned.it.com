@@ -229,10 +229,10 @@ export default function Home() {
       <footer className="py-20 border-t border-border">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
           <img src="/assets/logo.png" alt="OWNED" className="w-[150px] h-[150px] object-contain opacity-80" />
-          <div className="flex gap-8 text-sm font-medium text-muted-foreground">
-            <Link href="https://x.com/owneditxyz" target="_blank" rel="noopener noreferrer">Twitter</Link>
-            <Link href="#">Discord</Link>
-            <Link href="#">Terms</Link>
+          <div className="flex gap-8 text-sm font-medium text-muted-foreground transition-all">
+            <Link href="https://x.com/owneditxyz" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Twitter</Link>
+            <Link href="/terms" className="hover:text-primary transition-colors text-[10px] font-black uppercase tracking-widest">Terms</Link>
+            <Link href="/privacy" className="hover:text-primary transition-colors text-[10px] font-black uppercase tracking-widest">Privacy</Link>
           </div>
           <p className="text-sm text-muted-foreground">© 2026 OWNED · IT</p>
         </div>
