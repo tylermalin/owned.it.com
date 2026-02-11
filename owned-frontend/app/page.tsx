@@ -230,7 +230,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
           <img src="/assets/logo.png" alt="OWNED" className="w-[150px] h-[150px] object-contain opacity-80" />
           <div className="flex gap-8 text-sm font-medium text-muted-foreground">
-            <Link href="#">Twitter</Link>
+            <Link href="https://x.com/owneditxyz" target="_blank" rel="noopener noreferrer">Twitter</Link>
             <Link href="#">Discord</Link>
             <Link href="#">Terms</Link>
           </div>
