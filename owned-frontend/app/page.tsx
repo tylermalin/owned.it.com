@@ -1,5 +1,12 @@
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import Link from 'next/link';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  other: {
+    'base:app_id': '698bc660f5cfc733257240f2',
+  },
+};
 
 export default function Home() {
   return (
