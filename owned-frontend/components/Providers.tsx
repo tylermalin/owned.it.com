@@ -7,6 +7,7 @@ import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
 import { config } from '@/lib/wagmi';
 import { Toaster } from 'react-hot-toast';
 import { useState, useEffect } from 'react';
+import { sdk } from '@farcaster/miniapp-sdk';
 
 const queryClient = new QueryClient();
 
@@ -15,6 +16,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         setMounted(true);
+        // Signal the Base app that our app is ready to be displayed
+        const initSDK = async () => {
+            await sdk.actions.ready();
+        };
+        initSDK();
     }, []);
 
     return (

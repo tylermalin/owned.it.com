@@ -12,6 +12,18 @@ export const metadata: Metadata = {
   },
   other: {
     'base:app_id': '698bc660f5cfc733257240f2',
+    'fc:miniapp': JSON.stringify({
+      version: "next",
+      imageUrl: "https://ownedit.xyz/assets/logo.png",
+      button: {
+        title: "Launch App",
+        action: {
+          type: "launch_miniapp",
+          name: "OWNED IT",
+          url: "https://ownedit.xyz"
+        }
+      }
+    }),
   },
 };
 
