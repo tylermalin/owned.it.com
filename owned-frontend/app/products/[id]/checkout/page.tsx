@@ -101,6 +101,10 @@ export default function CheckoutPage() {
         purchaseProduct(productId);
     };
 
+    // For demo purposes, if it's a demo product ID, we show it even without contract data
+    const isDemoProduct = productId >= 1 && productId <= 5;
+    const demoData = DEMO_METADATA[productId];
+
     if (isContractLoading || isMetadataLoading) {
         return (
             <div className="min-h-screen bg-[#fafaf9] dark:bg-[#171717] flex items-center justify-center">
@@ -109,7 +113,7 @@ export default function CheckoutPage() {
         );
     }
 
-    if (contractError || !product || !(product as any).active) {
+    if ((contractError || !product || !(product as any).active) && !isDemoProduct) {
         return (
             <div className="min-h-screen bg-[#fafaf9] dark:bg-[#171717] flex items-center justify-center p-6 text-center">
                 <div className="max-w-md space-y-6">
@@ -125,7 +129,8 @@ export default function CheckoutPage() {
         );
     }
 
-    const { price } = product as any;
+    // Use contract data if available, otherwise use demo defaults
+    const price = product ? (product as any).price : (demoData?.price ? BigInt(Math.round(parseFloat(demoData.price) * 1000000)) : BigInt(0));
     const title = metadata?.name || `Product #${productId}`;
     const subtitle = metadata?.subtitle;
     const description = metadata?.description || 'No description provided';

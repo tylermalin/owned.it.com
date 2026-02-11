@@ -44,6 +44,9 @@ export function ProductCard({ productId }: ProductCardProps) {
         }
     }, [product]);
 
+    // For demo purposes, if it's a demo product ID, we show it even without contract data
+    const isDemoProduct = productId >= 1 && productId <= 5;
+
     if (isContractLoading || isMetadataLoading) {
         return (
             <div className="border border-neutral-200 dark:border-neutral-800 p-6 animate-pulse space-y-4">
@@ -54,11 +57,15 @@ export function ProductCard({ productId }: ProductCardProps) {
         );
     }
 
-    if (error || !product || !(product as any).active) {
+    if ((error || !product || !(product as any).active) && !isDemoProduct) {
         return null;
     }
 
-    const { price, maxSupply, sold } = product as any;
+    // Use contract data if available, otherwise use demo defaults
+    const demoData = DEMO_METADATA[productId];
+    const price = product ? (product as any).price : (demoData?.price ? BigInt(Math.round(parseFloat(demoData.price) * 1000000)) : BigInt(0));
+    const maxSupply = product ? (product as any).maxSupply : BigInt(0);
+    const sold = product ? (product as any).sold : BigInt(0);
     const title = metadata?.name || `Product #${productId}`;
     const subtitle = metadata?.subtitle;
     const availability = BigInt(maxSupply) > BigInt(0) ? `${sold.toString()}/${maxSupply.toString()} sold` : `${sold.toString()} sold`;

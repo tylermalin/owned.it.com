@@ -143,7 +143,7 @@ export default function Home() {
                 <div className="aspect-video bg-muted rounded-2xl overflow-hidden grayscale group-hover:grayscale-0 transition-all">
                   <iframe
                     className="w-full h-full"
-                    src="https://www.youtube.com/embed/FidY4QTPkrQ?autoplay=1&mute=1&loop=1&playlist=FidY4QTPkrQ&controls=0&modestbranding=1&rel=0"
+                    src="https://www.youtube.com/embed/FidY4QTPkrQ?autoplay=1&mute=1&loop=1&playlist=FidY4QTPkrQ&controls=0&modestbranding=1&rel=0&playsinline=1"
                     title="OWNED IT Demo Video"
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
