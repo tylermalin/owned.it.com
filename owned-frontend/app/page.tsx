@@ -35,12 +35,12 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 py-[10px] flex justify-between items-center">
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center py-2">
-              <img src="/assets/logo.png" alt="OWNED" className="w-[150px] h-[150px] object-contain hover:scale-105 transition-transform" />
+              <img src="/assets/logo.png" alt="OWNED" className="w-[120px] h-[120px] object-contain hover:scale-105 transition-transform" />
             </Link>
-            <div className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
-              <Link href="#features" className="hover:text-foreground transition-colors">Features</Link>
-              <Link href="#solutions" className="hover:text-foreground transition-colors">Solutions</Link>
-              <Link href="#pricing" className="hover:text-foreground transition-colors">Pricing</Link>
+            <div className="hidden md:flex items-center gap-8 text-sm font-bold uppercase tracking-widest text-muted-foreground">
+              <Link href="/products" className="hover:text-primary transition-colors">Marketplace</Link>
+              <Link href="#features" className="hover:text-primary transition-colors">Features</Link>
+              <Link href="/pricing" className="hover:text-primary transition-colors text-primary">Pricing</Link>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -50,198 +50,218 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <main className="relative pt-48 pb-20 overflow-hidden">
+      <main className="relative pt-48 pb-32 overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
 
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-8 animate-fade-in">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-            </span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-12 animate-fade-in border border-primary/10">
             NOW LIVE ON BASE
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-foreground mb-8 text-balance">
-            Sell Your Knowledge <br className="hidden md:block" />
-            <span className="text-primary italic">Direct</span> to Your Audience
+          <h1 className="text-6xl md:text-[7rem] font-black tracking-tighter text-foreground mb-8 text-balance leading-[0.9]">
+            Build your store.<br />
+            Sell anywhere.<br />
+            <span className="text-primary italic font-serif">Own everything.</span>
           </h1>
 
-          <p className="max-w-2xl mx-auto text-xl text-muted-foreground mb-10 text-balance font-medium leading-relaxed">
-            Effortlessly manage your digital products, coaching, and memberships with crypto-native simplicity. No subscriptions. No platform risk.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
-            <Link
-              href="/dashboard"
-              className="px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-bold text-lg shadow-saas hover:scale-105 active:scale-95 transition-all w-full sm:w-auto text-center"
-            >
-              Get Started Free
-            </Link>
-            <a
-              href="/products"
-              className="px-8 py-4 bg-white text-foreground border border-border rounded-2xl font-bold text-lg shadow-sm hover:bg-muted transition-all w-full sm:w-auto text-center"
-            >
-              View Demo Store
-            </a>
+          <div className="space-y-4 mb-20">
+            <p className="text-2xl md:text-3xl text-foreground font-bold tracking-tight">Crypto-native commerce on Base.</p>
+            <p className="max-w-3xl mx-auto text-xl text-muted-foreground font-medium italic leading-relaxed">
+              Deploy your own onchain storefront, accept USDC instantly, and sell directly to your audience—without platforms, permission, or lock-in.
+            </p>
           </div>
 
-          {/* Dashboard Mockup Placeholder */}
-          <div className="relative max-w-5xl mx-auto px-4 mt-20">
-            <div className="rounded-3xl border border-border bg-white shadow-saas-lg overflow-hidden animate-slide-up">
-              <div className="bg-muted h-8 border-b border-border flex items-center px-4 gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
-                <div className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
-                <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
-              </div>
-              <div className="aspect-[16/9] bg-slate-50 relative overflow-hidden">
-                <img
-                  src="/assets/dashboard_preview.png"
-                  alt="Platform Dashboard Preview"
-                  className="w-full h-full object-cover object-top"
-                />
-              </div>
-            </div>
-            {/* Floating elements */}
-            <div className="absolute -top-12 -left-12 hidden lg:block animate-bounce-slow">
-              <div className="p-4 bg-white rounded-2xl shadow-saas-lg border border-border flex items-center gap-3">
-                <div className="p-2 bg-blue-100 rounded-lg text-primary">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                </div>
-                <div className="text-left">
-                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">New Sale</p>
-                  <p className="text-sm font-bold">$199.00 USDC</p>
-                </div>
-              </div>
-            </div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+            <Link
+              href="/pricing"
+              className="px-10 py-5 bg-primary text-primary-foreground rounded-2xl font-black uppercase tracking-[0.2em] text-sm shadow-saas hover:scale-105 active:scale-95 transition-all w-full sm:w-auto text-center"
+            >
+              Start Selling
+            </Link>
+            <Link
+              href="/products"
+              className="px-10 py-5 bg-white text-foreground border border-border rounded-2xl font-black uppercase tracking-[0.2em] text-sm shadow-sm hover:bg-muted transition-all w-full sm:w-auto text-center"
+            >
+              View Demo Store
+            </Link>
           </div>
         </div>
       </main>
 
-      {/* Features Bento Grid */}
-      <section id="features" className="py-32 bg-slate-50/50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-20 space-y-4">
-            <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest">
-              Features
+      {/* Platform Overview */}
+      <section className="py-32 bg-slate-50/50 border-y border-border">
+        <div className="max-w-5xl mx-auto px-6 text-center space-y-12">
+          <div className="space-y-4">
+            <div className="text-4xl md:text-6xl font-black tracking-tighter">
+              Build your store. Sell anywhere. Own everything.
             </div>
-            <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">Everything you need to grow</h2>
-            <p className="text-xl text-muted-foreground font-medium">Forget complex project management tools.</p>
+            <p className="text-2xl text-muted-foreground font-medium italic max-w-3xl mx-auto leading-relaxed">
+              OWNED is a crypto-native commerce protocol for creators who want control, not platforms.
+            </p>
+          </div>
+          <div className="bg-white p-12 md:p-16 rounded-[4rem] border border-border shadow-saas text-xl md:text-2xl font-medium leading-relaxed italic text-foreground text-balance">
+            "You deploy your own onchain store, sell directly to your audience, and keep ownership of your <span className="text-primary font-black not-italic">code, content, and customer relationships.</span>"
+          </div>
+          <div className="flex flex-wrap justify-center gap-8 md:gap-16">
+            <div className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-muted-foreground">
+              <span className="w-2 h-2 rounded-full bg-primary" /> No middlemen
+            </div>
+            <div className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-muted-foreground">
+              <span className="w-2 h-2 rounded-full bg-primary" /> No lock-in
+            </div>
+            <div className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-muted-foreground">
+              <span className="w-2 h-2 rounded-full bg-primary" /> No permission required
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How it Works / 3-Step Model */}
+      <section className="py-32 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-24 space-y-4">
+            <h2 className="text-5xl md:text-6xl font-black tracking-tight italic text-foreground">How OWNED Works</h2>
+            <p className="text-xl text-muted-foreground font-medium tracking-wide">Infrastructure, not just a page.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="md:col-span-2 bg-white p-10 rounded-4xl border border-border shadow-saas hover:shadow-saas-lg transition-all group">
-              <div className="flex flex-col h-full justify-between gap-8">
-                <div className="space-y-4">
-                  <h3 className="text-3xl font-bold">Smart Storefronts</h3>
-                  <p className="text-lg text-muted-foreground font-medium leading-relaxed">
-                    Deploy your own smart contract in seconds. You own the code, you own the store, you own the relationship.
-                  </p>
-                </div>
-                <div className="aspect-video bg-muted rounded-2xl overflow-hidden grayscale group-hover:grayscale-0 transition-all">
-                  <iframe
-                    className="w-full h-full"
-                    src="https://www.youtube.com/embed/FidY4QTPkrQ?autoplay=1&mute=1&loop=1&playlist=FidY4QTPkrQ&controls=0&modestbranding=1&rel=0&playsinline=1"
-                    title="OWNED IT Demo Video"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                  ></iframe>
-                </div>
-              </div>
-            </div>
-            {/* Feature 2 */}
-            <div className="bg-primary p-10 rounded-4xl text-primary-foreground shadow-saas flex flex-col justify-between">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Step 1 */}
+            <div className="bg-white p-12 rounded-[3.5rem] border border-border shadow-saas space-y-8 group hover:border-primary transition-all">
+              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary text-2xl font-black">1</div>
               <div className="space-y-4">
-                <h3 className="text-3xl font-bold">Instant Payments</h3>
-                <p className="text-lg opacity-80 font-medium">USDC goes directly to your wallet. No 30-day holds. No withdrawal limits.</p>
+                <h3 className="text-3xl font-black tracking-tight">Build Your Store</h3>
+                <p className="text-lg text-muted-foreground font-medium italic leading-relaxed">
+                  Deploy your own storefront smart contract on Base in minutes.
+                </p>
               </div>
-              <div className="text-6xl font-black italic opacity-20 text-right">97%</div>
+              <ul className="space-y-3 pt-4 border-t border-border/50">
+                <li className="flex items-center gap-3 text-sm font-bold text-foreground">
+                  <span className="text-primary">•</span> Your store lives onchain
+                </li>
+                <li className="flex items-center gap-3 text-sm font-bold text-foreground">
+                  <span className="text-primary">•</span> You control pricing & products
+                </li>
+                <li className="flex items-center gap-3 text-sm font-bold text-foreground">
+                  <span className="text-primary">•</span> Media & metadata on IPFS
+                </li>
+              </ul>
+              <div className="pt-4 text-[10px] font-black uppercase tracking-widest text-primary italic">
+                OWNED never takes custody.
+              </div>
             </div>
-            {/* Feature 3 */}
-            <div className="bg-white p-10 rounded-4xl border border-border shadow-saas flex flex-col justify-between group">
+
+            {/* Step 2 */}
+            <div className="bg-white p-12 rounded-[3.5rem] border border-border shadow-saas space-y-8 group hover:border-primary transition-all">
+              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary text-2xl font-black">2</div>
               <div className="space-y-4">
-                <h3 className="text-2xl font-bold">IPFS Fulfillment</h3>
-                <p className="text-muted-foreground font-medium">Securely deliver digital files via decentralized storage. Censorship resistant.</p>
+                <h3 className="text-3xl font-black tracking-tight">Sell Anywhere</h3>
+                <p className="text-lg text-muted-foreground font-medium italic leading-relaxed">
+                  Your store is not tied to a single platform. Sell wherever your audience is.
+                </p>
               </div>
-              <div className="h-32 bg-muted rounded-2xl mt-8 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path></svg>
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border/50">
+                <div className="px-4 py-3 bg-slate-50 rounded-xl text-xs font-bold text-muted-foreground text-center">X Threads</div>
+                <div className="px-4 py-3 bg-slate-50 rounded-xl text-xs font-bold text-muted-foreground text-center">Discord</div>
+                <div className="px-4 py-3 bg-slate-50 rounded-xl text-xs font-bold text-muted-foreground text-center">Base Apps</div>
+                <div className="px-4 py-3 bg-slate-50 rounded-xl text-xs font-bold text-muted-foreground text-center">Direct DMs</div>
+              </div>
+              <div className="pt-4 text-[10px] font-black uppercase tracking-widest text-primary italic text-center">
+                Your store follows your audience.
               </div>
             </div>
-            {/* Feature 4 */}
-            <div className="md:col-span-2 bg-white p-10 rounded-4xl border border-border shadow-saas flex flex-col md:flex-row gap-8 items-center">
-              <div className="flex-1 space-y-4">
-                <h3 className="text-3xl font-bold">Editorial Checkout</h3>
-                <p className="text-lg text-muted-foreground font-medium">A high-conversion checkout experience that looks like a luxury magazine. Optimized for trust.</p>
+
+            {/* Step 3 */}
+            <div className="bg-white p-12 rounded-[3.5rem] border border-border shadow-saas space-y-8 group hover:border-primary transition-all">
+              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary text-2xl font-black">3</div>
+              <div className="space-y-4">
+                <h3 className="text-3xl font-black tracking-tight">Own Everything</h3>
+                <p className="text-lg text-muted-foreground font-medium italic leading-relaxed">
+                  You don't rent access. You own the underlying infrastructure.
+                </p>
               </div>
-              <div className="w-full md:w-1/2 aspect-[16/9] bg-slate-50 rounded-2xl overflow-hidden border border-border shadow-sm relative">
-                <img
-                  src="/assets/checkout_preview.png"
-                  alt="Editorial Checkout Preview"
-                  className="w-full h-full object-cover object-top"
-                />
+              <ul className="space-y-3 pt-4 border-t border-border/50">
+                <li className="flex items-center gap-3 text-sm font-bold text-foreground">
+                  <span className="text-primary">•</span> Contracts are truly yours
+                </li>
+                <li className="flex items-center gap-3 text-sm font-bold text-foreground">
+                  <span className="text-primary">•</span> Real-time settlement
+                </li>
+                <li className="flex items-center gap-3 text-sm font-bold text-foreground">
+                  <span className="text-primary">•</span> Censorship resistant
+                </li>
+              </ul>
+              <div className="pt-4 text-[10px] font-black uppercase tracking-widest text-primary italic">
+                Works even if OWNED disappears.
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section id="pricing" className="py-32">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-20 space-y-4">
-            <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest">
-              Pricing
-            </div>
-            <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">Fair, transparent pricing</h2>
-            <p className="text-xl text-muted-foreground font-medium">Stack sats, not subscriptions.</p>
+      {/* Comparison: What makes OWNED different */}
+      <section className="py-32 bg-slate-900 text-white rounded-[4rem] md:rounded-[6rem] mx-6">
+        <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+          <div className="space-y-8 text-center lg:text-left">
+            <h2 className="text-5xl md:text-7xl font-black tracking-tighter leading-tight">
+              What makes <br /><span className="text-primary italic font-serif">OWNED</span> different?
+            </h2>
+            <p className="text-2xl text-slate-400 font-medium italic leading-relaxed">
+              Most creator tools give you a page. We give you infrastructure.
+            </p>
           </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="p-8 bg-white/5 rounded-3xl border border-white/10 space-y-4">
+              <h4 className="text-xl font-bold italic">No account freezes</h4>
+              <p className="text-sm text-slate-400 leading-relaxed font-medium">Smart contracts don't have "lock" buttons. Your store responds only to you.</p>
+            </div>
+            <div className="p-8 bg-white/5 rounded-3xl border border-white/10 space-y-4">
+              <h4 className="text-xl font-bold italic">No payment holds</h4>
+              <p className="text-sm text-slate-400 leading-relaxed font-medium">USDC settles directly to your wallet. Not our bank account.</p>
+            </div>
+            <div className="p-8 bg-white/5 rounded-3xl border border-white/10 space-y-4">
+              <h4 className="text-xl font-bold italic">No deplatforming</h4>
+              <p className="text-sm text-slate-400 leading-relaxed font-medium">Sovereign code cannot be deleted by a centralized admin.</p>
+            </div>
+            <div className="p-8 bg-white/5 rounded-3xl border border-white/10 space-y-4">
+              <h4 className="text-xl font-bold italic">No subscription traps</h4>
+              <p className="text-sm text-slate-400 leading-relaxed font-medium">Own it once, use it forever. Pay for tools, not permission.</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-          <div className="max-w-md mx-auto bg-white p-12 rounded-4xl border-2 border-primary shadow-saas-lg space-y-8 relative overflow-hidden">
-            <div className="absolute top-4 right-4 bg-primary text-white text-[10px] font-bold px-2 py-1 rounded">MOST POPULAR</div>
-            <div className="space-y-2">
-              <h4 className="text-xl font-bold text-muted-foreground">Standard Creator</h4>
-              <div className="flex items-baseline gap-1">
-                <span className="text-5xl font-black italic">$9</span>
-                <span className="text-muted-foreground font-medium">/month</span>
-              </div>
-            </div>
-            <ul className="space-y-4 text-lg font-medium">
-              <li className="flex items-center gap-3">
-                <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
-                3% Transaction Fee
-              </li>
-              <li className="flex items-center gap-3">
-                <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
-                Unlimited Products
-              </li>
-              <li className="flex items-center gap-3">
-                <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
-                Fees Cap at $100/mo
-              </li>
-            </ul>
-            <Link
-              href="/dashboard"
-              className="block w-full py-4 bg-primary text-primary-foreground text-center rounded-2xl font-bold shadow-saas hover:scale-105 active:scale-95 transition-all"
-            >
-              Get Started
-            </Link>
+      {/* Feature Bridge */}
+      <section className="py-48 bg-white text-center">
+        <div className="max-w-4xl mx-auto px-6 space-y-12">
+          <div className="space-y-6">
+            <h2 className="text-4xl md:text-6xl font-black tracking-tight leading-tight">
+              Built as protocol, delivered with <span className="text-primary italic">professional</span> tooling.
+            </h2>
+            <p className="text-xl md:text-2xl text-muted-foreground font-medium italic leading-relaxed max-w-3xl mx-auto">
+              Use OWNED as pure infrastructure, or unlock our dashboard, analytics, and fulfillment tools when you want convenience—without giving up ownership.
+            </p>
           </div>
+          <Link
+            href="/pricing"
+            className="inline-block px-12 py-6 bg-primary text-white rounded-3xl font-black uppercase tracking-[0.3em] shadow-saas hover:scale-105 active:scale-95 transition-all"
+          >
+            Explore the Stack
+          </Link>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-20 border-t border-border">
+      <footer className="py-20 border-t border-border bg-white mt-12">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
           <img src="/assets/logo.png" alt="OWNED" className="w-[150px] h-[150px] object-contain opacity-80" />
-          <div className="flex gap-8 text-sm font-medium text-muted-foreground transition-all">
+          <div className="flex gap-8 text-[10px] font-black uppercase tracking-widest text-muted-foreground transition-all">
+            <Link href="/pricing" className="hover:text-primary transition-colors text-primary">Pricing</Link>
             <Link href="https://x.com/owneditxyz" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Twitter</Link>
-            <Link href="/terms" className="hover:text-primary transition-colors text-[10px] font-black uppercase tracking-widest">Terms</Link>
-            <Link href="/privacy" className="hover:text-primary transition-colors text-[10px] font-black uppercase tracking-widest">Privacy</Link>
+            <Link href="/terms" className="hover:text-primary transition-colors">Terms</Link>
+            <Link href="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
           </div>
-          <p className="text-sm text-muted-foreground">© 2026 OWNED · IT</p>
+          <p className="text-sm text-muted-foreground font-medium">© 2026 OWNED · IT</p>
         </div>
       </footer>
     </div>

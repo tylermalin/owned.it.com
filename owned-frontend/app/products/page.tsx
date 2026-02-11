@@ -9,11 +9,17 @@ export default function ProductsPage() {
     return (
         <div className="min-h-screen bg-slate-50/50">
             {/* Header */}
-            <header className="bg-white border-b border-border sticky top-0 z-50 backdrop-blur-md bg-white/80">
+            <header className="bg-white/80 border-b border-border sticky top-0 z-50 backdrop-blur-md">
                 <div className="max-w-7xl mx-auto px-6 py-[10px] flex justify-between items-center">
-                    <Link href="/" className="py-2">
-                        <img src="/assets/logo.png" alt="OWNED" className="w-[150px] h-[150px] object-contain hover:scale-105 transition-transform" />
-                    </Link>
+                    <div className="flex items-center gap-8">
+                        <Link href="/" className="flex items-center py-2">
+                            <img src="/assets/logo.png" alt="OWNED" className="w-[120px] h-[120px] object-contain hover:scale-105 transition-transform" />
+                        </Link>
+                        <nav className="hidden md:flex items-center gap-8">
+                            <Link href="/products" className="text-sm font-bold uppercase tracking-widest text-primary">Marketplace</Link>
+                            <Link href="/pricing" className="text-sm font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">Pricing</Link>
+                        </nav>
+                    </div>
                     <ConnectButton />
                 </div>
             </header>
@@ -66,7 +72,8 @@ export default function ProductsPage() {
             <footer className="py-20 border-t border-border bg-white mt-20">
                 <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
                     <p className="text-sm text-muted-foreground font-medium">© 2026 OWNED · IT</p>
-                    <div className="flex gap-8 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    <div className="flex gap-8 text-[10px] font-black uppercase tracking-widest text-muted-foreground transition-all">
+                        <Link href="/pricing" className="hover:text-primary transition-colors text-primary">Pricing</Link>
                         <Link href="https://x.com/owneditxyz" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Twitter</Link>
                         <Link href="/terms" className="hover:text-primary transition-colors">Terms</Link>
                         <Link href="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
