@@ -59,24 +59,24 @@ export function useUpdateProduct() {
     };
 }
 
-export function useDeactivateProduct() {
+export function useSetProductActive() {
     const { data: hash, writeContract, isPending, error } = useWriteContract();
 
     const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
         hash,
     });
 
-    const deactivateProduct = (productId: number) => {
+    const setProductActive = (productId: number, active: boolean) => {
         writeContract({
             address: CREATOR_STORE_ADDRESS,
             abi: CreatorStoreABI,
             functionName: 'setProductActive',
-            args: [BigInt(productId), false],
+            args: [BigInt(productId), active],
         });
     };
 
     return {
-        deactivateProduct,
+        setProductActive,
         isPending,
         isConfirming,
         isSuccess,

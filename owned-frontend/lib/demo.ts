@@ -3,34 +3,34 @@ import { ProductMetadata } from './ipfs';
 export const DEMO_METADATA: Record<number, ProductMetadata> = {
     1: {
         name: "1:1 Strategy Session",
-        subtitle: "High-Impact Coaching",
-        description: "Personalized 60-minute strategy session to unlock your potential. We'll dive deep into your roadmap, product-market fit, and growth bottlenecks.",
+        subtitle: "Founder Consultation",
+        description: "60 minutes with founder Tyler Malin. Map your path from platform to protocol. Deep dive into store architecture, launch strategy, and execution roadmap.",
         image: "/demo/coaching_call.png",
         callToAction: "BOOK SESSION",
         thumbnailStyle: "callout",
-        productType: "coaching",
-        price: "250.00",
+        productType: "consulting",
+        price: "297.00",
         salePoints: [
             "60-minute intensive 1:1 strategy deep-dive",
-            "Custom roadmap and execution plan included",
-            "Direct followup support via encrypted channel",
+            "Store architecture & launch strategy review",
+            "7 days of direct followup support",
             "Lifetime access to session recordings"
         ]
     },
     2: {
-        name: "AI Prompt Guide",
-        subtitle: "Master Generative AI",
-        description: "200+ high-performance prompts for startup founders. Includes templates for automated operations and viral marketing.",
+        name: "The Definitive Guide to Sovereign Commerce",
+        subtitle: "The Protocol Blueprint",
+        description: "108 pages. 21 chapters. The complete technical and strategic blueprint for building sovereign commerce infrastructure. Learn the patterns that eliminate platform risk forever.",
         image: "/demo/ai_prompt_guide.png",
-        callToAction: "GET ACCESS",
+        callToAction: "BUY FULL GUIDE",
         thumbnailStyle: "button",
         productType: "digital",
-        price: "49.00",
+        price: "97.00",
         salePoints: [
-            "200+ battle-tested prompts for high-growth startups",
-            "Ready-to-use templates for operations and marketing",
-            "Updated monthly with the latest LLM optimizations",
-            "Blockchain-verified ownership of the guide"
+            "Infrastructure & Sovereignty deep-dives",
+            "Next-gen Product Architecture patterns",
+            "Sovereign Distribution Systems",
+            "Economic Models for the Protocol Era"
         ]
     },
     3: {
@@ -82,5 +82,22 @@ export const DEMO_METADATA: Record<number, ProductMetadata> = {
             "Limited edition physical merch pack",
             "NFT-gate to the digital twin event"
         ]
+    },
+    6: {
+        name: "The Definitive Guide (Ch. 1)",
+        subtitle: "Sample Chapter",
+        description: "Go deep into Chapter 1: The Sovereignty Crisis. Learn why your creator business is at risk on legacy platforms and the bridge to the protocol era.",
+        image: "/demo/ai_prompt_guide.png",
+        callToAction: "GET FREE CHAPTER",
+        thumbnailStyle: "button",
+        productType: "digital",
+        price: "0.00",
+        salePoints: [
+            "Full access to Chapter 1: The Sovereignty Crisis",
+            "Analysis of legacy platform structural risks",
+            "The bridge to sovereign commerce infrastructure",
+            "Minted as a free proof-of-knowledge NFT"
+        ],
+        redirectUrl: "https://blog.ownedit.xyz/sovereignty-crisis"
     }
 };

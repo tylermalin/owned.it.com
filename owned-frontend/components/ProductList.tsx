@@ -1,5 +1,5 @@
-import { useProduct } from '@/lib/hooks';
-import { useDeactivateProduct } from '@/lib/dashboardHooks';
+import { useProduct, useAllProducts } from '@/lib/hooks';
+import { useSetProductActive } from '@/lib/dashboardHooks';
 import { formatUSDC } from '@/lib/utils';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -10,31 +10,51 @@ interface ProductListProps {
 }
 
 export function ProductList({ onEdit }: ProductListProps) {
-    // Featured Amazing Demo Products
-    const productIds = [1, 2];
+    const { productIds, isLoading: isLogsLoading } = useAllProducts();
+
+    if (isLogsLoading) {
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl">
+                {[1, 2].map(id => (
+                    <div key={id} className="bg-white border border-border p-8 rounded-4xl shadow-sm animate-pulse space-y-6">
+                        <div className="h-40 bg-slate-50 rounded-3xl" />
+                        <div className="space-y-3">
+                            <div className="h-6 bg-slate-50 rounded-full w-3/4" />
+                            <div className="h-4 bg-slate-50 rounded-full w-1/2" />
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
+    }
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl">
             {productIds.map((id) => (
                 <ProductCardItem key={id} productId={id} onEdit={onEdit} />
             ))}
+            {productIds.length === 0 && (
+                <div className="col-span-full py-12 text-center bg-slate-50 rounded-4xl border border-dashed border-border">
+                    <p className="text-muted-foreground font-medium italic">No products launched yet. Launch your first product above.</p>
+                </div>
+            )}
         </div>
     );
 }
 
 function ProductCardItem({ productId, onEdit }: { productId: number; onEdit?: (id: number) => void }) {
     const { data: product, isLoading } = useProduct(productId);
-    const { deactivateProduct, isPending, isSuccess, error } = useDeactivateProduct();
+    const { setProductActive, isPending, isSuccess, error } = useSetProductActive();
 
     useEffect(() => {
         if (isSuccess) {
-            toast.success(`Product #${productId} deactivated.`);
+            toast.success(`Store visibility updated.`);
         }
     }, [isSuccess]);
 
     useEffect(() => {
         if (error) {
-            toast.error('Failed to deactivate product.');
+            toast.error('Failed to update visibility.');
         }
     }, [error]);
 
@@ -50,17 +70,15 @@ function ProductCardItem({ productId, onEdit }: { productId: number; onEdit?: (i
         );
     }
 
-    if (!product || !(product as any).active) {
+    if (!product) {
         return null;
     }
 
-    const { price, ipfsHash, maxSupply, sold } = product as any;
+    const { price, ipfsHash, maxSupply, sold, active } = product as any;
     const supply = maxSupply > BigInt(0) ? maxSupply.toString() : '∞';
 
-    const handleDeactivate = () => {
-        if (confirm('Are you sure you want to deactivate this product? It will no longer be available for sale.')) {
-            deactivateProduct(productId);
-        }
+    const handleToggleActive = () => {
+        setProductActive(productId, !active);
     };
 
     return (
@@ -69,21 +87,27 @@ function ProductCardItem({ productId, onEdit }: { productId: number; onEdit?: (i
                 <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center font-black text-primary italic shadow-sm">
                     {productId}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex items-center gap-4">
+                    <div className="flex flex-col items-end gap-1 mr-2">
+                        <span className={`text-[10px] font-black uppercase tracking-widest ${active ? 'text-emerald-500' : 'text-slate-400'}`}>
+                            {active ? 'Live on Store' : 'Hidden'}
+                        </span>
+                        <button
+                            onClick={handleToggleActive}
+                            disabled={isPending}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${active ? 'bg-emerald-500' : 'bg-slate-200'}`}
+                        >
+                            <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${active ? 'translate-x-6' : 'translate-x-1'}`}
+                            />
+                        </button>
+                    </div>
                     <button
                         onClick={() => onEdit?.(productId)}
                         className="p-2.5 bg-slate-50 text-slate-400 hover:text-primary hover:bg-white border border-transparent hover:border-border rounded-xl transition-all"
                         title="Edit Product"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                    </button>
-                    <button
-                        onClick={handleDeactivate}
-                        disabled={isPending}
-                        className="p-2.5 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-white border border-transparent hover:border-border rounded-xl transition-all"
-                        title="Deactivate Product"
-                    >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1-1v3M4 7h16"></path></svg>
                     </button>
                 </div>
             </div>

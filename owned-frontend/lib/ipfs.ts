@@ -78,7 +78,7 @@ export async function uploadImageToIPFS(file: File): Promise<string> {
     }
 }
 
-// Helper to get IPFS gateway URL
+// Helper to get IPFS gateway URL using internal proxy to avoid CORS/reliability issues
 export function getIPFSGatewayUrl(hash: string): string {
-    return `https://nftstorage.link/ipfs/${hash}`;
+    return `/api/ipfs/fetch?hash=${hash}`;
 }

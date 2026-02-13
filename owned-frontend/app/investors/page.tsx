@@ -1,91 +1,110 @@
+'use client';
+
+import { useState } from 'react';
 import { Nav } from '@/components/Nav';
-import Link from 'next/link';
+import { Lock, ArrowRight, ShieldCheck, TrendingUp, Users } from 'lucide-react';
+import toast from 'react-hot-toast';
 
-export default function InvestorPortal() {
-    return (
-        <div className="min-h-screen bg-slate-950 text-white selection:bg-primary/30">
-            <Nav />
+export default function InvestorsPage() {
+    const [password, setPassword] = useState('');
+    const [isAuthorized, setIsAuthorized] = useState(false);
 
-            <main className="relative pt-48 pb-32 overflow-hidden px-6">
-                {/* Dark Background Effects */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1000px] bg-[radial-gradient(circle_at_center,rgba(0,97,255,0.08)_0%,transparent_70%)] pointer-events-none" />
+    const handleLogin = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (password === 'OWNED2026') {
+            setIsAuthorized(true);
+            toast.success('Access Granted');
+        } else {
+            toast.error('Incorrect Password');
+        }
+    };
 
-                <div className="max-w-4xl mx-auto relative z-10">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-12 border border-primary/20">
-                        Investor Portal
+    if (!isAuthorized) {
+        return (
+            <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-6 relative overflow-hidden">
+                <div className="absolute inset-0 bg-primary/5 blur-[120px] rounded-full translate-y-1/2 scale-150" />
+
+                <div className="max-w-md w-full space-y-12 relative z-10 text-center">
+                    <div className="space-y-6">
+                        <img src="/assets/logo.png" alt="OWNED" className="w-[120px] h-[120px] mx-auto object-contain brightness-0 invert" />
+                        <div className="space-y-2">
+                            <h1 className="text-4xl font-black text-white tracking-tight">Investor <span className="text-primary italic">Portal</span></h1>
+                            <p className="text-slate-400 font-medium">Please enter the access code to view the confidential deck and data room.</p>
+                        </div>
                     </div>
 
-                    <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-[0.9] mb-8">
-                        Sovereign Commerce <br />
-                        <span className="text-primary italic font-serif italic">Infrastructure.</span>
-                    </h1>
+                    <form onSubmit={handleLogin} className="space-y-4">
+                        <div className="relative">
+                            <Lock className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                            <input
+                                type="password"
+                                placeholder="Access Code"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="w-full pl-16 pr-6 py-6 bg-white/5 border border-white/10 rounded-3xl text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-bold text-lg"
+                                autoFocus
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            className="w-full py-6 bg-primary text-primary-foreground rounded-3xl font-black uppercase tracking-[0.3em] text-sm shadow-saas hover:scale-[1.02] active:scale-[0.98] transition-all"
+                        >
+                            Enter Portal
+                        </button>
+                    </form>
 
-                    <p className="text-xl md:text-2xl text-slate-400 font-medium italic mb-16 leading-relaxed">
-                        Creators are facing an existential crisis: platform dependence.
-                        OWNEDit is building the self-custodial infrastructure that returns
-                        ownership of code, content, and customers to the people who create the value.
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-600 italic">
+                        Authorized Personnel Only
                     </p>
+                </div>
+            </div>
+        );
+    }
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
-                        <div className="p-8 rounded-3xl bg-white/5 border border-white/10 space-y-4">
-                            <h3 className="text-xl font-bold italic text-primary">The Vision</h3>
-                            <p className="text-sm text-slate-400 leading-relaxed font-medium">
-                                A world where commerce is a protocol, not a platform. No middlemen,
-                                no payment holds, and no deplatforming risk.
-                            </p>
-                        </div>
-                        <div className="p-8 rounded-3xl bg-white/5 border border-white/10 space-y-4">
-                            <h3 className="text-xl font-bold italic text-primary">The Traction</h3>
-                            <p className="text-sm text-slate-400 leading-relaxed font-medium">
-                                Fully functional V1 live on Base Sepolia. Creators are already
-                                deploying their own storefront contracts and accepting USDC.
-                            </p>
-                        </div>
+    return (
+        <div className="min-h-screen bg-slate-50/50">
+            <Nav />
+            <main className="max-w-7xl mx-auto px-6 py-24 space-y-24">
+                <div className="space-y-6 text-center">
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-[0.3em] rounded-full border border-primary/20">
+                        Seed Round 2026
                     </div>
+                    <h1 className="text-6xl font-black tracking-tight leading-tight">
+                        The Sovereignty <span className="text-primary italic">Protocol</span>.
+                    </h1>
+                </div>
 
-                    <div className="flex flex-col sm:flex-row items-center gap-6">
-                        <Link
-                            href="/investors/deck"
-                            className="w-full sm:w-auto px-12 py-6 bg-primary text-white rounded-3xl font-black uppercase tracking-[0.3em] text-sm shadow-saas hover:scale-105 active:scale-95 transition-all text-center"
-                        >
-                            View Pitch Deck
-                        </Link>
-                        <Link
-                            href="/contact"
-                            className="w-full sm:w-auto px-12 py-6 bg-white/5 text-white border border-white/10 rounded-3xl font-black uppercase tracking-[0.3em] text-sm hover:bg-white/10 transition-all text-center"
-                        >
-                            Contact Founder
-                        </Link>
+                {/* Strategy Deck Placeholder */}
+                <div className="aspect-video w-full bg-slate-900 rounded-[3rem] border border-white/5 shadow-saas-lg flex flex-col items-center justify-center p-20 space-y-8 relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <Lock className="w-16 h-16 text-primary animate-pulse" />
+                    <div className="text-center space-y-4 relative z-10">
+                        <h2 className="text-3xl font-black text-white italic">Interactive Pitch Deck</h2>
+                        <p className="text-slate-400 font-medium max-w-sm">Use the arrows or your keyboard to navigate the strategy slides.</p>
+                    </div>
+                    <button className="px-10 py-5 bg-white text-slate-950 rounded-2xl font-black uppercase tracking-[0.2em] text-xs shadow-lg relative z-10 hover:scale-105 transition-all">
+                        Launch Presentation
+                    </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="bg-white p-10 rounded-4xl border border-border shadow-sm space-y-4">
+                        <TrendingUp className="w-8 h-8 text-primary" />
+                        <h3 className="text-xl font-extrabold">Market size</h3>
+                        <p className="text-muted-foreground font-medium italic">$250B+ Creator Economy growing at 15% CAGR.</p>
+                    </div>
+                    <div className="bg-white p-10 rounded-4xl border border-border shadow-sm space-y-4">
+                        <Users className="w-8 h-8 text-primary" />
+                        <h3 className="text-xl font-extrabold">Early Traction</h3>
+                        <p className="text-muted-foreground font-medium italic">500+ Qualified creators on waitlist for Q1 Launch.</p>
+                    </div>
+                    <div className="bg-white p-10 rounded-4xl border border-border shadow-sm space-y-4">
+                        <ShieldCheck className="w-8 h-8 text-primary" />
+                        <h3 className="text-xl font-extrabold">Moat</h3>
+                        <p className="text-muted-foreground font-medium italic">Native IPFS fulfillment + Sovereign Smart Contracts.</p>
                     </div>
                 </div>
             </main>
-
-            {/* Metrics Snapshot */}
-            <section className="py-24 border-t border-white/10 bg-black/40">
-                <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
-                    <div className="space-y-1">
-                        <p className="text-4xl font-black tracking-tighter">$300B</p>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Creator Economy TAM</p>
-                    </div>
-                    <div className="space-y-1">
-                        <p className="text-4xl font-black tracking-tighter">100%</p>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Custody Controlled by Creator</p>
-                    </div>
-                    <div className="space-y-1">
-                        <p className="text-4xl font-black tracking-tighter">0%</p>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Platform Fees Taken</p>
-                    </div>
-                    <div className="space-y-1">
-                        <p className="text-4xl font-black tracking-tighter">Base</p>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Native Infrastructure</p>
-                    </div>
-                </div>
-            </section>
-
-            <footer className="py-20 border-t border-white/10 text-center">
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-600 mb-4">OWNED · IT INFRASTRUCTURE</p>
-                <p className="text-xs text-slate-500">© 2026 · Confidential & Proprietary</p>
-            </footer>
         </div>
     );
 }

@@ -19,7 +19,6 @@ export function Nav() {
                         <Link href="/products" className="hover:text-primary transition-colors">Marketplace</Link>
                         <Link href="/#features" className="hover:text-primary transition-colors">Features</Link>
                         <Link href="/pricing" className="hover:text-primary transition-colors">Pricing</Link>
-                        <Link href="/investors" className="hover:text-primary transition-colors text-[10px] px-3 py-1 bg-slate-50 rounded-lg border border-border">Investors</Link>
                     </div>
                 </div>
                 <div className="flex items-center gap-4">

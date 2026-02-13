@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAddProduct, useUpdateProduct } from '@/lib/dashboardHooks';
-import { useProduct } from '@/lib/hooks';
+import { useProduct, useAllProducts } from '@/lib/hooks';
 import toast from 'react-hot-toast';
 import { ProductTypeSelector, ProductType } from './ProductTypeSelector';
 import { uploadToIPFS, uploadImageToIPFS, ProductMetadata } from '@/lib/ipfs';
@@ -40,6 +40,9 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
 
     // Fetch product data if in edit mode
     const { data: productData, isLoading: isProductLoading } = useProduct(editProductId || 0);
+
+    // Dynamic discovery for ID generation
+    const { productIds } = useAllProducts();
 
     // Populate form if editing
     useEffect(() => {
@@ -116,8 +119,8 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
 
         // Auto-fill Product ID with next number if not editing
         if (!productId && !editProductId) {
-            const nextId = Math.floor(Math.random() * 1000) + 3;
-            setProductId(nextId.toString());
+            const maxId = productIds.length > 0 ? Math.max(...productIds) : 6; // Default demo products go up to 6
+            setProductId((maxId + 1).toString());
         }
     };
 
@@ -167,7 +170,8 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                 requiredInfo: requiredInfo,
                 attributes: [
                     { trait_type: 'Product Type', value: productType || 'digital' },
-                    { trait_type: 'Price', value: `$${price}` },
+                    { trait_type: 'Original Price', value: `$${price}` },
+                    { trait_type: 'Discount Price', value: discountPrice ? `$${discountPrice}` : 'None' },
                 ],
             };
 
@@ -198,10 +202,12 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
 
         const supply = maxSupply === '' ? 0 : parseInt(maxSupply);
 
+        const finalPrice = discountPrice !== '' ? discountPrice : price;
+
         if (editProductId) {
-            updateProduct(parseInt(productId), price, ipfsHash, supply);
+            updateProduct(parseInt(productId), finalPrice, ipfsHash, supply);
         } else {
-            addProduct(parseInt(productId), price, ipfsHash, supply);
+            addProduct(parseInt(productId), finalPrice, ipfsHash, supply);
         }
     };
 
@@ -405,6 +411,37 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                 />
                             </div>
                         </div>
+
+                        <div className="space-y-4 pt-4 border-t border-border border-dashed">
+                            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">
+                                Required Customer Information
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                                {requiredInfo.map((info) => (
+                                    <div key={info} className="px-4 py-2 bg-slate-100 text-slate-900 rounded-xl flex items-center gap-2 group border border-border">
+                                        <span className="text-sm font-bold">{info}</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => setRequiredInfo(requiredInfo.filter(i => i !== info))}
+                                            className="text-slate-400 hover:text-red-500 transition-colors"
+                                        >
+                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                        </button>
+                                    </div>
+                                ))}
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const next = prompt('Enter info field name (e.g. Phone, Telegram, Shipping Address):');
+                                        if (next && !requiredInfo.includes(next)) setRequiredInfo([...requiredInfo, next]);
+                                    }}
+                                    className="px-4 py-2 border-2 border-dashed border-border rounded-xl text-xs font-bold text-muted-foreground hover:border-primary hover:text-primary transition-all"
+                                >
+                                    + Add Field
+                                </button>
+                            </div>
+                            <p className="text-[10px] text-muted-foreground italic">These fields will be requested during checkout and stored on IPFS.</p>
+                        </div>
                     </div>
                 </div>
 
@@ -415,10 +452,10 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                         <h4 className="font-bold uppercase tracking-widest text-xs text-muted-foreground">Pricing</h4>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white border border-border p-10 rounded-4xl shadow-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 bg-white border border-border p-10 rounded-4xl shadow-sm">
                         <div className="space-y-2">
                             <label htmlFor="price" className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">
-                                Price (USDC) *
+                                Original Price (USDC)
                             </label>
                             <div className="relative">
                                 <span className="absolute left-5 top-1/2 -translate-y-1/2 text-xl font-bold text-muted-foreground">$</span>
@@ -427,12 +464,30 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                     id="price"
                                     value={price}
                                     onChange={(e) => setPrice(e.target.value)}
-                                    className="w-full pl-10 pr-5 py-5 bg-slate-50 border border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-black text-3xl italic tracking-tight transition-all"
-                                    placeholder="9.99"
+                                    className="w-full pl-10 pr-5 py-5 bg-slate-50 border border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-black text-2xl italic tracking-tight transition-all"
+                                    placeholder="97.00"
                                     required
                                     disabled={isLoading}
                                 />
                             </div>
+                        </div>
+                        <div className="space-y-2">
+                            <label htmlFor="discountPrice" className="text-xs font-bold uppercase tracking-widest text-primary ml-1">
+                                Discounted Price (USDC)
+                            </label>
+                            <div className="relative">
+                                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-xl font-bold text-primary">$</span>
+                                <input
+                                    type="text"
+                                    id="discountPrice"
+                                    value={discountPrice}
+                                    onChange={(e) => setDiscountPrice(e.target.value)}
+                                    className="w-full pl-10 pr-5 py-5 bg-white border-2 border-primary rounded-2xl focus:outline-none focus:ring-4 focus:ring-primary/10 font-black text-2xl italic tracking-tight transition-all"
+                                    placeholder="0 for FREE"
+                                    disabled={isLoading}
+                                />
+                            </div>
+                            <p className="text-[10px] text-primary/70 font-bold uppercase tracking-widest mt-1 ml-1">The actual price paid on-chain.</p>
                         </div>
                         <div className="space-y-2">
                             <label htmlFor="maxSupply" className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">
@@ -443,7 +498,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                 id="maxSupply"
                                 value={maxSupply}
                                 onChange={(e) => setMaxSupply(e.target.value)}
-                                className="w-full px-5 py-5 bg-white border border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-bold text-xl transition-all"
+                                className="w-full px-5 py-5 bg-slate-50 border border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-bold text-xl transition-all"
                                 placeholder="0"
                                 disabled={isLoading}
                             />

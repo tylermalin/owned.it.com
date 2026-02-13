@@ -109,8 +109,76 @@ export default function PricingPage() {
                         Pricing that respects <span className="text-primary italic">ownership.</span>
                     </h1>
                     <p className="text-2xl text-muted-foreground font-medium max-w-3xl mx-auto leading-relaxed italic">
-                        Your store is yours. Pay once to deploy, or pay for professional tooling.
+                        Most platforms extract rent as you grow. We charge for tools, not permission.
                     </p>
+                </div>
+
+                {/* Decision Guidance */}
+                <div className="mb-32 space-y-24">
+                    <div className="text-center space-y-4">
+                        <h2 className="text-4xl md:text-5xl font-black tracking-tight italic">Which Plan Should You Choose?</h2>
+                        <p className="text-xl text-muted-foreground font-medium italic">Not sure which tier fits your business? Here's how to decide:</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+                        <div className="p-10 bg-white rounded-[3rem] border border-border shadow-saas space-y-6">
+                            <div className="text-lg font-black text-foreground">Choose <span className="text-primary italic">"Own It Once"</span> if:</div>
+                            <ul className="space-y-4">
+                                {[
+                                    "You're earning $0-5K/month and want to test sovereign commerce",
+                                    "You're comfortable with smart contracts and onchain tools",
+                                    "You want maximum ownership with minimal ongoing costs",
+                                    "You can handle product setup without a dashboard"
+                                ].map((item, i) => (
+                                    <li key={i} className="flex gap-3 text-sm font-medium text-foreground">
+                                        <span className="text-primary">✅</span> {item}
+                                    </li>
+                                ))}
+                            </ul>
+                            <div className="pt-6 border-t border-border/50 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Best for: Crypto-native creators, developers, technical founders</div>
+                        </div>
+
+                        <div className="p-10 bg-white rounded-[3rem] border border-primary shadow-saas scale-105 relative space-y-6">
+                            <div className="absolute top-0 right-10 -translate-y-1/2 bg-primary text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-saas">Recommended</div>
+                            <div className="text-lg font-black text-foreground">Choose <span className="text-primary italic">"Pro Seller"</span> if:</div>
+                            <ul className="space-y-4">
+                                {[
+                                    "You're earning $5K-50K/month and want professional tooling",
+                                    "You want a web dashboard to manage products easily",
+                                    "You need analytics, fulfillment, and conversion insights",
+                                    "You sell multiple products and want convenience"
+                                ].map((item, i) => (
+                                    <li key={i} className="flex gap-3 text-sm font-medium text-foreground">
+                                        <span className="text-primary">✅</span> {item}
+                                    </li>
+                                ))}
+                            </ul>
+                            <div className="pt-6 border-t border-border/50 text-[10px] font-black uppercase tracking-widest text-primary">Best for: Professional creators, course sellers, digital product businesses</div>
+                        </div>
+
+                        <div className="p-10 bg-white rounded-[3rem] border border-border shadow-saas space-y-6">
+                            <div className="text-lg font-black text-foreground">Choose <span className="text-primary italic">"Enterprise"</span> if:</div>
+                            <ul className="space-y-4">
+                                {[
+                                    "You're a fund, DAO, media org, or large community",
+                                    "You need to manage multiple stores with team permissions",
+                                    "You want white-label options and custom fee routing",
+                                    "You require dedicated infrastructure and priority support"
+                                ].map((item, i) => (
+                                    <li key={i} className="flex gap-3 text-sm font-medium text-foreground">
+                                        <span className="text-primary">✅</span> {item}
+                                    </li>
+                                ))}
+                            </ul>
+                            <div className="pt-6 border-t border-border/50 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Best for: Organizations, agencies, communities, investment groups</div>
+                        </div>
+                    </div>
+
+                    <div className="text-center">
+                        <p className="text-xl text-muted-foreground font-medium italic mb-6">Still not sure?</p>
+                        <Link href="/contact" className="inline-block px-10 py-5 bg-foreground text-background rounded-2xl font-black uppercase tracking-[0.2em] text-sm shadow-saas hover:scale-105 transition-all">Book a Strategy Session → ($297)</Link>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-primary mt-4 italic">I'll tell you which tier fits your business model.</p>
+                    </div>
                 </div>
 
                 {/* Pricing Grid */}
@@ -222,8 +290,8 @@ export default function PricingPage() {
                     <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -ml-32 -mb-32" />
 
                     <div className="relative space-y-6">
-                        <h2 className="text-5xl font-black tracking-tight">OWNED is a protocol, <span className="text-primary">not a platform.</span></h2>
-                        <p className="text-xl text-muted-foreground font-medium italic">You own your contracts. You control your funds. You can leave anytime.</p>
+                        <h2 className="text-5xl font-black tracking-tight">You Own <span className="text-primary">Your Contracts.</span></h2>
+                        <p className="text-xl text-muted-foreground font-medium italic">Every store is a sovereign smart contract on Base.</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
@@ -232,27 +300,27 @@ export default function PricingPage() {
                                 <Check className="w-6 h-6 text-primary" strokeWidth={3} />
                             </div>
                             <h3 className="text-xl font-bold">You own your contracts</h3>
-                            <p className="text-sm text-muted-foreground font-medium">Every store is a sovereign smart contract on Base.</p>
+                            <p className="text-sm text-muted-foreground font-medium">Your store isn't hosted on our servers. It's deployed to the blockchain. You control it.</p>
                         </div>
                         <div className="space-y-4 border-y md:border-y-0 md:border-x border-border/50 py-12 md:py-0">
                             <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
                                 <Check className="w-6 h-6 text-primary" strokeWidth={3} />
                             </div>
                             <h3 className="text-xl font-bold">You control your funds</h3>
-                            <p className="text-sm text-muted-foreground font-medium">Payments settle directly to your wallet in real-time.</p>
+                            <p className="text-sm text-muted-foreground font-medium">Payments settle directly to your wallet in real-time. We never hold your money.</p>
                         </div>
                         <div className="space-y-4">
                             <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
                                 <Check className="w-6 h-6 text-primary" strokeWidth={3} />
                             </div>
                             <h3 className="text-xl font-bold">You can leave anytime</h3>
-                            <p className="text-sm text-muted-foreground font-medium">Sovereign infrastructure means no lock-in. Ever.</p>
+                            <p className="text-sm text-muted-foreground font-medium">Sovereign infrastructure means no lock-in. Export your data anytime. Point your contract to a new interface.</p>
                         </div>
                     </div>
 
                     <div className="relative pt-8">
                         <div className="text-4xl font-black italic tracking-tighter text-foreground decoration-primary decoration-4 underline-offset-[12px] underline">
-                            Stack sats, not subscriptions.
+                            Stack ownership, not subscriptions.
                         </div>
                     </div>
                 </div>
