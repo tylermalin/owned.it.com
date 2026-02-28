@@ -88,37 +88,53 @@ export interface ProductMetadata {
 }
 
 
-// Helper to upload via local proxy API (to bypass CORS)
-async function uploadToLighthouse(blob: Blob | File, fileName: string): Promise<string> {
+// Helper to upload directly to Pinata using a temporary, scoped API key
+async function uploadToPinata(blob: Blob | File, fileName: string): Promise<string> {
     const formData = new FormData();
     // Wrap blob in File if it's not already one, to ensure fileName is preserved
     const file = blob instanceof File ? blob : new File([blob], fileName, { type: blob.type });
     formData.append('file', file);
 
-    const response = await fetch('/api/ipfs/upload', {
+    // Add metadata
+    formData.append('pinataMetadata', JSON.stringify({ name: fileName }));
+
+    // Get a temporary Pinata JWT from our backend (bypasses Vercel 4.5MB payload limit)
+    const keyRes = await fetch('/api/ipfs/key');
+    if (!keyRes.ok) {
+        const errorData = await keyRes.json().catch(() => ({}));
+        console.error('Failed to grab temporary upload key:', errorData);
+        throw new Error(errorData.error || 'Failed to initialize secure upload session.');
+    }
+    const { JWT } = await keyRes.json();
+
+    // Upload directly to Pinata from the browser
+    const response = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
         method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${JWT}`,
+        },
         body: formData,
     });
 
     if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Proxy Upload Error:', errorData);
-        throw new Error(errorData.error || `Upload failed: ${response.statusText}`);
+        const errorData = await response.text();
+        console.error('Direct Pinata Upload Error:', errorData);
+        throw new Error(`Upload failed: ${response.statusText}`);
     }
 
     const data = await response.json();
-    if (!data.Hash) {
-        throw new Error('Invalid response from upload proxy');
+    if (!data.IpfsHash) {
+        throw new Error('Invalid response from secure upload service');
     }
 
-    return data.Hash;
+    return data.IpfsHash;
 }
 
 export async function uploadToIPFS(metadata: ProductMetadata): Promise<string> {
     try {
         const metadataString = JSON.stringify(metadata, null, 2);
         const blob = new Blob([metadataString], { type: 'application/json' });
-        return await uploadToLighthouse(blob, `metadata-${Date.now()}.json`);
+        return await uploadToPinata(blob, `metadata-${Date.now()}.json`);
     } catch (error: any) {
         console.error('Error uploading to IPFS:', error);
         throw new Error(`Failed to upload to IPFS: ${error?.message || 'Unknown error'}`);
@@ -127,7 +143,7 @@ export async function uploadToIPFS(metadata: ProductMetadata): Promise<string> {
 
 export async function uploadImageToIPFS(file: File): Promise<string> {
     try {
-        return await uploadToLighthouse(file, file.name);
+        return await uploadToPinata(file, file.name);
     } catch (error: any) {
         console.error('Error uploading image to IPFS:', error);
         throw new Error(`Failed to upload image to IPFS: ${error?.message || 'Unknown error'}`);
