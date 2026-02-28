@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useEffect, ReactNode, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { storeReferral, getReferrer } from '@/lib/affiliateTracker';
 
@@ -17,7 +17,7 @@ export function useAffiliate() {
     return useContext(AffiliateContext);
 }
 
-export function AffiliateProvider({ children }: { children: ReactNode }) {
+function AffiliateTracker() {
     const searchParams = useSearchParams();
 
     // On mount, capture ?ref= param and store the referral
@@ -33,12 +33,19 @@ export function AffiliateProvider({ children }: { children: ReactNode }) {
         }
     }, [searchParams]);
 
+    return null;
+}
+
+export function AffiliateProvider({ children }: { children: ReactNode }) {
     const getReferrerForProduct = (productId: number): string | null => {
         return getReferrer(productId);
     };
 
     return (
         <AffiliateContext.Provider value={{ getReferrerForProduct }}>
+            <Suspense fallback={null}>
+                <AffiliateTracker />
+            </Suspense>
             {children}
         </AffiliateContext.Provider>
     );
