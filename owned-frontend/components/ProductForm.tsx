@@ -475,7 +475,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
 
         const finalPrice = discountPrice !== '' ? discountPrice : price;
 
-        if (isLocalTest && !editProductId) {
+        if (isLocalTest) {
             // Save to LocalStorage
             const TEST_PRODUCTS_KEY = 'owned-local-products';
             const localData = localStorage.getItem(TEST_PRODUCTS_KEY);
@@ -499,8 +499,11 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
             };
 
             localStorage.setItem(TEST_PRODUCTS_KEY, JSON.stringify(localProducts));
-            toast.success('Test product created locally!');
-            resetForm();
+            toast.success(`Test product ${editProductId ? 'updated' : 'created'} locally!`);
+
+            if (!editProductId) {
+                resetForm();
+            }
             if (onSuccess) onSuccess();
             return;
         }
