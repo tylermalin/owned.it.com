@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { getIPFSGatewayUrl, ProductMetadata } from '@/lib/ipfs';
 
 import { DEMO_METADATA } from '@/lib/demo';
+import { FormattedDescription } from '@/components/FormattedDescription';
 import {
     Download,
     Ticket,
@@ -19,7 +20,8 @@ import {
     CheckCircle2,
     Calendar,
     Globe,
-    LayoutDashboard
+    LayoutDashboard,
+    Package
 } from 'lucide-react';
 
 interface ProductCardProps {
@@ -58,7 +60,7 @@ export function ProductCard({ productId }: ProductCardProps) {
     }, [product]);
 
     // For demo purposes, if it's a demo product ID, we show it even without contract data
-    const isDemoProduct = productId >= 1 && productId <= 5;
+    const isDemoProduct = productId >= 1 && productId <= 7;
 
     if (isContractLoading || isMetadataLoading) {
         return (
@@ -160,6 +162,22 @@ export function ProductCard({ productId }: ProductCardProps) {
                                 {getCategoryLabel()}
                             </span>
                         </div>
+                        {metadata?.affiliateEnabled && (
+                            <div className="flex items-center justify-center gap-1.5 mt-3">
+                                <span className="px-2.5 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
+                                    <Globe className="w-3 h-3" />
+                                    {metadata.affiliatePercent}% Affiliate
+                                </span>
+                            </div>
+                        )}
+                        {metadata?.productType === 'bundle' && (
+                            <div className="flex items-center justify-center gap-1.5 mt-2">
+                                <span className="px-2.5 py-1 bg-primary/10 text-primary border border-primary/20 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
+                                    <Package className="w-3 h-3" />
+                                    Product Bundle
+                                </span>
+                            </div>
+                        )}
                     </div>
 
                     <div className="pt-4">
@@ -208,6 +226,18 @@ export function ProductCard({ productId }: ProductCardProps) {
                                 {getCategoryLabel()}
                             </span>
                         </div>
+                        {metadata?.affiliateEnabled && (
+                            <div className="absolute bottom-3 right-3 px-2 py-1 bg-emerald-500 text-white rounded-lg text-[9px] font-black uppercase tracking-widest flex items-center gap-1 shadow-sm">
+                                <Globe className="w-2.5 h-2.5" />
+                                {metadata.affiliatePercent}% Affiliate
+                            </div>
+                        )}
+                        {metadata?.productType === 'bundle' && (
+                            <div className="absolute bottom-3 left-3 px-2 py-1 bg-primary text-white rounded-lg text-[9px] font-black uppercase tracking-widest flex items-center gap-1 shadow-sm">
+                                <Package className="w-2.5 h-2.5" />
+                                Bundle
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -222,9 +252,7 @@ export function ProductCard({ productId }: ProductCardProps) {
                             {title}
                         </h3>
                     </div>
-                    <p className="text-sm text-muted-foreground line-clamp-2 font-medium">
-                        {metadata?.description || 'No description provided.'}
-                    </p>
+                    <FormattedDescription text={metadata?.description || 'No description provided.'} variant="card" />
                 </div>
 
                 <div className="flex items-center justify-between pt-6 mt-auto border-t border-border/50">

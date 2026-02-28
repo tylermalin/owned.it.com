@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 import { Check, Minus } from 'lucide-react';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { AuthButton } from '@/components/AuthButton';
 
 const tiers = [
     {
         name: "Own It Once",
         subtitle: "Deploy + Own Forever",
-        price: "$299",
+        price: "$297",
         description: "one-time payment",
         bestFor: "Crypto-native creators & developers",
         includes: [
@@ -94,7 +94,7 @@ export default function PricingPage() {
                     <nav className="hidden md:flex items-center gap-8">
                         <Link href="/products" className="text-sm font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">Marketplace</Link>
                         <Link href="/pricing" className="text-sm font-bold uppercase tracking-widest text-primary">Pricing</Link>
-                        <ConnectButton />
+                        <AuthButton />
                     </nav>
                 </div>
             </header>
@@ -182,56 +182,61 @@ export default function PricingPage() {
                 </div>
 
                 {/* Pricing Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-32">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-32">
                     {tiers.map((tier, idx) => (
-                        <div key={idx} className={`relative flex flex-col bg-white rounded-[3.5rem] border ${tier.highlight ? 'border-primary ring-1 ring-primary/20 scale-105 z-10' : 'border-border'} p-12 shadow-saas hover:shadow-saas-lg transition-all`}>
+                        <div
+                            key={idx}
+                            className={`relative flex flex-col glass rounded-[3.5rem] ${tier.highlight ? 'ring-2 ring-primary bg-white/90 scale-105 z-10' : 'bg-white/60'} p-12 shadow-saas hover:shadow-saas-lg transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] group`}
+                        >
                             {tier.highlight && (
-                                <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest shadow-saas">
+                                <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-8 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.3em] shadow-glow animate-pulse">
                                     {tier.highlight}
                                 </div>
                             )}
 
-                            <div className="mb-10 text-center">
-                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-2">{tier.subtitle}</p>
-                                <h2 className="text-4xl font-black tracking-tight">{tier.name}</h2>
+                            <div className="mb-12 text-center">
+                                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary mb-4">{tier.subtitle}</p>
+                                <h2 className="text-5xl font-black tracking-tight text-foreground">{tier.name}</h2>
                             </div>
 
-                            <div className="mb-10 text-center">
-                                <div className="flex items-baseline justify-center gap-1">
-                                    <span className="text-5xl font-black italic tracking-tighter">{tier.price}</span>
-                                    <span className="text-sm font-bold text-muted-foreground text-left max-w-[120px] leading-tight">{tier.description}</span>
+                            <div className="mb-12 text-center">
+                                <div className="flex items-baseline justify-center gap-2">
+                                    <span className="text-6xl font-black italic tracking-tighter text-foreground">{tier.price}</span>
+                                    <span className="text-sm font-bold text-muted-foreground text-left max-w-[120px] leading-tight uppercase tracking-widest">{tier.description}</span>
                                 </div>
-                                {tier.footerNote && <p className="text-[10px] font-bold text-primary uppercase mt-2">{tier.footerNote}</p>}
+                                {tier.footerNote && <p className="text-[10px] font-black text-primary uppercase mt-4 tracking-[0.2em]">{tier.footerNote}</p>}
                             </div>
 
-                            <div className="space-y-6 mb-12 flex-1">
-                                <p className="text-xs font-bold text-muted-foreground italic border-b border-border pb-4">
-                                    Best for {tier.bestFor}
+                            <div className="space-y-8 mb-16 flex-1">
+                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] border-b border-border pb-6">
+                                    Strategic for {tier.bestFor}
                                 </p>
-                                <ul className="space-y-4">
+                                <ul className="space-y-5">
                                     {tier.includes.map((item, i) => (
-                                        <li key={i} className="flex gap-3 text-sm font-medium text-foreground">
-                                            <Check className="w-5 h-5 text-primary shrink-0" />
+                                        <li key={i} className="flex gap-4 text-sm font-medium text-foreground group/item">
+                                            <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover/item:bg-primary transition-colors duration-300">
+                                                <Check className="w-3.5 h-3.5 text-primary group-hover/item:text-white transition-colors duration-300" strokeWidth={4} />
+                                            </div>
                                             {item}
                                         </li>
                                     ))}
                                     {tier.notIncluded?.map((item, i) => (
-                                        <li key={i} className="flex gap-3 text-sm font-medium text-muted-foreground opacity-50">
-                                            <Minus className="w-5 h-5 shrink-0" />
+                                        <li key={i} className="flex gap-4 text-sm font-medium text-muted-foreground opacity-50">
+                                            <Minus className="w-6 h-6 shrink-0 opacity-20" />
                                             {item}
                                         </li>
                                     ))}
                                 </ul>
                             </div>
 
-                            <div className="space-y-4 text-center">
+                            <div className="space-y-6 text-center">
                                 <Link
                                     href={tier.href}
-                                    className={`block w-full py-6 rounded-3xl font-black uppercase tracking-[0.3em] transition-all hover:scale-[1.02] active:scale-[0.98] shadow-saas ${tier.highlight ? 'bg-primary text-primary-foreground shadow-primary/20' : 'bg-muted text-foreground'}`}
+                                    className={`block w-full py-8 rounded-[2rem] font-black uppercase tracking-[0.3em] text-xs transition-all hover:scale-[1.05] active:scale-[0.95] shadow-saas ${tier.highlight ? 'bg-slate-900 text-white shadow-slate-900/20' : 'bg-white/50 border border-border text-foreground hover:bg-white'}`}
                                 >
                                     {tier.cta}
                                 </Link>
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-50">{tier.microcopy}</p>
+                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-50 italic">{tier.microcopy}</p>
                             </div>
                         </div>
                     ))}

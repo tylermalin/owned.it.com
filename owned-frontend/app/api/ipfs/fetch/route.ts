@@ -9,11 +9,24 @@ const GATEWAYS = [
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
-    const hash = searchParams.get('hash');
+    let hash = searchParams.get('hash');
 
     if (!hash) {
         return NextResponse.json({ error: 'No hash provided' }, { status: 400 });
     }
+
+    // Clean leading colon if present
+    hash = hash.startsWith(':') ? hash.substring(1) : hash;
+
+    // Basic CID validation: check for common prefixes and a minimum length
+    // CIDv0 starts with 'Qm' and is 46 chars. CIDv1 starts with 'b' (base32/base36/base58)
+    // A very basic check for common IPFS CID formats.
+    if (hash.length < 40 || (!hash.startsWith('Qm') && !hash.startsWith('b'))) {
+        return NextResponse.json({ error: 'Invalid hash format' }, { status: 400 });
+    }
+
+    let lastStatus = 502;
+    let any404 = false;
 
     // Iterate through gateways until one succeeds
     for (const gateway of GATEWAYS) {
@@ -23,9 +36,6 @@ export async function GET(req: NextRequest) {
 
             const response = await fetch(`${gateway}${hash}`, {
                 signal: controller.signal,
-                headers: {
-                    'Accept': 'application/json',
-                }
             });
 
             clearTimeout(timeoutId);
@@ -40,11 +50,19 @@ export async function GET(req: NextRequest) {
                         'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
                     }
                 });
+            } else {
+                if (response.status === 404) any404 = true;
+                lastStatus = response.status;
             }
         } catch (error) {
             console.error(`Gateway ${gateway} failed for hash ${hash}:`, error);
         }
     }
 
-    return NextResponse.json({ error: 'Failed to fetch from all gateways' }, { status: 502 });
+    // If any gateway returned 404, return 404. Otherwise return the last status seen or 502.
+    const finalStatus = any404 ? 404 : lastStatus;
+    return NextResponse.json({
+        error: finalStatus === 404 ? 'Content not found' : 'Failed to fetch from all gateways',
+        status: finalStatus
+    }, { status: finalStatus });
 }

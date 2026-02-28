@@ -4,14 +4,16 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Check, Star, Users, BarChart3, Loader2 } from 'lucide-react';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useAccount } from 'wagmi';
+import { AuthButton } from '@/components/AuthButton';
+import { useMagic } from '@/components/MagicProvider';
 import { useSubscribePro } from '@/lib/registryHooks';
+import { EXPLORER_URL } from '@/lib/constants';
 import toast from 'react-hot-toast';
 
 export default function RegisterPage() {
     const router = useRouter();
-    const { isConnected } = useAccount();
+    const { user: magicUser, isLoading: isMagicLoading } = useMagic();
+    const isMagicConnected = !!magicUser?.publicAddress;
     const { subscribe, isApprovePending, isApproveSuccess, isActionPending, isActionSuccess, actionHash, actionError } = useSubscribePro();
 
     const [formData, setFormData] = useState({
@@ -22,6 +24,7 @@ export default function RegisterPage() {
 
     useEffect(() => {
         if (isActionSuccess) {
+            localStorage.setItem('demo_pro_access', 'true');
             toast.success('Subscription activated! 7-day trial started.');
             setTimeout(() => router.push('/dashboard'), 3000);
         }
@@ -29,14 +32,15 @@ export default function RegisterPage() {
 
     useEffect(() => {
         if (actionError) {
-            toast.error('Activation failed: ' + (actionError.message || 'Unknown error'));
+            const message = typeof actionError === 'string' ? actionError : (actionError as any).message || 'Unknown error';
+            toast.error('Activation failed: ' + message);
         }
     }, [actionError]);
 
     const handleSubscribe = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!isConnected) {
-            toast.error('Please connect your wallet first');
+        if (!isMagicConnected) {
+            toast.error('Please sign in first');
             return;
         }
         subscribe();
@@ -61,7 +65,7 @@ export default function RegisterPage() {
                         <Link href="/pricing" className="text-sm font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
                             <ArrowLeft className="w-4 h-4" /> Back to Pricing
                         </Link>
-                        <ConnectButton />
+                        <AuthButton />
                     </div>
                 </div>
             </header>
@@ -173,7 +177,7 @@ export default function RegisterPage() {
 
                                 {actionHash && (
                                     <p className="text-[10px] text-center text-muted-foreground font-bold uppercase tracking-wider italic">
-                                        Escrow initiated: <a href={`https://sepolia.basescan.org/tx/${actionHash}`} target="_blank" rel="noopener noreferrer" className="text-primary underline">View on Basescan</a>
+                                        Escrow initiated: <a href={`${EXPLORER_URL}/tx/${actionHash}`} target="_blank" rel="noopener noreferrer" className="text-primary underline">View on Basescan</a>
                                     </p>
                                 )}
 

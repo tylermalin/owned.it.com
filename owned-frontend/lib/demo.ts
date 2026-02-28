@@ -2,37 +2,40 @@ import { ProductMetadata } from './ipfs';
 
 export const DEMO_METADATA: Record<number, ProductMetadata> = {
     1: {
-        name: "1:1 Strategy Session",
-        subtitle: "Founder Consultation",
-        description: "60 minutes with founder Tyler Malin. Map your path from platform to protocol. Deep dive into store architecture, launch strategy, and execution roadmap.",
+        name: "Strategy Session",
+        subtitle: "Founder & Team Bootcamp",
+        description: "60 minute bootcamp and strategy planning kickoff with CEO Tyler Malin and OwnedIt Team. Map your path from platform to protocol. Deep dive into store architecture, launch strategy, and execution roadmap.",
         image: "/demo/coaching_call.png",
-        callToAction: "BOOK SESSION",
+        callToAction: "BOOK BOOTCAMP",
         thumbnailStyle: "callout",
         productType: "consulting",
         price: "297.00",
         salePoints: [
-            "60-minute intensive 1:1 strategy deep-dive",
+            "60-minute intensive strategy bootcamp",
+            "Kickoff with CEO Tyler Malin & Team",
             "Store architecture & launch strategy review",
-            "7 days of direct followup support",
-            "Lifetime access to session recordings"
-        ]
+            "7 days of direct followup support"
+        ],
+        testimonialDiscountPercent: 20
     },
     2: {
-        name: "The Definitive Guide to Sovereign Commerce",
-        subtitle: "The Protocol Blueprint",
-        description: "108 pages. 21 chapters. The complete technical and strategic blueprint for building sovereign commerce infrastructure. Learn the patterns that eliminate platform risk forever.",
+        name: "The Definitive Guide",
+        subtitle: "Pre-Sale - $95",
+        description: "108 pages. 21 chapters. The complete technical and strategic blueprint for building sovereign commerce infrastructure. Includes Chapter 1 (Free Download) - The Sovereignty Crisis.",
         image: "/demo/ai_prompt_guide.png",
-        callToAction: "BUY FULL GUIDE",
+        callToAction: "PRE-ORDER GUIDE",
         thumbnailStyle: "button",
         productType: "digital",
-        price: "97.00",
+        price: "95.00",
         salePoints: [
-            "Infrastructure & Sovereignty deep-dives",
+            "Pre-Sale pricing $95 (Limited time)",
+            "Chapter One included for Free",
             "Next-gen Product Architecture patterns",
-            "Sovereign Distribution Systems",
-            "Economic Models for the Protocol Era"
-        ]
+            "Sovereign Distribution Systems"
+        ],
+        testimonialDiscountPercent: 15
     },
+    /* ... IDs 3-6 ... */
     3: {
         name: "I Owned It (Official Audio)",
         subtitle: "Original Song by Tyler Malin",
@@ -84,8 +87,8 @@ export const DEMO_METADATA: Record<number, ProductMetadata> = {
         ]
     },
     6: {
-        name: "The Definitive Guide (Ch. 1)",
-        subtitle: "Sample Chapter",
+        name: "The Definitive Guide (Chapter 1)",
+        subtitle: "Free Sample Chapter",
         description: "Go deep into Chapter 1: The Sovereignty Crisis. Learn why your creator business is at risk on legacy platforms and the bridge to the protocol era.",
         image: "/demo/ai_prompt_guide.png",
         callToAction: "GET FREE CHAPTER",
@@ -98,6 +101,23 @@ export const DEMO_METADATA: Record<number, ProductMetadata> = {
             "The bridge to sovereign commerce infrastructure",
             "Minted as a free proof-of-knowledge NFT"
         ],
-        redirectUrl: "https://blog.ownedit.xyz/sovereignty-crisis"
+        redirectUrl: "/downloads/chapter1.pdf"
+    },
+    7: {
+        name: "The Builder's Club Membership",
+        subtitle: "Founding Member - $47/mo",
+        description: "Monthly Membership NFT that gives you exclusive access to the inner circle of sovereign builders. Includes weekly strategy calls and access to the private Discord.",
+        image: "/assets/membership_nft.png",
+        callToAction: "JOIN CIRCLE",
+        thumbnailStyle: "button",
+        productType: "digital",
+        price: "47.00",
+        salePoints: [
+            "Weekly Strategy Calls with Tyler & Team",
+            "Private Discord community access",
+            "Priority Support & Protocol Alpha",
+            "Minted as a transferable Membership NFT"
+        ],
+        testimonialDiscountPercent: 25
     }
 };

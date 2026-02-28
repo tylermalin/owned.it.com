@@ -4,14 +4,16 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Rocket, Shield, Zap, Loader2 } from 'lucide-react';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useAccount } from 'wagmi';
+import { AuthButton } from '@/components/AuthButton';
+import { useMagic } from '@/components/MagicProvider';
 import { useDeployStore } from '@/lib/registryHooks';
+import { EXPLORER_URL } from '@/lib/constants';
 import toast from 'react-hot-toast';
 
 export default function DeployPage() {
     const router = useRouter();
-    const { isConnected } = useAccount();
+    const { user: magicUser, isLoading: isMagicLoading } = useMagic();
+    const isMagicConnected = !!magicUser?.publicAddress;
     const { deploy, isApprovePending, isApproveSuccess, isActionPending, isActionSuccess, actionHash, actionError } = useDeployStore();
 
     const [formData, setFormData] = useState({
@@ -22,6 +24,7 @@ export default function DeployPage() {
 
     useEffect(() => {
         if (isActionSuccess) {
+            localStorage.setItem('demo_pro_access', 'true');
             toast.success('Store deployed successfully!');
             setTimeout(() => router.push('/dashboard'), 3000);
         }
@@ -29,14 +32,15 @@ export default function DeployPage() {
 
     useEffect(() => {
         if (actionError) {
-            toast.error('Deployment failed: ' + (actionError.message || 'Unknown error'));
+            const message = typeof actionError === 'string' ? actionError : (actionError as any).message || 'Unknown error';
+            toast.error('Deployment failed: ' + message);
         }
     }, [actionError]);
 
     const handleDeploy = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!isConnected) {
-            toast.error('Please connect your wallet first');
+        if (!isMagicConnected) {
+            toast.error('Please sign in first');
             return;
         }
         deploy();
@@ -47,7 +51,7 @@ export default function DeployPage() {
         ? 'Approving USDC...'
         : isActionPending
             ? 'Deploying Store...'
-            : `Deploy Store ($299)`;
+            : `Deploy Store ($297)`;
 
     return (
         <div className="min-h-screen bg-slate-50/50 flex flex-col">
@@ -61,7 +65,7 @@ export default function DeployPage() {
                         <Link href="/pricing" className="text-sm font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
                             <ArrowLeft className="w-4 h-4" /> Back to Pricing
                         </Link>
-                        <ConnectButton />
+                        <AuthButton />
                     </div>
                 </div>
             </header>
@@ -98,7 +102,7 @@ export default function DeployPage() {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-lg text-foreground">One-time Payment</h3>
-                                    <p className="text-sm text-muted-foreground font-medium">$299 USDC to live forever on Base.</p>
+                                    <p className="text-sm text-muted-foreground font-medium">$297 USDC to live forever on Base.</p>
                                 </div>
                             </div>
                             <div className="flex gap-4 items-start">
@@ -171,7 +175,7 @@ export default function DeployPage() {
 
                             {actionHash && (
                                 <p className="text-[10px] text-center text-muted-foreground font-bold uppercase tracking-wider italic">
-                                    Transaction confirmed: <a href={`https://sepolia.basescan.org/tx/${actionHash}`} target="_blank" rel="noopener noreferrer" className="text-primary underline">View on Basescan</a>
+                                    Transaction confirmed: <a href={`${EXPLORER_URL}/tx/${actionHash}`} target="_blank" rel="noopener noreferrer" className="text-primary underline">View on Basescan</a>
                                 </p>
                             )}
 

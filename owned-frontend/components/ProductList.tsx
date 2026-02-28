@@ -1,9 +1,27 @@
 import { useProduct, useAllProducts } from '@/lib/hooks';
-import { useSetProductActive } from '@/lib/dashboardHooks';
 import { formatUSDC } from '@/lib/utils';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { Globe } from 'lucide-react';
+import { useMagic } from '@/components/MagicProvider';
+import { useContractOwner } from '@/lib/useOwner';
+
+// Helper to get hidden product IDs from localStorage
+function getHiddenProducts(): number[] {
+    if (typeof window === 'undefined') return [];
+    try {
+        const stored = localStorage.getItem('hidden-products');
+        return stored ? JSON.parse(stored) : [];
+    } catch {
+        return [];
+    }
+}
+
+function setHiddenProducts(ids: number[]) {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem('hidden-products', JSON.stringify(ids));
+}
 
 interface ProductListProps {
     onEdit?: (productId: number) => void;
@@ -44,19 +62,32 @@ export function ProductList({ onEdit }: ProductListProps) {
 
 function ProductCardItem({ productId, onEdit }: { productId: number; onEdit?: (id: number) => void }) {
     const { data: product, isLoading } = useProduct(productId);
-    const { setProductActive, isPending, isSuccess, error } = useSetProductActive();
+    const [isVisible, setIsVisible] = useState(true);
+    const { user } = useMagic();
+    const { data: ownerAddress } = useContractOwner();
 
+    // Initialize visibility from localStorage on mount
     useEffect(() => {
-        if (isSuccess) {
-            toast.success(`Store visibility updated.`);
-        }
-    }, [isSuccess]);
+        const hidden = getHiddenProducts();
+        setIsVisible(!hidden.includes(productId));
+    }, [productId]);
 
-    useEffect(() => {
-        if (error) {
-            toast.error('Failed to update visibility.');
+    const handleToggleVisibility = () => {
+        const hidden = getHiddenProducts();
+        let newHidden: number[];
+        if (isVisible) {
+            // Hide it
+            newHidden = [...hidden, productId];
+            setIsVisible(false);
+            toast.success(`Product #${productId} hidden from store`);
+        } else {
+            // Show it
+            newHidden = hidden.filter(id => id !== productId);
+            setIsVisible(true);
+            toast.success(`Product #${productId} is now live on store`);
         }
-    }, [error]);
+        setHiddenProducts(newHidden);
+    };
 
     if (isLoading) {
         return (
@@ -70,16 +101,27 @@ function ProductCardItem({ productId, onEdit }: { productId: number; onEdit?: (i
         );
     }
 
-    if (!product) {
+    if (!product || !user?.publicAddress) {
         return null;
     }
 
-    const { price, ipfsHash, maxSupply, sold, active } = product as any;
-    const supply = maxSupply > BigInt(0) ? maxSupply.toString() : '∞';
+    const { price, ipfsHash, maxSupply, sold, active, isTest, creator } = product as any;
 
-    const handleToggleActive = () => {
-        setProductActive(productId, !active);
-    };
+    // Filter tests: Ensure the test item was explicitly created by the logged-in user.
+    if (isTest && creator && creator.toLowerCase() !== user.publicAddress.toLowerCase()) {
+        return null; // Local product created by another simulated user
+    }
+
+    // Filter on-chain: In demo mode, only the contract owner (or fallback demo pro flag) sees all on-chain products
+    if (!isTest) {
+        const isOwner = ownerAddress?.toLowerCase() === user.publicAddress.toLowerCase();
+        const hasDemoPro = typeof window !== 'undefined' && localStorage.getItem('demo_pro_access') === 'true';
+        if (!isOwner && !hasDemoPro) {
+            return null; // Only store owners see on-chain products here
+        }
+    }
+
+    const supply = maxSupply > BigInt(0) ? maxSupply.toString() : '∞';
 
     return (
         <div className="group bg-white border border-border p-8 rounded-4xl shadow-sm hover:shadow-saas hover:border-primary/30 transition-all flex flex-col space-y-6">
@@ -89,16 +131,15 @@ function ProductCardItem({ productId, onEdit }: { productId: number; onEdit?: (i
                 </div>
                 <div className="flex items-center gap-4">
                     <div className="flex flex-col items-end gap-1 mr-2">
-                        <span className={`text-[10px] font-black uppercase tracking-widest ${active ? 'text-emerald-500' : 'text-slate-400'}`}>
-                            {active ? 'Live on Store' : 'Hidden'}
+                        <span className={`text-[10px] font-black uppercase tracking-widest ${isVisible ? 'text-emerald-500' : 'text-slate-400'}`}>
+                            {isVisible ? 'Live on Store' : 'Hidden'}
                         </span>
                         <button
-                            onClick={handleToggleActive}
-                            disabled={isPending}
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${active ? 'bg-emerald-500' : 'bg-slate-200'}`}
+                            onClick={handleToggleVisibility}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${isVisible ? 'bg-emerald-500' : 'bg-slate-200'}`}
                         >
                             <span
-                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${active ? 'translate-x-6' : 'translate-x-1'}`}
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isVisible ? 'translate-x-6' : 'translate-x-1'}`}
                             />
                         </button>
                     </div>
@@ -111,6 +152,19 @@ function ProductCardItem({ productId, onEdit }: { productId: number; onEdit?: (i
                     </button>
                 </div>
             </div>
+
+            {product && (product as any).affiliateEnabled && (
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl w-fit">
+                    <Globe className="w-3.5 h-3.5" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">{(product as any).affiliatePercent}% Affiliate enabled</span>
+                </div>
+            )}
+
+            {product && (product as any).isTest && (
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary border border-primary/20 rounded-xl w-fit">
+                    <span className="text-[10px] font-black uppercase tracking-widest">🧪 Test Product (Local)</span>
+                </div>
+            )}
 
             <div className="space-y-4">
                 <div className="space-y-1">
@@ -138,3 +192,4 @@ function ProductCardItem({ productId, onEdit }: { productId: number; onEdit?: (i
         </div>
     );
 }
+

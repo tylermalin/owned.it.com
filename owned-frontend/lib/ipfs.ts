@@ -30,7 +30,63 @@ export interface ProductMetadata {
         trait_type: string;
         value: string;
     }>;
+    // Affiliate & Bundle System
+    affiliateEnabled?: boolean;
+    affiliatePercent?: number;
+    bundleEnabled?: boolean;
+    wholesalePrice?: string;
+    bundleItems?: Array<{
+        productId: number;
+        creatorAddress: string;
+        affiliatePercent: number;
+    }>;
+    // Coaching / Webinar — weekly availability
+    availability?: {
+        timezone: string;
+        sessionDuration: number;   // minutes
+        schedule: {
+            day: 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun';
+            startTime: string;     // "09:00"
+            endTime: string;       // "17:00"
+        }[];
+    };
+    // eCourse — structured module/lesson curriculum
+    curriculum?: {
+        modules: {
+            title: string;
+            lessons: {
+                title: string;
+                videoUrl?: string;
+                slidesUrl?: string;
+                description?: string;
+            }[];
+        }[];
+    };
+    // Community — NFT-gated Discord
+    communityGating?: {
+        discordInviteUrl: string;
+        discordServerId?: string;
+        gatingType: 'nft';
+    };
+    community?: {
+        discordUrl: string;
+    };
+    // Consulting / Meeting
+    consulting?: {
+        meetingUrl: string;
+    };
+    // Merch / Print-on-Demand
+    merch?: {
+        storeLink: string;
+        fulfillmentPartner?: string;
+        sizes?: string[];
+        colors?: { name: string; hex: string }[];
+        mockupImages?: string[];   // IPFS hashes
+    };
+    testimonialDiscountPercent?: number;
+    testimonialDiscountLimit?: number;
 }
+
 
 // Helper to upload via local proxy API (to bypass CORS)
 async function uploadToLighthouse(blob: Blob | File, fileName: string): Promise<string> {

@@ -1,6 +1,6 @@
 'use client';
 
-export type ProductType = 'digital' | 'coaching' | 'custom' | 'course' | 'membership' | 'webinar' | 'community' | 'url';
+export type ProductType = 'digital' | 'coaching' | 'custom' | 'course' | 'membership' | 'webinar' | 'community' | 'url' | 'merch';
 
 interface ProductTypeSelectorProps {
     onSelect: (type: ProductType) => void;
@@ -11,19 +11,19 @@ const productTypes: { type: ProductType; label: string; icon: string; descriptio
         type: 'digital',
         label: 'Digital Product',
         icon: '📁',
-        description: 'Sell eBooks, templates, or any downloadable file.',
+        description: 'Sell eBooks, templates, guides, or any downloadable file.',
     },
     {
         type: 'coaching',
         label: 'Coaching Call',
         icon: '🤙',
-        description: 'Sell 1:1 video calls and consulting sessions.',
+        description: 'Sell 1:1 video calls with availability scheduling built in.',
     },
     {
         type: 'course',
         label: 'eCourse',
         icon: '🎓',
-        description: 'Bundle lessons and material into a structured course.',
+        description: 'Build a structured course with modules, lessons, videos, and slides.',
     },
     {
         type: 'membership',
@@ -35,27 +35,34 @@ const productTypes: { type: ProductType; label: string; icon: string; descriptio
         type: 'community',
         label: 'Community',
         icon: '🤝',
-        description: 'Access to a private discord or group chat.',
+        description: 'NFT-gated Discord or private group access — token in their wallet.',
     },
     {
         type: 'webinar',
         label: 'Webinar',
         icon: '🎥',
-        description: 'Live or recorded video training events.',
+        description: 'Live or recorded training events with scheduling.',
+    },
+    {
+        type: 'merch',
+        label: 'Merch / POD',
+        icon: '👕',
+        description: 'Sell print-on-demand apparel with sizes, colors, and mockups.',
     },
     {
         type: 'url',
         label: 'Link / URL',
         icon: '🔗',
-        description: 'Direct access to a private link or media.',
+        description: 'Direct buyers to any private link or resource after purchase.',
     },
     {
         type: 'custom',
         label: 'Custom',
         icon: '✨',
-        description: 'Anything else you want to sell direct.',
+        description: 'Anything else you want to sell directly to your audience.',
     },
 ];
+
 
 export function ProductTypeSelector({ onSelect }: ProductTypeSelectorProps) {
     return (

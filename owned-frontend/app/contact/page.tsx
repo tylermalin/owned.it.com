@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, MessageSquare, ShieldCheck, Globe, Zap } from 'lucide-react';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { AuthButton } from '@/components/AuthButton';
 
 export default function ContactPage() {
     const [formData, setFormData] = useState({
@@ -25,7 +25,7 @@ export default function ContactPage() {
                         <Link href="/pricing" className="text-sm font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
                             <ArrowLeft className="w-4 h-4" /> Back to Pricing
                         </Link>
-                        <ConnectButton />
+                        <AuthButton />
                     </div>
                 </div>
             </header>

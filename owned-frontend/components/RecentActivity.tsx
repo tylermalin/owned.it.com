@@ -1,10 +1,10 @@
 'use client';
 
-import { usePublicClient } from 'wagmi';
 import { useEffect, useState } from 'react';
 import { CREATOR_STORE_ADDRESS } from '@/lib/constants';
 import CreatorStoreABI from '@/lib/CreatorStoreABI.json';
 import { formatUSDC, shortenAddress } from '@/lib/utils';
+import { publicClient } from '@/lib/hooks';
 
 interface Activity {
     type: 'sale' | 'withdrawal';
@@ -15,24 +15,31 @@ interface Activity {
 }
 
 export function RecentActivity() {
-    const publicClient = usePublicClient();
     const [activities, setActivities] = useState<Activity[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         async function fetchActivity() {
-            if (!publicClient) return;
-
             try {
                 setError(null);
-                // Fetch last 1000 blocks for sales
-                // In a real app, you'd want a more robust indexing solution
-                const logs = await publicClient.getContractEvents({
+                // Query only a small window (2,000 blocks) for recent activity
+                const currentBlock = await publicClient.getBlockNumber();
+                const fromBlock = currentBlock > 2000n ? currentBlock - 2000n : 0n;
+
+                const logs = await publicClient.getLogs({
                     address: CREATOR_STORE_ADDRESS,
-                    abi: CreatorStoreABI,
-                    eventName: 'ProductPurchased',
-                    fromBlock: 'earliest', // Note: On Base Sepolia this is fine for now
+                    event: {
+                        type: 'event',
+                        name: 'ProductPurchased',
+                        inputs: [
+                            { name: 'productId', type: 'uint256', indexed: true },
+                            { name: 'buyer', type: 'address', indexed: true },
+                            { name: 'tokenId', type: 'uint256', indexed: false },
+                            { name: 'price', type: 'uint256', indexed: false }
+                        ]
+                    },
+                    fromBlock,
                 });
 
                 const formattedLogs = logs.map((log: any) => ({
@@ -41,7 +48,7 @@ export function RecentActivity() {
                     amount: log.args.price as bigint,
                     address: log.args.buyer as string,
                     txHash: log.transactionHash,
-                    timestamp: 'Recent', // Timestamps require fetching block data
+                    timestamp: 'Recent',
                 })).reverse();
 
                 setActivities(formattedLogs as any);

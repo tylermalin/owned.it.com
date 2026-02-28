@@ -1,24 +1,67 @@
-import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
-import { CREATOR_STORE_ADDRESS } from './constants';
+import { CREATOR_STORE_ADDRESS, CHAIN, RPC_URL } from './constants';
 import CreatorStoreABI from './CreatorStoreABI.json';
-import { parseUSDC } from './utils';
+import { parseUSDC, getReadableError } from './utils';
+import { createWalletClient, custom, createPublicClient, http } from 'viem';
+import { useMagic } from '@/components/MagicProvider';
+import { useState } from 'react';
+
+const publicClient = createPublicClient({
+    chain: CHAIN,
+    transport: http(RPC_URL)
+});
 
 export function useAddProduct() {
-    const { data: hash, writeContract, isPending, error } = useWriteContract();
+    const { user, magic } = useMagic();
+    const [hash, setHash] = useState<`0x${string}` | undefined>(undefined);
+    const [isPending, setIsPending] = useState(false);
+    const [isConfirming, setIsConfirming] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
+    const [error, setError] = useState<any>(null);
 
-    const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-        hash,
-    });
-
-    const addProduct = (productId: number, priceUSD: string, ipfsHash: string, maxSupply: number) => {
+    const addProduct = async (productId: number, priceUSD: string, ipfsHash: string, maxSupply: number) => {
         const priceInUSDC = parseUSDC(priceUSD);
 
-        writeContract({
-            address: CREATOR_STORE_ADDRESS,
-            abi: CreatorStoreABI,
-            functionName: 'addProduct',
-            args: [BigInt(productId), priceInUSDC, ipfsHash, BigInt(maxSupply)],
-        });
+        if (!user?.publicAddress || !magic) {
+            setError('Please sign in first');
+            return;
+        }
+
+        setIsPending(true);
+        setHash(undefined);
+        setIsSuccess(false);
+        setError(null);
+
+        try {
+            const walletClient = createWalletClient({
+                account: user.publicAddress as `0x${string}`,
+                chain: CHAIN,
+                transport: custom(magic.rpcProvider)
+            });
+
+            const txHash = await walletClient.writeContract({
+                address: CREATOR_STORE_ADDRESS,
+                abi: CreatorStoreABI as any,
+                functionName: 'addProduct',
+                args: [BigInt(productId), priceInUSDC, ipfsHash, BigInt(maxSupply)],
+            });
+
+            setHash(txHash);
+            setIsConfirming(true);
+            const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+            setIsConfirming(false);
+
+            if (receipt.status === 'success') {
+                setIsSuccess(true);
+            } else {
+                setError('Transaction failed on-chain');
+            }
+        } catch (err: any) {
+            console.error('Add product error:', err);
+            setError(getReadableError(err));
+        } finally {
+            setIsPending(false);
+            setIsConfirming(false);
+        }
     };
 
     return {
@@ -32,21 +75,57 @@ export function useAddProduct() {
 }
 
 export function useUpdateProduct() {
-    const { data: hash, writeContract, isPending, error } = useWriteContract();
+    const { user, magic } = useMagic();
+    const [hash, setHash] = useState<`0x${string}` | undefined>(undefined);
+    const [isPending, setIsPending] = useState(false);
+    const [isConfirming, setIsConfirming] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
+    const [error, setError] = useState<any>(null);
 
-    const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-        hash,
-    });
-
-    const updateProduct = (productId: number, priceUSD: string, ipfsHash: string, maxSupply: number) => {
+    const updateProduct = async (productId: number, priceUSD: string, ipfsHash: string, maxSupply: number) => {
         const priceInUSDC = parseUSDC(priceUSD);
 
-        writeContract({
-            address: CREATOR_STORE_ADDRESS,
-            abi: CreatorStoreABI,
-            functionName: 'updateProduct',
-            args: [BigInt(productId), priceInUSDC, ipfsHash, BigInt(maxSupply)],
-        });
+        if (!user?.publicAddress || !magic) {
+            setError('Please sign in first');
+            return;
+        }
+
+        setIsPending(true);
+        setHash(undefined);
+        setIsSuccess(false);
+        setError(null);
+
+        try {
+            const walletClient = createWalletClient({
+                account: user.publicAddress as `0x${string}`,
+                chain: CHAIN,
+                transport: custom(magic.rpcProvider)
+            });
+
+            const txHash = await walletClient.writeContract({
+                address: CREATOR_STORE_ADDRESS,
+                abi: CreatorStoreABI as any,
+                functionName: 'updateProduct',
+                args: [BigInt(productId), priceInUSDC, ipfsHash, BigInt(maxSupply)],
+            });
+
+            setHash(txHash);
+            setIsConfirming(true);
+            const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+            setIsConfirming(false);
+
+            if (receipt.status === 'success') {
+                setIsSuccess(true);
+            } else {
+                setError('Transaction failed on-chain');
+            }
+        } catch (err: any) {
+            console.error('Update product error:', err);
+            setError(getReadableError(err));
+        } finally {
+            setIsPending(false);
+            setIsConfirming(false);
+        }
     };
 
     return {
@@ -60,19 +139,55 @@ export function useUpdateProduct() {
 }
 
 export function useSetProductActive() {
-    const { data: hash, writeContract, isPending, error } = useWriteContract();
+    const { user, magic } = useMagic();
+    const [hash, setHash] = useState<`0x${string}` | undefined>(undefined);
+    const [isPending, setIsPending] = useState(false);
+    const [isConfirming, setIsConfirming] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
+    const [error, setError] = useState<any>(null);
 
-    const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-        hash,
-    });
+    const setProductActive = async (productId: number, active: boolean) => {
+        if (!user?.publicAddress || !magic) {
+            setError('Please sign in first');
+            return;
+        }
 
-    const setProductActive = (productId: number, active: boolean) => {
-        writeContract({
-            address: CREATOR_STORE_ADDRESS,
-            abi: CreatorStoreABI,
-            functionName: 'setProductActive',
-            args: [BigInt(productId), active],
-        });
+        setIsPending(true);
+        setHash(undefined);
+        setIsSuccess(false);
+        setError(null);
+
+        try {
+            const walletClient = createWalletClient({
+                account: user.publicAddress as `0x${string}`,
+                chain: CHAIN,
+                transport: custom(magic.rpcProvider)
+            });
+
+            const txHash = await walletClient.writeContract({
+                address: CREATOR_STORE_ADDRESS,
+                abi: CreatorStoreABI as any,
+                functionName: 'setProductActive',
+                args: [BigInt(productId), active],
+            });
+
+            setHash(txHash);
+            setIsConfirming(true);
+            const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+            setIsConfirming(false);
+
+            if (receipt.status === 'success') {
+                setIsSuccess(true);
+            } else {
+                setError('Transaction failed on-chain');
+            }
+        } catch (err: any) {
+            console.error('Toggle active error:', err);
+            setError(getReadableError(err));
+        } finally {
+            setIsPending(false);
+            setIsConfirming(false);
+        }
     };
 
     return {
@@ -86,18 +201,54 @@ export function useSetProductActive() {
 }
 
 export function useWithdrawCreator() {
-    const { data: hash, writeContract, isPending, error } = useWriteContract();
+    const { user, magic } = useMagic();
+    const [hash, setHash] = useState<`0x${string}` | undefined>(undefined);
+    const [isPending, setIsPending] = useState(false);
+    const [isConfirming, setIsConfirming] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
+    const [error, setError] = useState<any>(null);
 
-    const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-        hash,
-    });
+    const withdraw = async () => {
+        if (!user?.publicAddress || !magic) {
+            setError('Please sign in first');
+            return;
+        }
 
-    const withdraw = () => {
-        writeContract({
-            address: CREATOR_STORE_ADDRESS,
-            abi: CreatorStoreABI,
-            functionName: 'withdrawCreator',
-        });
+        setIsPending(true);
+        setHash(undefined);
+        setIsSuccess(false);
+        setError(null);
+
+        try {
+            const walletClient = createWalletClient({
+                account: user.publicAddress as `0x${string}`,
+                chain: CHAIN,
+                transport: custom(magic.rpcProvider)
+            });
+
+            const txHash = await walletClient.writeContract({
+                address: CREATOR_STORE_ADDRESS,
+                abi: CreatorStoreABI as any,
+                functionName: 'withdrawCreatorFunds',
+            });
+
+            setHash(txHash);
+            setIsConfirming(true);
+            const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+            setIsConfirming(false);
+
+            if (receipt.status === 'success') {
+                setIsSuccess(true);
+            } else {
+                setError('Transaction failed on-chain');
+            }
+        } catch (err: any) {
+            console.error('Withdrawal error:', err);
+            setError(getReadableError(err));
+        } finally {
+            setIsPending(false);
+            setIsConfirming(false);
+        }
     };
 
     return {
