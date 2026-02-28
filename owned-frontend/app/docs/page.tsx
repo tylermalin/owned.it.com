@@ -229,7 +229,7 @@ export default function DocsPage() {
                                 ))}
                             </nav>
                             <div className="p-6 border-t border-border bg-slate-50/50">
-                                <Link href="/deploy" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary hover:underline">
+                                <Link href="/dashboard/deploy" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary hover:underline">
                                     Deploy Your Store <ArrowRight className="w-3 h-3" />
                                 </Link>
                             </div>
@@ -877,7 +877,7 @@ export default function DocsPage() {
                                     Every tool in this guide — coupons, affiliates, bundles, incentives — is wired into one thesis: your business should outlast any single platform.
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-                                    <Link href="/deploy" className="px-10 py-5 bg-primary text-white rounded-2xl font-black uppercase tracking-[0.2em] text-sm shadow-glow hover:scale-105 transition-all flex items-center gap-3 justify-center">
+                                    <Link href="/dashboard/deploy" className="px-10 py-5 bg-primary text-white rounded-2xl font-black uppercase tracking-[0.2em] text-sm shadow-glow hover:scale-105 transition-all flex items-center gap-3 justify-center">
                                         Deploy Your Store <ArrowRight className="w-4 h-4" />
                                     </Link>
                                     <Link href="/products" className="px-10 py-5 bg-white/10 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-sm border border-white/10 hover:bg-white/20 transition-all flex items-center gap-3 justify-center">

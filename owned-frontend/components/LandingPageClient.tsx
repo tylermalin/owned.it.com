@@ -47,7 +47,7 @@ export function LandingPageClient() {
                     </div>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-8 mb-20 animate-in fade-in slide-in-from-bottom-16 duration-1000 delay-500">
-                        <Link href="/deploy" className="group relative inline-flex items-center gap-4 px-12 py-6 bg-primary text-primary-foreground rounded-2xl font-black uppercase tracking-[0.2em] text-sm overflow-hidden shadow-glow hover:scale-[1.05] active:scale-[0.95] transition-all">
+                        <Link href="/dashboard/deploy" className="group relative inline-flex items-center gap-4 px-12 py-6 bg-primary text-primary-foreground rounded-2xl font-black uppercase tracking-[0.2em] text-sm overflow-hidden shadow-glow hover:scale-[1.05] active:scale-[0.95] transition-all">
                             <span className="relative z-10">Deploy Your Store ($297)</span>
                             <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
                             <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />

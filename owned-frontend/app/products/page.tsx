@@ -64,7 +64,7 @@ export default function ProductsPage() {
                                     {productIds.length} {productIds.length === 1 ? 'product' : 'products'} available
                                 </span>
                                 <div className="h-4 w-px bg-border" />
-                                <Link href="/deploy" className="flex items-center gap-1.5 text-xs font-bold text-primary hover:underline">
+                                <Link href="/dashboard/deploy" className="flex items-center gap-1.5 text-xs font-bold text-primary hover:underline">
                                     Sell yours <ArrowRight className="w-3 h-3" />
                                 </Link>
                             </div>

@@ -25,7 +25,7 @@ const tiers = [
             "Ongoing IPFS pinning guarantees"
         ],
         cta: "Deploy My Store",
-        href: "/deploy",
+        href: "/dashboard/deploy",
         microcopy: "Your store works forever. OWNED never owns it."
     },
     {

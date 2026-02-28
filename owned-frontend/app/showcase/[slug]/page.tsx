@@ -189,7 +189,7 @@ export default function ShowcaseDetailPage() {
                         Ready to Build Your <span className="text-primary italic font-serif">Bad Ass</span> Business?
                     </h2>
                     <Link
-                        href="/deploy"
+                        href="/dashboard/deploy"
                         className="group relative inline-flex items-center gap-4 px-12 py-6 bg-primary text-primary-foreground rounded-2xl font-black uppercase tracking-[0.2em] text-sm overflow-hidden shadow-glow hover:scale-[1.05] active:scale-[0.95] transition-all"
                     >
                         DEPLOY YOUR STORE NOW
