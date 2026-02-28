@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Libre_Baskerville, Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
+import { Analytics } from "@vercel/analytics/next";
 
 const libreBaskerville = Libre_Baskerville({
   weight: ['400', '700'],
@@ -30,6 +31,7 @@ export default function RootLayout({
         className={`${libreBaskerville.variable} ${inter.variable} font-sans antialiased text-foreground bg-background`}
       >
         <Providers>{children}</Providers>
+        <Analytics />
       </body>
     </html>
   );
