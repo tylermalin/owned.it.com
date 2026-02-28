@@ -369,6 +369,11 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
             return;
         }
 
+        if (productType === 'digital' && !digitalFile && !currentDigitalFileHash && !redirectUrl) {
+            toast.error('Please upload a digital asset or provide an external link');
+            return;
+        }
+
         setIsUploadingIPFS(true);
         toast.loading('Uploading to IPFS...', { id: 'ipfs-upload' });
 
@@ -1022,6 +1027,69 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                         )}
                     </div>
                 </div>
+
+                {/* ── Digital Asset (digital) ── */}
+                {productType === 'digital' && (
+                    <div className="space-y-8">
+                        <div className="flex items-center gap-4">
+                            <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-blue-500 text-white text-sm font-black shadow-saas">💻</span>
+                            <h4 className="font-bold uppercase tracking-widest text-xs text-muted-foreground">Digital Asset</h4>
+                        </div>
+                        <div className="bg-white border border-border rounded-4xl p-8 space-y-8">
+
+                            <div className="space-y-4">
+                                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Upload File</label>
+                                <div className="p-10 border-2 border-dashed border-border bg-slate-50 rounded-3xl text-center relative group hover:border-primary transition-colors">
+                                    {digitalFile ? (
+                                        <div className="space-y-2 relative z-10 pointer-events-none">
+                                            <div className="text-4xl">📄</div>
+                                            <p className="text-sm font-bold text-primary">{digitalFile.name}</p>
+                                            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">({(digitalFile.size / 1024 / 1024).toFixed(2)} MB)</p>
+                                        </div>
+                                    ) : currentDigitalFileHash ? (
+                                        <div className="space-y-2 relative z-10 pointer-events-none">
+                                            <div className="text-3xl">✅</div>
+                                            <p className="text-sm font-bold text-primary">File previously uploaded</p>
+                                            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest break-all px-4">{currentDigitalFileHash}</p>
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col items-center gap-3 relative z-10 pointer-events-none">
+                                            <div className="p-4 bg-white rounded-2xl shadow-sm group-hover:scale-110 transition-transform text-2xl">📥</div>
+                                            <div className="space-y-1">
+                                                <p className="text-sm font-bold text-foreground">Click or Drag to Upload File</p>
+                                                <p className="text-[11px] text-muted-foreground font-medium italic">Max 100MB (PDF, ZIP, MP4, etc.)</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <input
+                                        type="file"
+                                        onChange={(e) => setDigitalFile(e.target.files?.[0] || null)}
+                                        className="absolute inset-0 opacity-0 cursor-pointer z-20"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-4">
+                                <div className="h-px bg-border flex-1"></div>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">OR</span>
+                                <div className="h-px bg-border flex-1"></div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Provide External Link</label>
+                                <input
+                                    type="url"
+                                    value={redirectUrl}
+                                    onChange={(e) => setRedirectUrl(e.target.value)}
+                                    placeholder="https://google.com/drive/..."
+                                    className="w-full px-5 py-4 bg-slate-50 border border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 font-medium"
+                                />
+                                <p className="text-[10px] text-muted-foreground italic">If you provide a link instead of uploading a file, buyers will be redirected here after purchase.</p>
+                            </div>
+
+                        </div>
+                    </div>
+                )}
 
                 {/* ── Availability Scheduler (coaching / webinar) ── */}
                 {(productType === 'coaching' || productType === 'webinar') && (
