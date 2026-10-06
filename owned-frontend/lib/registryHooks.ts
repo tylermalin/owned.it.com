@@ -32,14 +32,6 @@ export function useOnchainAction(targetAddress: `0x${string}`, amountUSD: string
         setIsApproveSuccess(false);
 
         try {
-            // DEMO MODE BYPASS - allow testing UI without real Testnet USDC
-            if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-                console.log('DEMO MODE: Skipping real USDC approval tx...');
-                setTimeout(() => setIsApproveSuccess(true), 1500);
-                setIsApprovePending(false);
-                return;
-            }
-
             const walletClient = createWalletClient({
                 account: user.publicAddress as `0x${string}`,
                 chain: CHAIN,
@@ -57,13 +49,7 @@ export function useOnchainAction(targetAddress: `0x${string}`, amountUSD: string
             setIsApproveSuccess(true);
         } catch (err: any) {
             console.error('Approval failed:', err);
-            // Fallback for demo mode if user cancelled or insufficient funds
-            if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-                console.log('DEMO MODE: Catching approval error and forcing success...');
-                setIsApproveSuccess(true);
-            } else {
-                setActionError(getReadableError(err));
-            }
+            setActionError(getReadableError(err));
         } finally {
             setIsApprovePending(false);
         }
@@ -76,14 +62,6 @@ export function useOnchainAction(targetAddress: `0x${string}`, amountUSD: string
         setIsActionSuccess(false);
 
         try {
-            // DEMO MODE BYPASS
-            if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-                console.log('DEMO MODE: Skipping real protocol tx...');
-                setTimeout(() => setIsActionSuccess(true), 2000);
-                setIsActionPending(false);
-                return;
-            }
-
             const walletClient = createWalletClient({
                 account: user.publicAddress as `0x${string}`,
                 chain: CHAIN,
@@ -106,13 +84,7 @@ export function useOnchainAction(targetAddress: `0x${string}`, amountUSD: string
             }
         } catch (err: any) {
             console.error('Action failed:', err);
-            // Fallback for demo mode
-            if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-                console.log('DEMO MODE: Catching action error and forcing success...');
-                setIsActionSuccess(true);
-            } else {
-                setActionError(getReadableError(err));
-            }
+            setActionError(getReadableError(err));
         } finally {
             setIsActionPending(false);
         }

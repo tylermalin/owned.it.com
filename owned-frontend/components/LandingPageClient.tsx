@@ -8,7 +8,7 @@ import { ScrollTriggerPopup } from '@/components/ScrollTriggerPopup';
 import { SavingsCalculator } from '@/components/SavingsCalculator';
 import { SavingsButton } from '@/components/SavingsButton';
 import { VideoModal } from '@/components/VideoModal';
-import { Play, ChevronRight, Star, Quote, ArrowRight, GraduationCap, FileText, Users2, Clock3, Music, MapPin, Sparkles, Link2 } from 'lucide-react';
+import { Play, ChevronRight, Star, ArrowRight, GraduationCap, FileText, Users2, Clock3, Music, MapPin, Sparkles, Link2 } from 'lucide-react';
 
 export function LandingPageClient() {
     const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
@@ -48,7 +48,7 @@ export function LandingPageClient() {
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-8 mb-20 animate-in fade-in slide-in-from-bottom-16 duration-1000 delay-500">
                         <Link href="/dashboard/deploy" className="group relative inline-flex items-center gap-4 px-12 py-6 bg-primary text-primary-foreground rounded-2xl font-black uppercase tracking-[0.2em] text-sm overflow-hidden shadow-glow hover:scale-[1.05] active:scale-[0.95] transition-all">
-                            <span className="relative z-10">Deploy Your Store ($297)</span>
+                            <span className="relative z-10">Join the Waitlist</span>
                             <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
                             <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                         </Link>
@@ -77,67 +77,6 @@ export function LandingPageClient() {
                     </div>
                 </div>
             </main>
-
-            {/* Social Proof Section */}
-            <section className="py-48 bg-slate-50/50 relative overflow-hidden">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="text-center mb-32 space-y-4">
-                        <div className="text-primary font-black uppercase tracking-[0.3em] text-[10px] mb-4">Protocol Proof</div>
-                        <h2 className="text-5xl md:text-[6rem] font-black tracking-tight italic text-foreground leading-none">Trusted by Sovereign<br />Builders</h2>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-32">
-                        <div className="group p-16 glass rounded-[4rem] shadow-saas-lg space-y-12 italic relative hover:scale-[1.02] transition-all duration-500">
-                            <Quote className="w-12 h-12 text-primary/20 absolute top-12 left-10" />
-                            <p className="text-3xl font-medium leading-[1.4] text-foreground text-balance relative">
-                                "My store processed $8K in the first 30 days. I own the contract. I own the code. I own the customer relationships. This is what sovereignty looks like in practice."
-                            </p>
-                            <div className="flex items-center gap-8 not-italic pt-12 border-t border-border">
-                                <div className="w-20 h-20 bg-primary rounded-[2rem] flex items-center justify-center text-white text-2xl font-black shadow-glow">TM</div>
-                                <div>
-                                    <div className="text-2xl font-black text-foreground">Tyler Malin</div>
-                                    <div className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Founder @ OWNED</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="group p-16 glass rounded-[4rem] shadow-saas-lg space-y-12 italic relative hover:scale-[1.02] transition-all duration-500">
-                            <Quote className="w-12 h-12 text-primary/20 absolute top-12 left-10" />
-                            <p className="text-3xl font-medium leading-[1.4] text-foreground text-balance relative">
-                                "I was paying Gumroad 10%. Now I pay 3% and own the infrastructure. The break-even was 28 days. Everything after that is pure savings."
-                            </p>
-                            <div className="flex items-center gap-8 not-italic pt-12 border-t border-border">
-                                <div className="w-20 h-20 bg-slate-200 rounded-[2rem] flex items-center justify-center text-slate-600 text-2xl font-black">SB</div>
-                                <div>
-                                    <div className="text-2xl font-black text-foreground">Sovereign Builder</div>
-                                    <div className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Early Adopter</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-slate-900 text-white rounded-[4rem] p-16 md:p-24 border border-white/10 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-[100px] -mr-48 -mt-48" />
-                        <div className="text-center mb-16 relative">
-                            <h3 className="text-3xl md:text-4xl font-black uppercase tracking-[0.3em] text-primary italic">Live Protocol Stats</h3>
-                        </div>
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-12 relative">
-                            {[
-                                { label: "Protocol Fee", value: "3%", sub: "Fixed Forever" },
-                                { label: "Settlement", value: "< 2s", sub: "Instant USDC" },
-                                { label: "Custody Risk", value: "Zero", sub: "Non-Custodial" },
-                                { label: "Account Freezes", value: "Zero", sub: "Impossible" }
-                            ].map((stat, i) => (
-                                <div key={i} className="text-center space-y-3">
-                                    <div className="text-5xl md:text-7xl font-black italic tracking-tighter text-white">{stat.value}</div>
-                                    <div className="text-xs font-black uppercase tracking-[0.2em] text-primary">{stat.label}</div>
-                                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{stat.sub}</div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </section>
 
             {/* How it Works / 3-Step Model */}
             <section className="py-32 bg-white">
@@ -451,7 +390,6 @@ export function LandingPageClient() {
                     <img src="/assets/logo.png" alt="OWNED" className="h-[100px] w-auto opacity-50" />
                     <div className="flex gap-8">
                         <Link href="/pricing">Pricing</Link>
-                        <Link href="/investors">Investors</Link>
                         <Link href="/terms">Terms</Link>
                     </div>
                     <p>© 2026 OWNED · IT</p>

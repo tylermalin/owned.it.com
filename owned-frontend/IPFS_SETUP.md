@@ -7,18 +7,23 @@ We've switched to **Pinata** for IPFS uploads because Lighthouse was experiencin
 1. Visit [Pinata Cloud](https://app.pinata.cloud/) and sign up for a free account.
 2. Go to **API Keys** in the sidebar.
 3. Click **"New Key"**.
-4. Enable **all admin permissions** (default).
+4. Scope it to **pinning only** — enable `pinFileToIPFS` and `pinJSONToIPFS`, and leave admin/all-permissions **off**. The key only ever needs to pin content.
 5. Give it a name (e.g., "Owned Store").
 6. Click **"Generate Key"**.
 7. **IMPORTANT**: Copy the **JWT** (the very long string). You won't be able to see it again!
 
 ## Configure Your Environment
 
-Add the JWT to your `.env.local`:
+Add the JWT to your `.env.local` as a **server-only** variable:
 
 ```bash
-NEXT_PUBLIC_PINATA_JWT=your_very_long_jwt_here
+PINATA_JWT=your_very_long_jwt_here
 ```
+
+> ⚠️ **Security:** Do **not** use the `NEXT_PUBLIC_` prefix. Any `NEXT_PUBLIC_*`
+> value is inlined into the client bundle and is publicly readable — that would
+> leak your JWT to anyone who views the site. The JWT must only ever be read
+> server-side (in an API route). Never commit `.env.local` to git.
 
 ## How to Test
 

@@ -1,58 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, Check, Star, Users, BarChart3, Loader2 } from 'lucide-react';
+import { ArrowLeft, Check, Star, Users, BarChart3 } from 'lucide-react';
 import { AuthButton } from '@/components/AuthButton';
-import { useMagic } from '@/components/MagicProvider';
-import { useSubscribePro } from '@/lib/registryHooks';
-import { EXPLORER_URL } from '@/lib/constants';
-import toast from 'react-hot-toast';
+import { WaitlistForm } from '@/components/WaitlistForm';
 
 export default function RegisterPage() {
-    const router = useRouter();
-    const { user: magicUser, isLoading: isMagicLoading } = useMagic();
-    const isMagicConnected = !!magicUser?.publicAddress;
-    const { subscribe, isApprovePending, isApproveSuccess, isActionPending, isActionSuccess, actionHash, actionError } = useSubscribePro();
-
-    const [formData, setFormData] = useState({
-        storeName: '',
-        email: '',
-        socialHandle: ''
-    });
-
-    useEffect(() => {
-        if (isActionSuccess) {
-            localStorage.setItem('demo_pro_access', 'true');
-            toast.success('Subscription activated! 7-day trial started.');
-            setTimeout(() => router.push('/dashboard'), 3000);
-        }
-    }, [isActionSuccess, router]);
-
-    useEffect(() => {
-        if (actionError) {
-            const message = typeof actionError === 'string' ? actionError : (actionError as any).message || 'Unknown error';
-            toast.error('Activation failed: ' + message);
-        }
-    }, [actionError]);
-
-    const handleSubscribe = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!isMagicConnected) {
-            toast.error('Please sign in first');
-            return;
-        }
-        subscribe();
-    };
-
-    const isPending = isApprovePending || isActionPending;
-    const buttonText = isApprovePending
-        ? 'Approving USDC...'
-        : isActionPending
-            ? 'Activating...'
-            : 'Activate Pro Access';
-
     return (
         <div className="min-h-screen bg-slate-50/50 flex flex-col font-sans">
             {/* Header */}
@@ -76,18 +29,18 @@ export default function RegisterPage() {
                     <div className="lg:sticky lg:top-32 space-y-12">
                         <div className="space-y-6">
                             <div className="inline-block px-4 py-1.5 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-[0.3em] rounded-full border border-primary/10">
-                                Pro Seller Onboarding
+                                Pro Seller Waitlist
                             </div>
                             <h1 className="text-6xl font-black tracking-tighter leading-none">
                                 Scale with <span className="text-primary italic">Professional</span> Tools.
                             </h1>
                             <p className="text-2xl text-muted-foreground font-medium italic leading-relaxed">
-                                Pay for tooling, not permission. Unlock the dashboard, analytics, and fulfillment suite.
+                                Pay for tooling, not permission. Pro onboarding isn't open yet — join the waitlist to be first in.
                             </p>
                         </div>
 
                         <div className="bg-white rounded-[3rem] border border-border p-10 shadow-saas space-y-8">
-                            <h3 className="text-xs font-black uppercase tracking-widest text-primary italic">Included in Pro</h3>
+                            <h3 className="text-xs font-black uppercase tracking-widest text-primary italic">Planned for Pro</h3>
                             <ul className="grid grid-cols-1 gap-6">
                                 <li className="flex gap-4 items-center font-bold text-foreground">
                                     <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
@@ -117,78 +70,16 @@ export default function RegisterPage() {
                         </div>
                     </div>
 
-                    {/* Registration Side */}
-                    <div className="bg-white rounded-[4rem] border-2 border-primary shadow-saas-lg p-10 md:p-16 space-y-10 relative overflow-hidden">
+                    {/* Waitlist Side */}
+                    <div className="bg-white rounded-[4rem] border-2 border-primary shadow-saas-lg p-10 md:p-16 relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16" />
-
-                        <div className="relative space-y-2">
-                            <h2 className="text-3xl font-black tracking-tight italic">Start Your 7-Day Trial</h2>
-                            <p className="text-base text-muted-foreground font-medium">No platform risk. Cancel anytime. Still own your contracts.</p>
+                        <div className="relative">
+                            <WaitlistForm
+                                source="register-pro"
+                                heading="Join the Pro Waitlist"
+                                subheading="Pro seller onboarding isn't live yet. Leave your details and we'll reach out when it opens."
+                            />
                         </div>
-
-                        <form onSubmit={handleSubscribe} className="relative space-y-8">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Proposed Store Name</label>
-                                <input
-                                    type="text"
-                                    placeholder="e.g. The Alpha Lab"
-                                    className="w-full px-8 py-5 rounded-3xl bg-slate-50 border border-border text-foreground font-bold placeholder:text-muted-foreground/30 focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all text-lg"
-                                    value={formData.storeName}
-                                    onChange={(e) => setFormData({ ...formData, storeName: e.target.value })}
-                                    required
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Work Email</label>
-                                <input
-                                    type="email"
-                                    placeholder="you@creators.com"
-                                    className="w-full px-8 py-5 rounded-3xl bg-slate-50 border border-border text-foreground font-bold placeholder:text-muted-foreground/30 focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all text-lg"
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    required
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">X / Twitter Handle</label>
-                                <div className="flex items-center gap-3">
-                                    <span className="text-xl font-bold text-muted-foreground pl-2">@</span>
-                                    <input
-                                        type="text"
-                                        placeholder="handle"
-                                        className="flex-1 px-8 py-5 rounded-3xl bg-slate-50 border border-border text-foreground font-bold placeholder:text-muted-foreground/30 focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all text-lg"
-                                        value={formData.socialHandle}
-                                        onChange={(e) => setFormData({ ...formData, socialHandle: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="pt-6 space-y-4">
-                                <button
-                                    type="submit"
-                                    disabled={!formData.storeName || !formData.email || isPending}
-                                    className="w-full py-7 bg-primary text-primary-foreground rounded-[2.5rem] font-black uppercase tracking-[0.4em] text-sm shadow-saas hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 disabled:scale-100 shadow-primary/20 flex items-center justify-center gap-4"
-                                >
-                                    {isPending && <Loader2 className="w-5 h-5 animate-spin" />}
-                                    {buttonText}
-                                </button>
-
-                                {actionHash && (
-                                    <p className="text-[10px] text-center text-muted-foreground font-bold uppercase tracking-wider italic">
-                                        Escrow initiated: <a href={`${EXPLORER_URL}/tx/${actionHash}`} target="_blank" rel="noopener noreferrer" className="text-primary underline">View on Basescan</a>
-                                    </p>
-                                )}
-
-                                <p className="text-[10px] text-center text-muted-foreground font-bold uppercase tracking-wider">
-                                    $9 / MONTH AFTER TRIAL · BILLED ONCHAIN
-                                </p>
-                                <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 text-[10px] font-bold text-emerald-700 uppercase tracking-widest text-center">
-                                    7-Day Free Trial hold in escrow
-                                </div>
-                            </div>
-                        </form>
                     </div>
                 </div>
             </main>

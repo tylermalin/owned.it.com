@@ -253,7 +253,6 @@ export default function ProductDetailPage() {
                     <img src="/assets/logo.png" alt="OWNED" className="h-[100px] w-auto opacity-50" />
                     <div className="flex gap-8">
                         <Link href="/pricing">Pricing</Link>
-                        <Link href="/investors">Investors</Link>
                         <Link href="/terms">Terms</Link>
                     </div>
                     <p>© 2026 OWNED · IT</p>

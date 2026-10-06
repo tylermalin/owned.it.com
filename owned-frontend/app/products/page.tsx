@@ -100,7 +100,6 @@ export default function ProductsPage() {
                     <p className="text-sm text-muted-foreground font-medium">© 2026 OWNED · IT</p>
                     <div className="flex gap-8 text-[10px] font-black uppercase tracking-widest text-muted-foreground transition-all">
                         <Link href="/pricing" className="hover:text-primary transition-colors text-primary">Pricing</Link>
-                        <Link href="/investors" className="hover:text-primary transition-colors">Investors</Link>
                         <Link href="https://x.com/owneditxyz" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Twitter</Link>
                         <Link href="/terms" className="hover:text-primary transition-colors">Terms</Link>
                         <Link href="/privacy" className="hover:text-primary transition-colors">Privacy</Link>

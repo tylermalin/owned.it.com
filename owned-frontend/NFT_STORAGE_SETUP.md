@@ -20,11 +20,16 @@ NFT.Storage provides free IPFS storage for NFTs and metadata. Follow these steps
 ## Step 3: Add to Your Project
 
 1. Open `/Users/tylermalin/owned.it.com/owned-frontend/.env.local`
-2. Replace `your_nft_storage_token_here` with your actual token:
+2. Replace `your_nft_storage_token_here` with your actual token, as a **server-only** variable:
 
    ```
-   NEXT_PUBLIC_NFT_STORAGE_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+   NFT_STORAGE_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
    ```
+
+   > ⚠️ **Security:** Do **not** use the `NEXT_PUBLIC_` prefix. Any `NEXT_PUBLIC_*`
+   > value is inlined into the client bundle and is publicly readable — that would
+   > leak your token to anyone who views the site. The token must only ever be read
+   > server-side (in an API route). Never commit `.env.local` to git.
 
 3. Save the file
 4. Restart your dev server (the terminal will auto-reload)

@@ -1,58 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Rocket, Shield, Zap, Loader2 } from 'lucide-react';
-import { useMagic } from '@/components/MagicProvider';
-import { useDeployStore } from '@/lib/registryHooks';
-import { EXPLORER_URL } from '@/lib/constants';
+import { Rocket, Shield, Zap } from 'lucide-react';
 import { DashboardLayout } from '@/components/DashboardLayout';
-import toast from 'react-hot-toast';
+import { WaitlistForm } from '@/components/WaitlistForm';
 
 export default function DeployPage() {
-    const router = useRouter();
-    const { user: magicUser, isLoading: isMagicLoading } = useMagic();
-    const isMagicConnected = !!magicUser?.publicAddress;
-    const { deploy, isApprovePending, isApproveSuccess, isActionPending, isActionSuccess, actionHash, actionError } = useDeployStore();
-
-    const [formData, setFormData] = useState({
-        storeName: '',
-        slug: '',
-        email: ''
-    });
-
-    useEffect(() => {
-        if (isActionSuccess) {
-            localStorage.setItem('demo_pro_access', 'true');
-            toast.success('Store deployed successfully!');
-            setTimeout(() => router.push('/dashboard'), 3000);
-        }
-    }, [isActionSuccess, router]);
-
-    useEffect(() => {
-        if (actionError) {
-            const message = typeof actionError === 'string' ? actionError : (actionError as any).message || 'Unknown error';
-            toast.error('Deployment failed: ' + message);
-        }
-    }, [actionError]);
-
-    const handleDeploy = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!isMagicConnected) {
-            toast.error('Please sign in first');
-            return;
-        }
-        deploy();
-    };
-
-    const isPending = isApprovePending || isActionPending;
-    const buttonText = isApprovePending
-        ? 'Approving USDC...'
-        : isActionPending
-            ? 'Deploying Store...'
-            : `Deploy Store ($297)`;
-
     return (
         <DashboardLayout>
             <div className="flex-1 flex items-center justify-center p-6 py-12">
@@ -67,7 +19,7 @@ export default function DeployPage() {
                                 Deploy Your <span className="text-primary italic">Sovereign</span> Store.
                             </h1>
                             <p className="text-xl text-muted-foreground font-medium italic leading-relaxed">
-                                Join the protocol. We'll deploy your CreatorStore contract on Base and pin your storefront to IPFS.
+                                Store deployment isn't open to the public yet. Join the waitlist and we'll invite you as soon as it's live.
                             </p>
                         </div>
 
@@ -86,8 +38,8 @@ export default function DeployPage() {
                                     <Rocket className="w-5 h-5 text-primary" />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-lg text-foreground">One-time Payment</h3>
-                                    <p className="text-sm text-muted-foreground font-medium">$297 USDC to live forever on Base.</p>
+                                    <h3 className="font-bold text-lg text-foreground">Own It Once</h3>
+                                    <p className="text-sm text-muted-foreground font-medium">A one-time deployment that lives on Base.</p>
                                 </div>
                             </div>
                             <div className="flex gap-4 items-start">
@@ -102,72 +54,13 @@ export default function DeployPage() {
                         </div>
                     </div>
 
-                    {/* Form Side */}
-                    <div className="bg-white rounded-[3rem] border border-border shadow-saas p-10 md:p-12 space-y-8">
-                        <div className="space-y-2">
-                            <h2 className="text-2xl font-black tracking-tight">Setup Your Store</h2>
-                            <p className="text-sm text-muted-foreground font-medium">Enter your details to prepare the deployment.</p>
-                        </div>
-
-                        <form onSubmit={handleDeploy} className="space-y-6">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Store Name</label>
-                                <input
-                                    type="text"
-                                    placeholder="e.g. Creator Academy"
-                                    className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-border text-foreground font-bold placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                                    value={formData.storeName}
-                                    onChange={(e) => setFormData({ ...formData, storeName: e.target.value })}
-                                    required
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Store Slug</label>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm font-bold text-muted-foreground">ownedit.xyz/</span>
-                                    <input
-                                        type="text"
-                                        placeholder="your-name"
-                                        className="flex-1 px-6 py-4 rounded-2xl bg-slate-50 border border-border text-foreground font-bold placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                                        value={formData.slug}
-                                        onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
-                                        required
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Email Address</label>
-                                <input
-                                    type="email"
-                                    placeholder="your@email.com"
-                                    className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-border text-foreground font-bold placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    required
-                                />
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={!formData.storeName || !formData.slug || !formData.email || isPending}
-                                className="w-full py-6 bg-primary text-primary-foreground rounded-3xl font-black uppercase tracking-[0.3em] text-sm shadow-saas hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100 shadow-primary/20 mt-4 flex items-center justify-center gap-3"
-                            >
-                                {isPending && <Loader2 className="w-5 h-5 animate-spin" />}
-                                {buttonText}
-                            </button>
-
-                            {actionHash && (
-                                <p className="text-[10px] text-center text-muted-foreground font-bold uppercase tracking-wider italic">
-                                    Transaction confirmed: <a href={`${EXPLORER_URL}/tx/${actionHash}`} target="_blank" rel="noopener noreferrer" className="text-primary underline">View on Basescan</a>
-                                </p>
-                            )}
-
-                            <p className="text-[10px] text-center text-muted-foreground font-bold uppercase tracking-wider italic">
-                                {isActionPending ? 'Deployment in progress...' : 'Deployment takes ~2 minutes once confirmed.'}
-                            </p>
-                        </form>
+                    {/* Waitlist Side */}
+                    <div className="bg-white rounded-[3rem] border border-border shadow-saas p-10 md:p-12">
+                        <WaitlistForm
+                            source="deploy-store"
+                            heading="Join the Deployment Waitlist"
+                            subheading="Store deployment isn't live yet. Leave your details and we'll reach out when onboarding opens."
+                        />
                     </div>
                 </div>
             </div>

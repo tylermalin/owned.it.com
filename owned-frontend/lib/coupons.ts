@@ -9,15 +9,7 @@ export interface Coupon {
 }
 
 // In a real app, this would be fetched from a DB or contract.
-// For now, we seed it with the user's requested test code.
 export const ACTIVE_COUPONS: Coupon[] = [
-    {
-        code: 'tyl3r2026!',
-        discountPercent: 100,
-        redemptionCount: 0,
-        maxRedemptions: 1000,
-        // Active immediately, no expiry for now
-    },
     {
         code: 'SOVEREIGN20',
         discountPercent: 20,
