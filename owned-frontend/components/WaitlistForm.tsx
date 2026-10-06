@@ -10,8 +10,6 @@ interface WaitlistFormProps {
     subheading?: string;
 }
 
-const STORAGE_KEY = 'owned_waitlist';
-
 export function WaitlistForm({
     source = 'general',
     heading = 'Join the Waitlist',
@@ -27,14 +25,20 @@ export function WaitlistForm({
         if (!email) return;
         setIsSubmitting(true);
         try {
-            // No backend yet — persist locally so the signup isn't silently lost.
-            const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            existing.push({ name, email, source, at: new Date().toISOString() });
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
+            const res = await fetch('/api/waitlist', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, source }),
+            });
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error || 'Could not record your signup.');
+            }
+            // Only confirm once the server has actually recorded the signup.
             setIsDone(true);
             toast.success("You're on the waitlist — we'll be in touch.");
-        } catch {
-            toast.error('Something went wrong. Please try again.');
+        } catch (err: any) {
+            toast.error(err?.message || 'Something went wrong. Please try again.');
         } finally {
             setIsSubmitting(false);
         }
