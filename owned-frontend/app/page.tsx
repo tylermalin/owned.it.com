@@ -2,11 +2,11 @@ import { Metadata } from 'next';
 import { LandingPageClient } from '@/components/LandingPageClient';
 
 export const metadata: Metadata = {
-  title: "OWNED: Deploy Your Sovereign Creator Store on Base | 3% Fees, Instant Settlement, Zero Custody Risk",
-  description: "Deploy your own creator storefront smart contract on Base. Accept USDC instantly, sell directly to your audience. 3% fees, no middlemen, no custody risk. Own your infrastructure, not rent it.",
+  title: "OWNED: Deploy Your Creator Store on Base | Fixed 3% Fee · Private Beta",
+  description: "Deploy your own creator storefront smart contract on Base. USDC checkout, an onchain receipt for every sale, a fixed 3% fee. In private beta on Base Sepolia testnet — mainnet launch December 8, 2026.",
   openGraph: {
-    title: "OWNED: Deploy Your Sovereign Creator Store on Base",
-    description: "Deploy your own creator storefront smart contract on Base. Accept USDC instantly, sell directly to your audience. 3% fees, no middlemen, no custody risk.",
+    title: "OWNED: Deploy Your Creator Store on Base",
+    description: "USDC checkout, onchain receipts, a fixed 3% fee. In private beta on Base Sepolia testnet — mainnet launch December 8, 2026.",
     images: ["https://ownedit.xyz/assets/logo.png"],
   },
   other: {

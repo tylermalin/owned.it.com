@@ -2,10 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
-// Records a waitlist signup to whichever sink is configured.
-// Default sink is Formspree (form IDs are public by design — they ship in the
-// client-side form on every Formspree-backed site — so this is not a secret).
-// Override or switch sinks via env:
+// Records a waitlist signup to whichever sink is configured via env.
+// Configure exactly one of:
 //   - WAITLIST_FORMSPREE_ID          -> POSTs to https://formspree.io/f/<id>
 //   - WAITLIST_WEBHOOK_URL           -> POSTs JSON to that URL (e.g. a Google
 //                                       Apps Script that appends to a Sheet)
@@ -14,7 +12,6 @@ const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 //
 // If no sink resolves the route returns 503 so the form shows an error
 // instead of falsely telling the visitor they're on the list.
-const DEFAULT_FORMSPREE_ID = 'mvzvlkva';
 export async function POST(req: NextRequest) {
     let body: { email?: string; name?: string; source?: string; company?: string; org?: string; message?: string };
     try {
@@ -48,7 +45,7 @@ export async function POST(req: NextRequest) {
     const webhookUrl = process.env.WAITLIST_WEBHOOK_URL;
     const resendKey = process.env.RESEND_API_KEY;
     const notifyEmail = process.env.WAITLIST_NOTIFY_EMAIL;
-    const formspreeId = process.env.WAITLIST_FORMSPREE_ID || DEFAULT_FORMSPREE_ID;
+    const formspreeId = process.env.WAITLIST_FORMSPREE_ID;
 
     try {
         if (webhookUrl) {

@@ -337,18 +337,19 @@ export function LandingPageClient() {
             {/* Start Here Section */}
             <section className="py-32 bg-white">
                 <div className="max-w-7xl mx-auto px-6 text-center space-y-24">
-                    <h2 className="text-5xl md:text-6xl font-black tracking-tight italic text-foreground">Not Ready to Deploy? Start Here.</h2>
+                    <h2 className="text-5xl md:text-6xl font-black tracking-tight italic text-foreground">Planned at Launch</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
                         {[
-                            { t: "The Definitive Guide", p: "$95", d: "108 pages. The complete blueprint for sovereign commerce.", l: "/products/2" },
-                            { t: "Strategy Session", p: "$297", d: "60 minutes with Tyler Malin. Map your path to protocol.", l: "/products/1" },
-                            { t: "The Builder's Club Membership", p: "$47/mo", d: "Weekly calls. Private Discord. Priority support.", l: "/products/7" }
+                            { t: "The Definitive Guide", p: "$95", d: "108 pages. The complete blueprint for sovereign commerce." },
+                            { t: "Strategy Session", p: "$297", d: "60 minutes with Tyler Malin. Map your path to protocol." },
+                            { t: "The Builder's Club Membership", p: "$47/mo", d: "Weekly calls. Private Discord. Priority support." }
                         ].map((item, i) => (
-                            <div key={i} className="bg-white p-12 rounded-[3.5rem] border border-border shadow-saas space-y-8">
+                            <div key={i} className="bg-white p-12 rounded-[3.5rem] border border-border shadow-saas space-y-6">
+                                <div className="inline-block px-3 py-1 bg-slate-100 text-slate-500 text-[9px] font-black uppercase tracking-[0.25em] rounded-full">Planned · not yet live</div>
                                 <h3 className="text-3xl font-black tracking-tight">{item.t}</h3>
-                                <p className="text-4xl font-black italic text-primary">{item.p}</p>
+                                <p className="text-4xl font-black italic text-primary">{item.p} <span className="text-sm not-italic font-bold text-muted-foreground">indicative</span></p>
                                 <p className="text-sm text-muted-foreground font-medium italic">{item.d}</p>
-                                <Link href={item.l} className="block w-full py-4 bg-primary text-white rounded-2xl font-black uppercase tracking-[0.2em] text-xs text-center">Join Now →</Link>
+                                <Link href="/register" className="block w-full py-4 bg-primary text-white rounded-2xl font-black uppercase tracking-[0.2em] text-xs text-center">Join the Waitlist →</Link>
                             </div>
                         ))}
                     </div>
