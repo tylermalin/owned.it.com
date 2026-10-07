@@ -17,7 +17,7 @@ contract CreatorStoreTest is BaseTest {
         assertEq(_addProduct(PRICE, 0, 0), 1);
         assertEq(_addProduct(PRICE, 0, 0), 2);
         assertEq(store.nextProductId(), 3);
-        CreatorStore.Product memory p = store.getProduct(1);
+        CreatorStore.ProductView memory p = store.getProduct(1);
         assertEq(p.price, PRICE);
         assertTrue(p.active);
         assertEq(p.uri, "ipfs://meta");
@@ -26,18 +26,18 @@ contract CreatorStoreTest is BaseTest {
     function test_addProduct_onlyOwner() public {
         vm.prank(stranger);
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, stranger));
-        store.addProduct(PRICE, 0, 0, "ipfs://x");
+        store.addProduct(_in(PRICE, 0, 0, 0, "ipfs://x"));
     }
 
     function test_addProduct_validations() public {
         vm.startPrank(creator);
         vm.expectRevert(CreatorStore.EmptyUri.selector);
-        store.addProduct(PRICE, 0, 0, "");
+        store.addProduct(_in(PRICE, 0, 0, 0, ""));
         vm.expectRevert(CreatorStore.ReferralTooHigh.selector);
-        store.addProduct(PRICE, 0, 5_001, "ipfs://x");
+        store.addProduct(_in(PRICE, 0, 0, 5_001, "ipfs://x"));
         vm.expectRevert(abi.encodeWithSelector(CreatorStore.PriceAboveCap.selector, CAP + 1, CAP));
-        store.addProduct(CAP + 1, 0, 0, "ipfs://x");
-        store.addProduct(CAP, 0, 5_000, "ipfs://x"); // edges allowed
+        store.addProduct(_in(CAP + 1, 0, 0, 0, "ipfs://x"));
+        store.addProduct(_in(CAP, 0, 0, 5_000, "ipfs://x")); // edges allowed
         vm.stopPrank();
     }
 
@@ -46,10 +46,10 @@ contract CreatorStoreTest is BaseTest {
         uint256 t1 = _buy(buyer, id, address(0));
 
         vm.prank(creator);
-        store.updateProduct(id, 80e6, 0, 0, "ipfs://v2");
+        store.updateProduct(id, _in(80e6, 0, 0, 0, "ipfs://v2"));
 
         assertEq(store.getProduct(id).price, 80e6);
-        assertEq(store.tokenURI(t1), "ipfs://v2"); // receipts follow the product
+        assertEq(store.tokenURI(t1), "ipfs://meta"); // receipts keep the metadata they were sold with
         uint256 before = usdc.balanceOf(buyer);
         _buy(buyer, id, address(0));
         assertEq(before - usdc.balanceOf(buyer), 80e6);
@@ -58,7 +58,7 @@ contract CreatorStoreTest is BaseTest {
     function test_updateProduct_unknownReverts() public {
         vm.prank(creator);
         vm.expectRevert(abi.encodeWithSelector(CreatorStore.UnknownProduct.selector, 7));
-        store.updateProduct(7, PRICE, 0, 0, "ipfs://x");
+        store.updateProduct(7, _in(PRICE, 0, 0, 0, "ipfs://x"));
     }
 
     function test_updateProduct_maxSupplyCannotDropBelowSold() public {
@@ -67,9 +67,9 @@ contract CreatorStoreTest is BaseTest {
         _buy(buyer, id, address(0));
         vm.prank(creator);
         vm.expectRevert(abi.encodeWithSelector(CreatorStore.MaxSupplyBelowSold.selector, 1, 2));
-        store.updateProduct(id, PRICE, 1, 0, "ipfs://x");
+        store.updateProduct(id, _in(PRICE, 1, 0, 0, "ipfs://x"));
         vm.prank(creator);
-        store.updateProduct(id, PRICE, 2, 0, "ipfs://x"); // equal is fine, now sold out
+        store.updateProduct(id, _in(PRICE, 2, 0, 0, "ipfs://x")); // equal is fine, now sold out
         vm.startPrank(buyer);
         usdc.approve(address(store), PRICE);
         vm.expectRevert(abi.encodeWithSelector(CreatorStore.SoldOut.selector, id));
@@ -128,7 +128,7 @@ contract CreatorStoreTest is BaseTest {
         usdc.approve(address(store), type(uint256).max);
 
         vm.prank(creator);
-        store.updateProduct(id, 90e6, 0, 0, "ipfs://x"); // price raised after buyer approved
+        store.updateProduct(id, _in(90e6, 0, 0, 0, "ipfs://x")); // price raised after buyer approved
 
         vm.prank(buyer);
         vm.expectRevert(abi.encodeWithSelector(CreatorStore.PriceAboveMax.selector, 90e6, PRICE));
@@ -214,6 +214,7 @@ contract CreatorStoreTest is BaseTest {
 
     function test_referral_paidWhenValid() public {
         uint256 id = _addProduct(PRICE, 0, 2_000); // 20%
+        _approveReferrer(referrer);
         _buy(buyer, id, referrer);
         uint256 fee = (PRICE * FEE_BPS) / 10_000;
         uint256 ref = (PRICE * 2_000) / 10_000;
@@ -229,15 +230,18 @@ contract CreatorStoreTest is BaseTest {
     function test_referral_ignoredForSelfOwnerZeroOrDisabled() public {
         uint256 withRef = _addProduct(PRICE, 0, 2_000);
         uint256 noRef = _addProduct(PRICE, 0, 0);
+        _approveReferrer(referrer);
+        _approveReferrer(buyer); // approved, but still cannot refer their own purchase
         _buy(buyer, withRef, buyer); // self
-        _buy(buyer, withRef, creator); // store owner
+        _buy(buyer, withRef, creator); // store owner, never approvable
+        _buy(buyer, withRef, stranger); // not approved
         _buy(buyer, withRef, address(0)); // none
         _buy(buyer, noRef, referrer); // product pays no referrals
         assertEq(store.referralBalance(buyer), 0);
         assertEq(store.referralBalance(creator), 0);
         assertEq(store.referralBalance(referrer), 0);
         uint256 fee = (PRICE * FEE_BPS) / 10_000;
-        assertEq(store.creatorBalance(), 4 * (PRICE - fee));
+        assertEq(store.creatorBalance(), 5 * (PRICE - fee));
     }
 
     // ------------------------------------------------------------------
@@ -262,7 +266,7 @@ contract CreatorStoreTest is BaseTest {
         vm.startPrank(buyer);
         usdc.approve(address(store), 40e6);
         uint256 before = usdc.balanceOf(buyer);
-        store.purchaseWithVoucher(v, sig, address(0), _noPermit());
+        store.purchaseWithVoucher(v, sig, _noPermit());
         vm.stopPrank();
 
         assertEq(before - usdc.balanceOf(buyer), 40e6);
@@ -275,7 +279,7 @@ contract CreatorStoreTest is BaseTest {
         CreatorStore.Voucher memory v = _voucher(id, 0, stranger, 2);
         bytes memory sig = _signVoucher(creatorKey, v);
         vm.prank(stranger);
-        uint256 tokenId = store.purchaseWithVoucher(v, sig, address(0), _noPermit());
+        uint256 tokenId = store.purchaseWithVoucher(v, sig, _noPermit());
         assertEq(store.ownerOf(tokenId), stranger);
     }
 
@@ -285,9 +289,9 @@ contract CreatorStoreTest is BaseTest {
         bytes memory sig = _signVoucher(creatorKey, v);
         vm.startPrank(buyer);
         usdc.approve(address(store), 20e6);
-        store.purchaseWithVoucher(v, sig, address(0), _noPermit());
+        store.purchaseWithVoucher(v, sig, _noPermit());
         vm.expectRevert(abi.encodeWithSelector(CreatorStore.VoucherUsed.selector, 3));
-        store.purchaseWithVoucher(v, sig, address(0), _noPermit());
+        store.purchaseWithVoucher(v, sig, _noPermit());
         vm.stopPrank();
     }
 
@@ -299,21 +303,21 @@ contract CreatorStoreTest is BaseTest {
         bytes memory bad = _signVoucher(buyerKey, v);
         vm.prank(buyer);
         vm.expectRevert(CreatorStore.VoucherInvalidSignature.selector);
-        store.purchaseWithVoucher(v, bad, address(0), _noPermit());
+        store.purchaseWithVoucher(v, bad, _noPermit());
 
         // tampered price
         bytes memory good = _signVoucher(creatorKey, v);
         v.price = 1;
         vm.prank(buyer);
         vm.expectRevert(CreatorStore.VoucherInvalidSignature.selector);
-        store.purchaseWithVoucher(v, good, address(0), _noPermit());
+        store.purchaseWithVoucher(v, good, _noPermit());
 
         // wrong buyer
         CreatorStore.Voucher memory v2 = _voucher(id, 10e6, stranger, 5);
         bytes memory sig2 = _signVoucher(creatorKey, v2);
         vm.prank(buyer);
         vm.expectRevert(CreatorStore.VoucherWrongBuyer.selector);
-        store.purchaseWithVoucher(v2, sig2, address(0), _noPermit());
+        store.purchaseWithVoucher(v2, sig2, _noPermit());
 
         // expired
         CreatorStore.Voucher memory v3 = _voucher(id, 10e6, address(0), 6);
@@ -321,7 +325,7 @@ contract CreatorStoreTest is BaseTest {
         vm.warp(block.timestamp + 2 days);
         vm.prank(buyer);
         vm.expectRevert(CreatorStore.VoucherExpired.selector);
-        store.purchaseWithVoucher(v3, sig3, address(0), _noPermit());
+        store.purchaseWithVoucher(v3, sig3, _noPermit());
     }
 
     function test_voucher_cannotExceedListPrice() public {
@@ -330,7 +334,7 @@ contract CreatorStoreTest is BaseTest {
         bytes memory sig = _signVoucher(creatorKey, v);
         vm.prank(buyer);
         vm.expectRevert(CreatorStore.VoucherAboveListPrice.selector);
-        store.purchaseWithVoucher(v, sig, address(0), _noPermit());
+        store.purchaseWithVoucher(v, sig, _noPermit());
     }
 
     function test_voucher_cancelled() public {
@@ -341,7 +345,7 @@ contract CreatorStoreTest is BaseTest {
         store.cancelVoucher(8);
         vm.prank(buyer);
         vm.expectRevert(abi.encodeWithSelector(CreatorStore.VoucherUsed.selector, 8));
-        store.purchaseWithVoucher(v, sig, address(0), _noPermit());
+        store.purchaseWithVoucher(v, sig, _noPermit());
     }
 
     function test_voucher_smartWalletOwner() public {
@@ -355,7 +359,7 @@ contract CreatorStoreTest is BaseTest {
 
         vm.prank(creator);
         bytes memory ret = wallet.execute(
-            address(store), abi.encodeCall(store.addProduct, (PRICE, 0, 0, "ipfs://sw"))
+            address(store), abi.encodeCall(store.addProduct, (_in(PRICE, 0, 0, 0, "ipfs://sw")))
         );
         uint256 id = abi.decode(ret, (uint256));
 
@@ -363,7 +367,7 @@ contract CreatorStoreTest is BaseTest {
         bytes memory sig = _signVoucher(creatorKey, v);
         vm.startPrank(buyer);
         usdc.approve(address(store), 5e6);
-        store.purchaseWithVoucher(v, sig, address(0), _noPermit());
+        store.purchaseWithVoucher(v, sig, _noPermit());
         vm.stopPrank();
         assertEq(store.balanceOf(buyer), 1);
     }
@@ -445,6 +449,7 @@ contract CreatorStoreTest is BaseTest {
         price = bound(price, 0, CAP);
         referralBps = uint16(bound(referralBps, 0, 5_000));
         uint256 id = _addProduct(price, 0, referralBps);
+        _approveReferrer(referrer);
 
         vm.startPrank(buyer);
         usdc.approve(address(store), price);
@@ -465,7 +470,7 @@ contract CreatorStoreTest is BaseTest {
         uint256 id = _addProduct(PRICE, 0, 0);
         vm.startPrank(caller);
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, caller));
-        store.updateProduct(id, 1, 0, 0, "ipfs://x");
+        store.updateProduct(id, _in(1, 0, 0, 0, "ipfs://x"));
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, caller));
         store.setProductActive(id, false);
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, caller));

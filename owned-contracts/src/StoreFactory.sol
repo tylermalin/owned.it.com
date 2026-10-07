@@ -8,14 +8,18 @@ import {CreatorStore} from "./CreatorStore.sol";
 
 /// @title StoreFactory
 /// @notice Deploys one CreatorStore clone per call. The caller owns the new store.
-///         USDC, fee recipient and fee are fixed for every store this factory creates.
-/// @dev    The factory owner has exactly one power: raising the per-product price cap.
-///         It can never lower the cap, change fees, or touch any store's funds.
+///         USDC and the fee rate are fixed for every store this factory creates.
+/// @dev    The factory owner can: raise the per-product price cap, and propose a new
+///         platform fee recipient. Neither touches any creator's money or the fee rate.
+///         The only source of truth for which stores are real is `isStore` and `StoreCreated`.
 contract StoreFactory is Ownable2Step {
     address public immutable implementation;
     IERC20 public immutable usdc;
-    address public immutable feeRecipient;
     uint16 public immutable feeBps;
+
+    /// @notice Receives the platform share from every store. Rotatable, two-step.
+    address public feeRecipient;
+    address public pendingFeeRecipient;
 
     /// @notice Highest price a product may list at, in USDC base units. Only ever increases.
     uint256 public priceCap;
@@ -24,10 +28,13 @@ contract StoreFactory is Ownable2Step {
 
     event StoreCreated(address indexed creator, address indexed store, string name, string symbol);
     event PriceCapRaised(uint256 oldCap, uint256 newCap);
+    event FeeRecipientProposed(address indexed current, address indexed proposed);
+    event FeeRecipientChanged(address indexed previous, address indexed current);
 
     error ZeroAddress();
     error FeeTooHigh();
     error CapNotHigher(uint256 current, uint256 proposed);
+    error NotAuthorized();
 
     constructor(IERC20 usdc_, address feeRecipient_, uint16 feeBps_, uint256 priceCap_, address owner_)
         Ownable(owner_)
@@ -47,7 +54,7 @@ contract StoreFactory is Ownable2Step {
     function createStore(string calldata name, string calldata symbol) external returns (address store) {
         store = Clones.clone(implementation);
         isStore[store] = true;
-        CreatorStore(store).initialize(msg.sender, usdc, feeRecipient, feeBps, name, symbol);
+        CreatorStore(store).initialize(msg.sender, usdc, feeBps, name, symbol);
         emit StoreCreated(msg.sender, store, name, symbol);
     }
 
@@ -57,5 +64,22 @@ contract StoreFactory is Ownable2Step {
         if (newCap <= old) revert CapNotHigher(old, newCap);
         priceCap = newCap;
         emit PriceCapRaised(old, newCap);
+    }
+
+    /// @notice Propose a new fee recipient. Callable by the current recipient, or by the owner
+    ///         if the recipient's key is lost. Takes effect only when the new address accepts.
+    function proposeFeeRecipient(address proposed) external {
+        if (msg.sender != feeRecipient && msg.sender != owner()) revert NotAuthorized();
+        if (proposed == address(0)) revert ZeroAddress();
+        pendingFeeRecipient = proposed;
+        emit FeeRecipientProposed(feeRecipient, proposed);
+    }
+
+    function acceptFeeRecipient() external {
+        if (msg.sender != pendingFeeRecipient) revert NotAuthorized();
+        address previous = feeRecipient;
+        feeRecipient = msg.sender;
+        pendingFeeRecipient = address(0);
+        emit FeeRecipientChanged(previous, msg.sender);
     }
 }

@@ -40,9 +40,24 @@ abstract contract BaseTest is Test {
 
     function _noPermit() internal pure returns (CreatorStore.Permit memory p) {}
 
+    function _in(uint256 price, uint64 maxSupply, uint32 maxPerWallet, uint16 referralBps, string memory uri)
+        internal
+        pure
+        returns (CreatorStore.ProductInput memory)
+    {
+        return CreatorStore.ProductInput({
+            price: price, maxSupply: maxSupply, maxPerWallet: maxPerWallet, referralBps: referralBps, uri: uri
+        });
+    }
+
     function _addProduct(uint256 price, uint64 maxSupply, uint16 referralBps) internal returns (uint256 id) {
         vm.prank(creator);
-        id = store.addProduct(price, maxSupply, referralBps, "ipfs://meta");
+        id = store.addProduct(_in(price, maxSupply, 0, referralBps, "ipfs://meta"));
+    }
+
+    function _approveReferrer(address r) internal {
+        vm.prank(creator);
+        store.setReferrer(r, true);
     }
 
     function _buy(address who, uint256 productId, address ref) internal returns (uint256 tokenId) {

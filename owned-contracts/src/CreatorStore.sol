@@ -14,15 +14,18 @@ import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/Signa
 
 interface IStoreFactory {
     function priceCap() external view returns (uint256);
+    function feeRecipient() external view returns (address);
 }
 
 /// @title CreatorStore (v2)
 /// @notice One store per creator, deployed as a minimal clone by StoreFactory.
-///         The creator owns the store. The platform fee is fixed at creation and
+///         The creator owns the store. The platform fee rate is fixed at creation and
 ///         cannot be changed by anyone. Every purchase mints an ERC-721 receipt.
-/// @dev    Funds are accounted with pull-based balances. Invariant:
-///         usdc.balanceOf(this) >= creatorBalance + platformBalance + sum(referralBalance).
-///         The platform has no power over a store beyond collecting its fee.
+/// @dev    Pull-based accounting. Invariant:
+///         usdc.balanceOf(this) >= creatorBalance + platformBalance + totalReferralOwed.
+///         Anything above that is unsolicited and only the creator can sweep it.
+///         Trust only stores the factory created (StoreFactory.isStore / StoreCreated):
+///         anyone can clone the implementation and initialize it with a fake factory.
 contract CreatorStore is
     Initializable,
     ERC721Upgradeable,
@@ -41,20 +44,43 @@ contract CreatorStore is
     uint16 public constant MAX_FEE_BPS = 1_000; // 10% hard ceiling, checked at init
     uint16 public constant MAX_REFERRAL_BPS = 5_000; // 50% of a sale
 
-    bytes32 public constant VOUCHER_TYPEHASH =
-        keccak256("Voucher(uint256 productId,uint256 price,address buyer,uint64 expiry,uint256 nonce)");
+    /// @dev `epoch` binds a voucher to the ownership period it was signed in.
+    bytes32 public constant VOUCHER_TYPEHASH = keccak256(
+        "Voucher(uint256 productId,uint256 price,address buyer,uint64 expiry,uint256 nonce,uint256 epoch)"
+    );
 
     // ---------------------------------------------------------------------
     // Types
     // ---------------------------------------------------------------------
 
-    struct Product {
+    /// @notice What a creator sets when adding or updating a product.
+    struct ProductInput {
         uint256 price; // USDC, 6 decimals. 0 = free claim.
         uint64 maxSupply; // 0 = unlimited
+        uint32 maxPerWallet; // 0 = unlimited
+        uint16 referralBps; // share paid to an approved referrer, 0 = none
+        string uri; // public metadata URI. Never the deliverable.
+    }
+
+    struct Product {
+        uint256 price;
+        uint64 maxSupply;
         uint64 sold;
-        uint16 referralBps; // share of price paid to a referrer, 0 = no referrals
+        uint32 maxPerWallet;
+        uint32 version; // metadata version, bumped when the URI changes
+        uint16 referralBps;
         bool active;
-        string uri; // public metadata URI (title, description, image). Never the deliverable.
+    }
+
+    struct ProductView {
+        uint256 price;
+        uint64 maxSupply;
+        uint64 sold;
+        uint32 maxPerWallet;
+        uint32 version;
+        uint16 referralBps;
+        bool active;
+        string uri; // current URI
     }
 
     /// @notice A creator-signed price override for one product. `buyer == address(0)` means anyone.
@@ -81,18 +107,24 @@ contract CreatorStore is
 
     IERC20 public usdc;
     address public factory;
-    address public feeRecipient;
     uint16 public feeBps;
 
     uint256 public nextProductId; // first product id is 1
     uint256 public nextTokenId; // first token id is 1
+    uint256 public ownerEpoch; // bumps on every ownership change
 
     mapping(uint256 productId => Product) private _products;
+    mapping(uint256 productId => mapping(uint32 version => string)) private _uris;
+    mapping(uint256 productId => mapping(address buyer => uint256)) public purchasedBy;
+
     mapping(uint256 tokenId => uint256 productId) public productOf;
+    mapping(uint256 tokenId => uint32 version) public versionOf;
 
     uint256 public creatorBalance;
     uint256 public platformBalance;
+    uint256 public totalReferralOwed;
     mapping(address referrer => uint256) public referralBalance;
+    mapping(address referrer => bool) public approvedReferrer;
 
     mapping(uint256 nonce => bool) public voucherNonceUsed;
 
@@ -100,9 +132,10 @@ contract CreatorStore is
     // Events
     // ---------------------------------------------------------------------
 
-    event ProductAdded(uint256 indexed productId, uint256 price, uint64 maxSupply, uint16 referralBps, string uri);
-    event ProductUpdated(uint256 indexed productId, uint256 price, uint64 maxSupply, uint16 referralBps, string uri);
+    event ProductAdded(uint256 indexed productId, ProductInput input);
+    event ProductUpdated(uint256 indexed productId, ProductInput input, uint32 version);
     event ProductActiveSet(uint256 indexed productId, bool active);
+    event ReferrerSet(address indexed referrer, bool approved);
     event Purchased(
         uint256 indexed productId,
         address indexed buyer,
@@ -117,6 +150,8 @@ contract CreatorStore is
     event CreatorWithdrawal(address indexed to, uint256 amount);
     event PlatformWithdrawal(address indexed to, uint256 amount);
     event ReferralWithdrawal(address indexed referrer, address indexed to, uint256 amount);
+    event ExcessSwept(address indexed to, uint256 amount);
+    event TokenRescued(address indexed token, address indexed to, uint256 amount);
 
     // ---------------------------------------------------------------------
     // Errors
@@ -130,6 +165,7 @@ contract CreatorStore is
     error UnknownProduct(uint256 productId);
     error ProductInactive(uint256 productId);
     error SoldOut(uint256 productId);
+    error WalletLimitReached(uint256 productId);
     error MaxSupplyBelowSold(uint64 maxSupply, uint64 sold);
     error PriceAboveMax(uint256 price, uint256 maxPrice);
     error VoucherExpired();
@@ -137,9 +173,11 @@ contract CreatorStore is
     error VoucherUsed(uint256 nonce);
     error VoucherInvalidSignature();
     error VoucherAboveListPrice();
+    error InvalidReferrer();
     error NothingToWithdraw();
     error NotFeeRecipient();
     error RenounceDisabled();
+    error UseSweepForUsdc();
 
     // ---------------------------------------------------------------------
     // Init
@@ -151,15 +189,11 @@ contract CreatorStore is
     }
 
     /// @notice Called once by the factory right after cloning.
-    function initialize(
-        address owner_,
-        IERC20 usdc_,
-        address feeRecipient_,
-        uint16 feeBps_,
-        string calldata name_,
-        string calldata symbol_
-    ) external initializer {
-        if (owner_ == address(0) || address(usdc_) == address(0) || feeRecipient_ == address(0)) revert ZeroAddress();
+    function initialize(address owner_, IERC20 usdc_, uint16 feeBps_, string calldata name_, string calldata symbol_)
+        external
+        initializer
+    {
+        if (owner_ == address(0) || address(usdc_) == address(0)) revert ZeroAddress();
         if (feeBps_ > MAX_FEE_BPS) revert FeeTooHigh();
 
         __ERC721_init(name_, symbol_);
@@ -169,7 +203,6 @@ contract CreatorStore is
 
         usdc = usdc_;
         factory = msg.sender;
-        feeRecipient = feeRecipient_;
         feeBps = feeBps_;
         nextProductId = 1;
         nextTokenId = 1;
@@ -179,42 +212,49 @@ contract CreatorStore is
     // Creator: catalog
     // ---------------------------------------------------------------------
 
-    function addProduct(uint256 price, uint64 maxSupply, uint16 referralBps, string calldata uri)
-        external
-        onlyOwner
-        returns (uint256 productId)
-    {
-        _checkProductParams(price, referralBps, uri);
+    function addProduct(ProductInput calldata input) external onlyOwner returns (uint256 productId) {
+        _checkInput(input);
         productId = nextProductId++;
         _products[productId] = Product({
-            price: price,
-            maxSupply: maxSupply,
+            price: input.price,
+            maxSupply: input.maxSupply,
             sold: 0,
-            referralBps: referralBps,
-            active: true,
-            uri: uri
+            maxPerWallet: input.maxPerWallet,
+            version: 1,
+            referralBps: input.referralBps,
+            active: true
         });
-        emit ProductAdded(productId, price, maxSupply, referralBps, uri);
+        _uris[productId][1] = input.uri;
+        emit ProductAdded(productId, input);
     }
 
-    /// @notice Changes apply to future purchases only. Existing receipts keep pointing at this product.
-    function updateProduct(uint256 productId, uint256 price, uint64 maxSupply, uint16 referralBps, string calldata uri)
-        external
-        onlyOwner
-    {
+    /// @notice Changes apply to future purchases only. Receipts already sold keep the metadata they were sold with.
+    function updateProduct(uint256 productId, ProductInput calldata input) external onlyOwner {
         Product storage p = _existing(productId);
-        _checkProductParams(price, referralBps, uri);
-        if (maxSupply != 0 && maxSupply < p.sold) revert MaxSupplyBelowSold(maxSupply, p.sold);
-        p.price = price;
-        p.maxSupply = maxSupply;
-        p.referralBps = referralBps;
-        p.uri = uri;
-        emit ProductUpdated(productId, price, maxSupply, referralBps, uri);
+        _checkInput(input);
+        if (input.maxSupply != 0 && input.maxSupply < p.sold) revert MaxSupplyBelowSold(input.maxSupply, p.sold);
+        p.price = input.price;
+        p.maxSupply = input.maxSupply;
+        p.maxPerWallet = input.maxPerWallet;
+        p.referralBps = input.referralBps;
+        if (keccak256(bytes(input.uri)) != keccak256(bytes(_uris[productId][p.version]))) {
+            p.version += 1;
+            _uris[productId][p.version] = input.uri;
+        }
+        emit ProductUpdated(productId, input, p.version);
     }
 
     function setProductActive(uint256 productId, bool active) external onlyOwner {
         _existing(productId).active = active;
         emit ProductActiveSet(productId, active);
+    }
+
+    /// @notice Only approved referrers earn referral shares. This stops buyers from paying
+    ///         the referral cut to themselves (a free discount) or burning it to a dead address.
+    function setReferrer(address referrer, bool approved) external onlyOwner {
+        if (referrer == address(0) || referrer == address(this) || referrer == owner()) revert InvalidReferrer();
+        approvedReferrer[referrer] = approved;
+        emit ReferrerSet(referrer, approved);
     }
 
     /// @notice Stops all new purchases. Withdrawals keep working.
@@ -238,7 +278,7 @@ contract CreatorStore is
 
     /// @param maxPrice Reverts if the list price is above this. Protects buyers from a price change
     ///        landing between their signature and their transaction.
-    /// @param referrer Optional. Ignored if it is the buyer, the store owner, or the product pays no referrals.
+    /// @param referrer Optional. Paid only if approved by the creator, not the buyer, and the product pays referrals.
     function purchase(uint256 productId, uint256 maxPrice, address referrer, Permit calldata permit)
         external
         nonReentrant
@@ -252,31 +292,27 @@ contract CreatorStore is
     }
 
     /// @notice Buy at a price the store owner signed. Used for discounts, gifts (price 0) and private offers.
-    function purchaseWithVoucher(
-        Voucher calldata voucher,
-        bytes calldata signature,
-        address referrer,
-        Permit calldata permit
-    ) external nonReentrant whenNotPaused returns (uint256 tokenId) {
+    ///         Voucher sales never pay a referral share, so discounts cannot stack.
+    function purchaseWithVoucher(Voucher calldata voucher, bytes calldata signature, Permit calldata permit)
+        external
+        nonReentrant
+        whenNotPaused
+        returns (uint256 tokenId)
+    {
         if (voucher.expiry < block.timestamp) revert VoucherExpired();
         if (voucher.buyer != address(0) && voucher.buyer != msg.sender) revert VoucherWrongBuyer();
         if (voucherNonceUsed[voucher.nonce]) revert VoucherUsed(voucher.nonce);
         if (voucher.price > _existing(voucher.productId).price) revert VoucherAboveListPrice();
 
-        bytes32 digest = _hashTypedDataV4(
-            keccak256(
-                abi.encode(
-                    VOUCHER_TYPEHASH, voucher.productId, voucher.price, voucher.buyer, voucher.expiry, voucher.nonce
-                )
-            )
-        );
-        if (!SignatureChecker.isValidSignatureNow(owner(), digest, signature)) revert VoucherInvalidSignature();
+        if (!SignatureChecker.isValidSignatureNow(owner(), _voucherDigest(voucher), signature)) {
+            revert VoucherInvalidSignature();
+        }
 
         voucherNonceUsed[voucher.nonce] = true;
         emit VoucherRedeemed(voucher.nonce, voucher.productId, msg.sender, voucher.price);
 
         _maybePermit(permit);
-        tokenId = _purchase(voucher.productId, voucher.price, referrer);
+        tokenId = _purchase(voucher.productId, voucher.price, address(0));
     }
 
     // ---------------------------------------------------------------------
@@ -292,13 +328,16 @@ contract CreatorStore is
         emit CreatorWithdrawal(to, amount);
     }
 
+    /// @notice Pays the platform balance to whoever the factory currently names as fee recipient.
+    ///         The factory can rotate that address if it is lost or blacklisted.
     function withdrawPlatform() external nonReentrant {
-        if (msg.sender != feeRecipient) revert NotFeeRecipient();
+        address recipient = IStoreFactory(factory).feeRecipient();
+        if (msg.sender != recipient) revert NotFeeRecipient();
         uint256 amount = platformBalance;
         if (amount == 0) revert NothingToWithdraw();
         platformBalance = 0;
-        usdc.safeTransfer(feeRecipient, amount);
-        emit PlatformWithdrawal(feeRecipient, amount);
+        usdc.safeTransfer(recipient, amount);
+        emit PlatformWithdrawal(recipient, amount);
     }
 
     function withdrawReferral(address to) external nonReentrant {
@@ -306,32 +345,68 @@ contract CreatorStore is
         uint256 amount = referralBalance[msg.sender];
         if (amount == 0) revert NothingToWithdraw();
         referralBalance[msg.sender] = 0;
+        totalReferralOwed -= amount;
         usdc.safeTransfer(to, amount);
         emit ReferralWithdrawal(msg.sender, to, amount);
+    }
+
+    /// @notice Send USDC that arrived outside a purchase (owed to nobody) to the creator's chosen address.
+    function sweepExcess(address to) external onlyOwner nonReentrant {
+        if (to == address(0)) revert ZeroAddress();
+        uint256 excess = excessUsdc();
+        if (excess == 0) revert NothingToWithdraw();
+        usdc.safeTransfer(to, excess);
+        emit ExcessSwept(to, excess);
+    }
+
+    /// @notice Recover any token other than USDC sent here by mistake.
+    function rescueToken(IERC20 token, address to) external onlyOwner nonReentrant {
+        if (address(token) == address(usdc)) revert UseSweepForUsdc();
+        if (to == address(0)) revert ZeroAddress();
+        uint256 amount = token.balanceOf(address(this));
+        if (amount == 0) revert NothingToWithdraw();
+        token.safeTransfer(to, amount);
+        emit TokenRescued(address(token), to, amount);
     }
 
     // ---------------------------------------------------------------------
     // Views
     // ---------------------------------------------------------------------
 
-    function getProduct(uint256 productId) external view returns (Product memory) {
-        return _products[productId];
+    function getProduct(uint256 productId) external view returns (ProductView memory v) {
+        Product storage p = _products[productId];
+        v = ProductView({
+            price: p.price,
+            maxSupply: p.maxSupply,
+            sold: p.sold,
+            maxPerWallet: p.maxPerWallet,
+            version: p.version,
+            referralBps: p.referralBps,
+            active: p.active,
+            uri: _uris[productId][p.version]
+        });
     }
 
+    /// @notice Metadata of a receipt, frozen at the version it was sold under.
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
         _requireOwned(tokenId);
-        return _products[productOf[tokenId]].uri;
+        return _uris[productOf[tokenId]][versionOf[tokenId]];
     }
 
-    /// @notice EIP-712 digest a creator signs to issue a voucher. Exposed for frontends and tests.
+    function feeRecipient() external view returns (address) {
+        return IStoreFactory(factory).feeRecipient();
+    }
+
+    /// @notice USDC held beyond what is owed to the creator, platform and referrers.
+    function excessUsdc() public view returns (uint256) {
+        uint256 held = usdc.balanceOf(address(this));
+        uint256 owed = creatorBalance + platformBalance + totalReferralOwed;
+        return held > owed ? held - owed : 0;
+    }
+
+    /// @notice EIP-712 digest the current owner signs to issue a voucher.
     function voucherDigest(Voucher calldata voucher) external view returns (bytes32) {
-        return _hashTypedDataV4(
-            keccak256(
-                abi.encode(
-                    VOUCHER_TYPEHASH, voucher.productId, voucher.price, voucher.buyer, voucher.expiry, voucher.nonce
-                )
-            )
-        );
+        return _voucherDigest(voucher);
     }
 
     // ---------------------------------------------------------------------
@@ -343,6 +418,13 @@ contract CreatorStore is
         revert RenounceDisabled();
     }
 
+    /// @dev Every ownership change starts a new voucher epoch, so vouchers signed by an
+    ///      earlier owner stay dead even if ownership later returns to that key.
+    function _transferOwnership(address newOwner) internal override {
+        super._transferOwnership(newOwner);
+        ownerEpoch += 1;
+    }
+
     // ---------------------------------------------------------------------
     // Internal
     // ---------------------------------------------------------------------
@@ -351,15 +433,20 @@ contract CreatorStore is
         Product storage p = _products[productId];
         if (!p.active) revert ProductInactive(productId);
         if (p.maxSupply != 0 && p.sold >= p.maxSupply) revert SoldOut(productId);
+        if (p.maxPerWallet != 0 && purchasedBy[productId][msg.sender] >= p.maxPerWallet) {
+            revert WalletLimitReached(productId);
+        }
 
         // Effects
         p.sold += 1;
+        purchasedBy[productId][msg.sender] += 1;
 
         uint256 fee = (price * feeBps) / BPS;
         uint256 referralAmount;
-        if (p.referralBps != 0 && referrer != address(0) && referrer != msg.sender && referrer != owner()) {
+        if (p.referralBps != 0 && referrer != msg.sender && approvedReferrer[referrer]) {
             referralAmount = (price * p.referralBps) / BPS;
             referralBalance[referrer] += referralAmount;
+            totalReferralOwed += referralAmount;
         } else {
             referrer = address(0);
         }
@@ -368,12 +455,29 @@ contract CreatorStore is
 
         tokenId = nextTokenId++;
         productOf[tokenId] = productId;
+        versionOf[tokenId] = p.version;
 
         // Interactions: take payment first, then mint. _mint does not call the receiver.
         if (price != 0) usdc.safeTransferFrom(msg.sender, address(this), price);
         _mint(msg.sender, tokenId);
 
         emit Purchased(productId, msg.sender, tokenId, price, fee, referrer, referralAmount);
+    }
+
+    function _voucherDigest(Voucher calldata voucher) internal view returns (bytes32) {
+        return _hashTypedDataV4(
+            keccak256(
+                abi.encode(
+                    VOUCHER_TYPEHASH,
+                    voucher.productId,
+                    voucher.price,
+                    voucher.buyer,
+                    voucher.expiry,
+                    voucher.nonce,
+                    ownerEpoch
+                )
+            )
+        );
     }
 
     /// @dev A failed permit is ignored on purpose: someone may have front-run the same permit.
@@ -390,10 +494,10 @@ contract CreatorStore is
         p = _products[productId];
     }
 
-    function _checkProductParams(uint256 price, uint16 referralBps, string calldata uri) internal view {
-        if (bytes(uri).length == 0) revert EmptyUri();
-        if (referralBps > MAX_REFERRAL_BPS) revert ReferralTooHigh();
+    function _checkInput(ProductInput calldata input) internal view {
+        if (bytes(input.uri).length == 0) revert EmptyUri();
+        if (input.referralBps > MAX_REFERRAL_BPS) revert ReferralTooHigh();
         uint256 cap = IStoreFactory(factory).priceCap();
-        if (price > cap) revert PriceAboveCap(price, cap);
+        if (input.price > cap) revert PriceAboveCap(input.price, cap);
     }
 }
