@@ -54,9 +54,9 @@ export function WaitlistForm({
                     <Check className="w-8 h-8 text-emerald-600" strokeWidth={3} />
                 </div>
                 <div className="space-y-2">
-                    <h2 className="text-2xl font-black tracking-tight italic">You're on the list</h2>
+                    <h2 className="text-2xl font-black tracking-tight">You&apos;re on the list</h2>
                     <p className="text-sm text-muted-foreground font-medium">
-                        Thanks for your interest. We'll email you the moment onboarding opens.
+                        Thanks for your interest. We&apos;ll email you the moment onboarding opens.
                     </p>
                 </div>
             </div>
@@ -80,27 +80,29 @@ export function WaitlistForm({
             </div>
 
             <div className="space-y-2">
-                <h2 className="text-3xl font-black tracking-tight italic">{heading}</h2>
+                <h2 className="text-2xl font-black tracking-tight md:text-3xl">{heading}</h2>
                 <p className="text-base text-muted-foreground font-medium">{subheading}</p>
             </div>
 
             <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Name</label>
+                <label htmlFor="wl-name" className="text-xs font-bold text-foreground">Name</label>
                 <input
+                    id="wl-name"
                     type="text"
                     placeholder="Your name"
-                    className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-border text-foreground font-bold placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                    className="h-12 w-full rounded-xl border border-border bg-white px-4 text-base font-medium text-foreground placeholder:text-muted-foreground/50 focus:border-[var(--brand-magenta)] focus:outline-none focus:ring-2 focus:ring-[rgba(192,24,144,0.25)]"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                 />
             </div>
 
             <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Email</label>
+                <label htmlFor="wl-email" className="text-xs font-bold text-foreground">Email</label>
                 <input
+                    id="wl-email"
                     type="email"
                     placeholder="you@email.com"
-                    className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-border text-foreground font-bold placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                    className="h-12 w-full rounded-xl border border-border bg-white px-4 text-base font-medium text-foreground placeholder:text-muted-foreground/50 focus:border-[var(--brand-magenta)] focus:outline-none focus:ring-2 focus:ring-[rgba(192,24,144,0.25)]"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -110,14 +112,14 @@ export function WaitlistForm({
             <button
                 type="submit"
                 disabled={!email || isSubmitting}
-                className="w-full py-6 bg-primary text-primary-foreground rounded-3xl font-black uppercase tracking-[0.3em] text-sm shadow-saas hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-40 disabled:scale-100 shadow-primary/20 flex items-center justify-center gap-3"
+                className="btn-brand inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl px-6 text-xs font-black uppercase tracking-[0.12em] disabled:opacity-40"
             >
-                {isSubmitting && <Loader2 className="w-5 h-5 animate-spin" />}
+                {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
                 Join the Waitlist
             </button>
 
-            <p className="text-[10px] text-center text-muted-foreground font-bold uppercase tracking-wider">
-                No payment required · We'll never share your email
+            <p className="text-center text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                No payment required · We&apos;ll never share your email
             </p>
         </form>
     );

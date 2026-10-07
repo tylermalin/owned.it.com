@@ -130,11 +130,11 @@ export function BundleBuilder({ onSuccess, onCancel }: BundleBuilderProps) {
         <div className="space-y-12">
             <div className="flex items-center justify-between border-b border-border pb-8">
                 <div className="flex items-center gap-4">
-                    <div className="p-3 bg-primary/10 text-primary rounded-2xl">
+                    <div className="p-3 bg-primary/10 text-primary rounded-xl">
                         <Package className="w-6 h-6" />
                     </div>
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight">Bundle Builder</h2>
+                        <h2 className="text-2xl font-black tracking-tight text-foreground">Bundle Builder</h2>
                         <p className="text-sm text-muted-foreground">Combine multiple products into a single curated offer.</p>
                     </div>
                 </div>
@@ -185,7 +185,7 @@ export function BundleBuilder({ onSuccess, onCancel }: BundleBuilderProps) {
                 </div>
 
                 {/* Right: Bundle Configuration */}
-                <form onSubmit={handleLaunch} className="space-y-8 bg-slate-50/50 p-8 rounded-4xl border border-border/50">
+                <form onSubmit={handleLaunch} className="space-y-8 bg-slate-50/50 p-6 md:p-8 rounded-3xl border border-border/50">
                     <div className="space-y-6">
                         <h3 className="text-lg font-bold flex items-center gap-2">
                             <ShoppingBag className="w-5 h-5" />
@@ -195,7 +195,7 @@ export function BundleBuilder({ onSuccess, onCancel }: BundleBuilderProps) {
                         <div className="space-y-3">
                             {selectedItems.length > 0 ? (
                                 selectedItems.map(item => (
-                                    <div key={item.productId} className="bg-white p-4 rounded-2xl border border-border flex items-center justify-between shadow-sm">
+                                    <div key={item.productId} className="bg-white p-4 rounded-xl border border-border flex items-center justify-between shadow-sm">
                                         <div className="flex items-center gap-4 min-w-0">
                                             <div className="w-10 h-10 bg-slate-50 rounded-lg flex-shrink-0 overflow-hidden border border-border/50">
                                                 {item.metadata.image && (
@@ -218,7 +218,7 @@ export function BundleBuilder({ onSuccess, onCancel }: BundleBuilderProps) {
                                 ))
                             ) : (
                                 <div className="p-10 border-2 border-dashed border-border rounded-3xl text-center space-y-3">
-                                    <p className="text-sm text-muted-foreground italic">Add at least 2 products to start bundling</p>
+                                    <p className="text-sm text-muted-foreground">Add at least 2 products to start bundling</p>
                                 </div>
                             )}
                         </div>
@@ -226,25 +226,25 @@ export function BundleBuilder({ onSuccess, onCancel }: BundleBuilderProps) {
 
                     {selectedItems.length > 0 && (
                         <div className="space-y-8 pt-8 border-t border-border">
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Bundle ID</label>
+                                    <label className="text-xs font-bold text-foreground ml-1">Bundle ID</label>
                                     <input
                                         type="number"
                                         value={productId}
                                         onChange={(e) => setProductId(e.target.value)}
-                                        className="w-full px-5 py-3 bg-white border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 font-bold"
+                                        className="h-12 w-full rounded-xl border border-border bg-white px-4 text-base font-medium placeholder:text-muted-foreground/50 focus:border-[var(--brand-magenta)] focus:outline-none focus:ring-2 focus:ring-[rgba(192,24,144,0.25)]"
                                         placeholder="e.g. 99"
                                         required
                                     />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Bundle Price (USDC)</label>
+                                    <label className="text-xs font-bold text-foreground ml-1">Bundle Price (USDC)</label>
                                     <input
                                         type="text"
                                         value={bundlePrice}
                                         onChange={(e) => setBundlePrice(e.target.value)}
-                                        className="w-full px-5 py-3 bg-white border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 font-bold"
+                                        className="h-12 w-full rounded-xl border border-border bg-white px-4 text-base font-medium placeholder:text-muted-foreground/50 focus:border-[var(--brand-magenta)] focus:outline-none focus:ring-2 focus:ring-[rgba(192,24,144,0.25)]"
                                         placeholder="0.00"
                                         required
                                     />
@@ -252,23 +252,23 @@ export function BundleBuilder({ onSuccess, onCancel }: BundleBuilderProps) {
                             </div>
 
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Bundle Name</label>
+                                <label className="text-xs font-bold text-foreground ml-1">Bundle Name</label>
                                 <input
                                     type="text"
                                     value={bundleName}
                                     onChange={(e) => setBundleName(e.target.value)}
-                                    className="w-full px-5 py-4 bg-white border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 font-bold"
+                                    className="h-12 w-full rounded-xl border border-border bg-white px-4 text-base font-medium placeholder:text-muted-foreground/50 focus:border-[var(--brand-magenta)] focus:outline-none focus:ring-2 focus:ring-[rgba(192,24,144,0.25)]"
                                     placeholder="The Ultimate Creator Kit"
                                     required
                                 />
                             </div>
 
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Description</label>
+                                <label className="text-xs font-bold text-foreground ml-1">Description</label>
                                 <textarea
                                     value={bundleDescription}
                                     onChange={(e) => setBundleDescription(e.target.value)}
-                                    className="w-full px-5 py-4 bg-white border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 font-medium min-h-[100px]"
+                                    className="w-full rounded-xl border border-border bg-white px-4 py-3 text-base font-medium placeholder:text-muted-foreground/50 focus:border-[var(--brand-magenta)] focus:outline-none focus:ring-2 focus:ring-[rgba(192,24,144,0.25)] min-h-[100px]"
                                     placeholder="What's included in this bundle?"
                                     required
                                 />
@@ -284,8 +284,8 @@ export function BundleBuilder({ onSuccess, onCancel }: BundleBuilderProps) {
                                     <span className="text-sm font-bold text-emerald-600">${calculateTotalWholesale().toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between items-center pt-2">
-                                    <span className="text-lg font-black italic tracking-tighter">Your Profit Margin</span>
-                                    <span className="text-lg font-black italic tracking-tighter text-primary">
+                                    <span className="text-lg font-black tracking-tight">Your Profit Margin</span>
+                                    <span className="text-lg font-black tracking-tight text-primary">
                                         {bundlePrice && calculateTotalWholesale() > 0
                                             ? `${(((parseFloat(bundlePrice) - calculateTotalWholesale()) / parseFloat(bundlePrice)) * 100).toFixed(0)}%`
                                             : '--'}
@@ -296,7 +296,7 @@ export function BundleBuilder({ onSuccess, onCancel }: BundleBuilderProps) {
                             <button
                                 type="submit"
                                 disabled={selectedItems.length < 2 || isPending || isConfirming || isUploading}
-                                className="w-full py-5 bg-primary text-primary-foreground rounded-2xl font-black uppercase tracking-[0.2em] shadow-saas hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+                                className="btn-brand w-full rounded-xl px-6 h-12 inline-flex items-center justify-center gap-2 text-xs font-black uppercase tracking-[0.12em] disabled:opacity-50"
                             >
                                 <Rocket className="w-5 h-5" />
                                 {isPending || isConfirming || isUploading ? 'LAUNCHING...' : 'LAUNCH BUNDLE'}

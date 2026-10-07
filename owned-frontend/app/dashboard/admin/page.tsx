@@ -75,11 +75,11 @@ export default function AdminDashboard() {
     if (!isAdmin) {
         return (
             <DashboardLayout>
-                <div className="flex flex-col items-center justify-center py-20 bg-white rounded-4xl border border-border shadow-sm">
+                <div className="flex flex-col items-center justify-center py-16 px-6 text-center bg-white rounded-3xl border border-border">
                     <div className="p-4 bg-red-50 text-red-500 rounded-3xl mb-6">
                         <Lock className="w-12 h-12" />
                     </div>
-                    <h1 className="text-3xl font-black tracking-tight">Access Denied</h1>
+                    <h1 className="text-2xl md:text-3xl font-black tracking-tight">Access Denied</h1>
                     <p className="text-muted-foreground font-medium mt-2">This dashboard is restricted to authorized administrators only.</p>
                 </div>
             </DashboardLayout>
@@ -91,20 +91,20 @@ export default function AdminDashboard() {
             <div className="space-y-10">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                    <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-primary font-black uppercase tracking-widest text-[10px]">
+                    <div className="space-y-1">
+                        <p className="eyebrow flex items-center gap-2">
                             <ShieldAlert className="w-3.5 h-3.5" /> Admin Portal
-                        </div>
-                        <h1 className="text-4xl font-extrabold tracking-tight italic">Protocol Oversight</h1>
-                        <p className="text-lg text-muted-foreground font-medium">Manage products, members, and platform health.</p>
+                        </p>
+                        <h1 className="text-2xl md:text-3xl font-black tracking-tight">Protocol Oversight</h1>
+                        <p className="text-sm md:text-base text-muted-foreground font-medium">Manage products, members, and platform health.</p>
                     </div>
 
-                    <div className="flex bg-white p-1.5 border border-border rounded-2xl shadow-sm overflow-x-auto">
+                    <div className="flex bg-white p-1.5 border border-border rounded-xl overflow-x-auto max-w-full">
                         {(['products', 'members', 'stats', 'vault'] as const).map(tab => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-primary text-white shadow-saas' : 'text-muted-foreground hover:bg-slate-50'}`}
+                                className={`px-4 md:px-6 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all ${activeTab === tab ? 'btn-brand' : 'text-muted-foreground hover:bg-slate-50'}`}
                             >
                                 {tab}
                             </button>
@@ -116,30 +116,32 @@ export default function AdminDashboard() {
                     <div className="space-y-6">
                         <div className="flex items-center justify-between gap-4">
                             <div className="relative flex-1 max-w-md">
+                                <label htmlFor="admin-product-search" className="sr-only">Search products</label>
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                 <input
+                                    id="admin-product-search"
                                     type="text"
                                     placeholder="Search products..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-12 pr-4 py-3 bg-white border border-border rounded-2xl text-sm font-medium focus:outline-none focus:border-primary/30 shadow-sm"
+                                    className="h-12 w-full rounded-xl border border-border bg-white pl-12 pr-4 text-base font-medium placeholder:text-muted-foreground/50 focus:border-[var(--brand-magenta)] focus:outline-none focus:ring-2 focus:ring-[rgba(192,24,144,0.25)]"
                                 />
                             </div>
                             <div className="text-right">
                                 <div className="text-2xl font-black">{productIds.length}</div>
-                                <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total Products</div>
+                                <div className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Total Products</div>
                             </div>
                         </div>
 
-                        <div className="bg-white border border-border rounded-4xl shadow-sm overflow-hidden">
-                            <table className="w-full text-left border-collapse">
+                        <div className="bg-white border border-border rounded-3xl overflow-x-auto">
+                            <table className="w-full min-w-[720px] text-left border-collapse">
                                 <thead>
-                                    <tr className="bg-slate-50 border-bottom border-border">
-                                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Product</th>
-                                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Price</th>
-                                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Sales</th>
-                                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Status</th>
-                                        <th className="px-8 py-5 text-right text-[10px] font-black uppercase tracking-widest text-muted-foreground">Actions</th>
+                                    <tr className="bg-slate-50 border-b border-border">
+                                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-wider text-muted-foreground">Product</th>
+                                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-wider text-muted-foreground">Price</th>
+                                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-wider text-muted-foreground">Sales</th>
+                                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-wider text-muted-foreground">Status</th>
+                                        <th className="px-8 py-5 text-right text-[10px] font-black uppercase tracking-wider text-muted-foreground">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -171,24 +173,24 @@ export default function AdminDashboard() {
                         <div className="flex items-center justify-between">
                             <div className="text-right">
                                 <div className="text-2xl font-black">{members.length}</div>
-                                <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total Members</div>
+                                <div className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Total Members</div>
                             </div>
                         </div>
 
-                        <div className="bg-white border border-border rounded-4xl shadow-sm overflow-hidden">
-                            <table className="w-full text-left border-collapse">
+                        <div className="bg-white border border-border rounded-3xl overflow-x-auto">
+                            <table className="w-full min-w-[720px] text-left border-collapse">
                                 <thead>
-                                    <tr className="bg-slate-50 border-bottom border-border">
-                                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Member / Account</th>
-                                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Status</th>
-                                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Socials</th>
-                                        <th className="px-8 py-5 text-right text-[10px] font-black uppercase tracking-widest text-muted-foreground">Actions</th>
+                                    <tr className="bg-slate-50 border-b border-border">
+                                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-wider text-muted-foreground">Member / Account</th>
+                                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-wider text-muted-foreground">Status</th>
+                                        <th className="px-8 py-5 text-[10px] font-black uppercase tracking-wider text-muted-foreground">Socials</th>
+                                        <th className="px-8 py-5 text-right text-[10px] font-black uppercase tracking-wider text-muted-foreground">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {members.length === 0 ? (
                                         <tr className="border-t border-border">
-                                            <td colSpan={4} className="px-8 py-20 text-center text-muted-foreground font-medium italic">No members found</td>
+                                            <td colSpan={4} className="px-8 py-20 text-center text-muted-foreground font-medium">No members found</td>
                                         </tr>
                                     ) : (
                                         members.map(member => (
@@ -206,7 +208,7 @@ export default function AdminDashboard() {
                 )}
 
                 {activeTab === 'stats' && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <StatCard
                             title="Total Protocol Volume"
                             value={formatUSDC(stats.totalVolume)}
@@ -233,12 +235,12 @@ export default function AdminDashboard() {
 
                 {activeTab === 'vault' && (
                     <div className="space-y-8">
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div className="space-y-1">
-                                <h3 className="text-xl font-bold">Admin Vault</h3>
+                                <h3 className="text-xl font-black tracking-tight">Admin Vault</h3>
                                 <p className="text-sm text-muted-foreground">Digital assets held in the primary administrator wallet.</p>
                             </div>
-                            <div className="px-4 py-2 bg-slate-50 border border-border rounded-xl text-[10px] font-black text-muted-foreground">
+                            <div className="px-4 py-2 bg-slate-50 border border-border rounded-xl text-[10px] font-black text-muted-foreground font-mono break-all">
                                 {ADMIN_ADDRESS}
                             </div>
                         </div>
@@ -246,12 +248,12 @@ export default function AdminDashboard() {
                         {vaultLoading ? (
                             <div className="text-center py-20 animate-pulse">Scanning vault...</div>
                         ) : vaultAssets?.length === 0 ? (
-                            <div className="bg-white border border-border rounded-4xl p-20 text-center space-y-4">
+                            <div className="bg-white border border-border rounded-3xl p-8 md:p-16 text-center space-y-4">
                                 <Wallet className="w-12 h-12 text-slate-300 mx-auto" />
                                 <p className="text-muted-foreground font-medium">Vault is currently empty.</p>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {vaultAssets?.map((asset: any) => (
                                     <AdminVaultCard
                                         key={asset.id}
@@ -304,18 +306,18 @@ function AdminProductRow({ id, stats, isHidden, isFeatured, onToggleHide, onTogg
                         {metadata?.image && <img src={getIPFSGatewayUrl(metadata.image)} className="w-full h-full object-cover" />}
                     </div>
                     <div>
-                        <div className="font-bold text-slate-900">{metadata?.name || `Product #${id}`}</div>
-                        <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{metadata?.type || 'Digital'}</div>
+                        <div className="font-bold text-foreground">{metadata?.name || `Product #${id}`}</div>
+                        <div className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">{metadata?.type || 'Digital'}</div>
                     </div>
                 </div>
             </td>
             <td className="px-8 py-5">
-                <div className="font-black text-slate-900">{product?.price ? `$${formatUSDC(product.price)}` : 'FREE'}</div>
+                <div className="font-black text-foreground">{product?.price ? `$${formatUSDC(product.price)}` : 'FREE'}</div>
             </td>
             <td className="px-8 py-5">
                 <div className="flex flex-col">
-                    <div className="font-bold text-slate-900">{stats?.sold || 0} sold</div>
-                    <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                    <div className="font-bold text-foreground">{stats?.sold || 0} sold</div>
+                    <div className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">
                         {stats?.revenue ? formatUSDC(stats.revenue) : '$0.00'} rev
                     </div>
                 </div>
@@ -323,23 +325,23 @@ function AdminProductRow({ id, stats, isHidden, isFeatured, onToggleHide, onTogg
             <td className="px-8 py-5">
                 <div className="flex items-center gap-2">
                     {isHidden ? (
-                        <span className="flex items-center gap-1.5 px-3 py-1 bg-red-50 text-red-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-red-100">
+                        <span className="flex items-center gap-1.5 px-3 py-1 bg-red-50 text-red-600 rounded-lg text-[10px] font-black uppercase tracking-wider border border-red-100">
                             <EyeOff className="w-3 h-3" /> Hidden
                         </span>
                     ) : (
-                        <span className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-emerald-100">
+                        <span className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black uppercase tracking-wider border border-emerald-100">
                             <Eye className="w-3 h-3" /> Public
                         </span>
                     )}
                     {isFeatured && (
-                        <span className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-amber-100">
+                        <span className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-600 rounded-lg text-[10px] font-black uppercase tracking-wider border border-amber-100">
                             <Star className="w-3 h-3 fill-current" /> Featured
                         </span>
                     )}
                 </div>
             </td>
             <td className="px-8 py-5">
-                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                <div className="flex items-center justify-end gap-2 md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100 transition-all">
                     <button
                         onClick={onToggleFeature}
                         className={`p-2 rounded-xl border transition-all ${isFeatured ? 'bg-amber-50 border-amber-100 text-amber-600' : 'bg-white border-border text-slate-400 hover:border-amber-200 hover:text-amber-500'}`}
@@ -380,31 +382,31 @@ function MemberRow({ member, onGift }: { member: any; onGift?: () => void }) {
                         )}
                     </div>
                     <div>
-                        <div className="font-bold text-slate-900">{member.profile?.displayName || 'Anonymous Member'}</div>
-                        <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest font-mono">{member.address.slice(0, 10)}...{member.address.slice(-8)}</div>
+                        <div className="font-bold text-foreground">{member.profile?.displayName || 'Anonymous Member'}</div>
+                        <div className="text-[10px] font-black text-muted-foreground uppercase tracking-wider font-mono">{member.address.slice(0, 10)}...{member.address.slice(-8)}</div>
                     </div>
                 </div>
             </td>
             <td className="px-8 py-5">
                 {member.isAdmin ? (
-                    <span className="px-3 py-1 bg-primary/10 text-primary rounded-lg text-[10px] font-black uppercase tracking-widest border border-primary/20">Admin</span>
+                    <span className="px-3 py-1 bg-primary/10 text-primary rounded-lg text-[10px] font-black uppercase tracking-wider border border-primary/20">Admin</span>
                 ) : (
-                    <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-border">Member</span>
+                    <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-black uppercase tracking-wider border border-border">Member</span>
                 )}
             </td>
             <td className="px-8 py-5">
                 <div className="flex gap-2">
                     {member.profile?.socials?.twitter && <div className="w-6 h-6 bg-slate-50 rounded-lg border border-border flex items-center justify-center text-[10px] font-bold">X</div>}
                     {member.profile?.socials?.farcaster && <div className="w-6 h-6 bg-slate-50 rounded-lg border border-border flex items-center justify-center text-[10px] font-bold">F</div>}
-                    {!member.profile?.socials?.twitter && !member.profile?.socials?.farcaster && <span className="text-muted-foreground italic text-xs">None</span>}
+                    {!member.profile?.socials?.twitter && !member.profile?.socials?.farcaster && <span className="text-muted-foreground text-xs">None</span>}
                 </div>
             </td>
             <td className="px-8 py-5">
-                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                <div className="flex items-center justify-end gap-2 md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100 transition-all">
                     {onGift && (
                         <button
                             onClick={onGift}
-                            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-saas hover:gap-4 transition-all"
+                            className="btn-brand flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider"
                         >
                             <Gift className="w-3 h-3" /> Select for Gift
                         </button>
@@ -420,7 +422,7 @@ function MemberRow({ member, onGift }: { member: any; onGift?: () => void }) {
 
 function StatCard({ title, value, trend, icon, isLoading }: { title: string; value: string; trend: string; icon: React.ReactNode; isLoading?: boolean }) {
     if (isLoading) return (
-        <div className="bg-white border border-border rounded-4xl p-8 space-y-4 shadow-sm animate-pulse">
+        <div className="bg-white border border-border rounded-3xl p-6 md:p-8 space-y-4 animate-pulse">
             <div className="h-10 bg-slate-50 rounded-2xl w-10" />
             <div className="space-y-2">
                 <div className="h-8 bg-slate-50 rounded-xl w-3/4" />
@@ -430,14 +432,14 @@ function StatCard({ title, value, trend, icon, isLoading }: { title: string; val
     );
 
     return (
-        <div className="bg-white border border-border rounded-4xl p-8 space-y-4 shadow-sm">
+        <div className="bg-white border border-border rounded-3xl p-6 md:p-8 space-y-4">
             <div className="flex items-center justify-between">
-                <div className="p-2.5 bg-primary/5 text-primary rounded-2xl">{icon}</div>
+                <div className="p-2.5 bg-primary/5 text-primary rounded-xl">{icon}</div>
                 <div className="px-2 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-black rounded-lg border border-emerald-100">{trend}</div>
             </div>
             <div>
                 <div className="text-3xl font-black tracking-tight">{value}</div>
-                <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mt-1">{title}</div>
+                <div className="text-[10px] font-black uppercase tracking-wider text-muted-foreground mt-1">{title}</div>
             </div>
         </div>
     );
@@ -479,11 +481,11 @@ function AdminVaultCard({ asset, onSelect }: { asset: any, onSelect: (metadata: 
     return (
         <div
             onClick={() => onSelect(metadata)}
-            className="bg-white border border-border rounded-3xl p-6 space-y-6 hover:shadow-saas transition-all cursor-pointer group"
+            className="bg-white border border-border rounded-3xl p-6 space-y-6 card-lift cursor-pointer group"
         >
             <div className="aspect-square bg-slate-50 rounded-2xl overflow-hidden border border-border">
                 {displayImage ? (
-                    <img src={displayImage} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                    <img src={displayImage} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-300">
                         <ShoppingBag className="w-12 h-12" />
@@ -491,8 +493,8 @@ function AdminVaultCard({ asset, onSelect }: { asset: any, onSelect: (metadata: 
                 )}
             </div>
             <div className="space-y-2 text-center">
-                <h4 className="font-bold text-slate-900">{title}</h4>
-                <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                <h4 className="font-bold text-foreground">{title}</h4>
+                <div className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">
                     Holdings Entry #{asset.id}
                 </div>
             </div>
