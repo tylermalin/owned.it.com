@@ -27,8 +27,8 @@ Purchases can be paused by the creator. Withdrawals can never be paused.
 | Actor | Can | Cannot |
 | --- | --- | --- |
 | Creator (store owner) | Add, update, deactivate products. Approve referrers. Sign vouchers. Pause sales. Withdraw creator balance. Sweep unsolicited USDC, rescue other tokens. Transfer ownership (two-step; voids outstanding vouchers). | Renounce ownership. Change the fee. Touch platform or referral balances. |
-| OWNED fee recipient | Withdraw the platform balance of any store. Propose its successor. | Anything else in a store. |
-| Factory owner | Raise the price cap for all stores. Propose a new fee recipient if the current key is lost. | Lower the cap, change the fee rate, or touch creator or referral funds. |
+| OWNED fee recipient | Withdraw the platform balance of any store. | Rotate itself, or anything else in a store. |
+| Factory owner (platform Safe) | Raise the price cap for all stores. Rotate the fee recipient (two-step; the new address must accept). This redirects only platform money. | Lower the cap, change the fee rate, renounce ownership, or touch creator or referral funds. |
 | Referrer | Withdraw their own earned balance, even after approval is revoked. | Earn on their own purchases or on voucher sales. |
 | Buyer | Purchase with a `maxPrice` guard against price changes. | Buy inactive, sold-out or paused products. |
 

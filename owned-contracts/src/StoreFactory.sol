@@ -9,8 +9,10 @@ import {CreatorStore} from "./CreatorStore.sol";
 /// @title StoreFactory
 /// @notice Deploys one CreatorStore clone per call. The caller owns the new store.
 ///         USDC and the fee rate are fixed for every store this factory creates.
-/// @dev    The factory owner can: raise the per-product price cap, and propose a new
-///         platform fee recipient. Neither touches any creator's money or the fee rate.
+/// @dev    The factory owner (the platform Safe) can: raise the per-product price cap, and
+///         rotate the platform fee recipient. Neither touches creator or referral money or
+///         the fee rate. The current fee recipient has no rotation power, so a stolen
+///         recipient key cannot block recovery.
 ///         The only source of truth for which stores are real is `isStore` and `StoreCreated`.
 contract StoreFactory is Ownable2Step {
     address public immutable implementation;
@@ -35,6 +37,7 @@ contract StoreFactory is Ownable2Step {
     error FeeTooHigh();
     error CapNotHigher(uint256 current, uint256 proposed);
     error NotAuthorized();
+    error RenounceDisabled();
 
     constructor(IERC20 usdc_, address feeRecipient_, uint16 feeBps_, uint256 priceCap_, address owner_)
         Ownable(owner_)
@@ -66,10 +69,9 @@ contract StoreFactory is Ownable2Step {
         emit PriceCapRaised(old, newCap);
     }
 
-    /// @notice Propose a new fee recipient. Callable by the current recipient, or by the owner
-    ///         if the recipient's key is lost. Takes effect only when the new address accepts.
-    function proposeFeeRecipient(address proposed) external {
-        if (msg.sender != feeRecipient && msg.sender != owner()) revert NotAuthorized();
+    /// @notice Propose a new fee recipient. Owner only. Takes effect when the new address accepts,
+    ///         which proves it can sign. Recovers from a lost, stolen or blacklisted recipient key.
+    function proposeFeeRecipient(address proposed) external onlyOwner {
         if (proposed == address(0)) revert ZeroAddress();
         pendingFeeRecipient = proposed;
         emit FeeRecipientProposed(feeRecipient, proposed);
@@ -81,5 +83,10 @@ contract StoreFactory is Ownable2Step {
         feeRecipient = msg.sender;
         pendingFeeRecipient = address(0);
         emit FeeRecipientChanged(previous, msg.sender);
+    }
+
+    /// @dev Without an owner the price cap would freeze and the fee recipient could never be rotated.
+    function renounceOwnership() public pure override {
+        revert RenounceDisabled();
     }
 }

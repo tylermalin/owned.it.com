@@ -143,8 +143,10 @@ contract CreatorStore is
         uint256 price,
         uint256 platformFee,
         address referrer,
-        uint256 referralAmount
+        uint256 referralAmount,
+        uint32 version
     );
+    event OwnerEpochBumped(uint256 epoch);
     event VoucherRedeemed(uint256 indexed nonce, uint256 indexed productId, address indexed buyer, uint256 price);
     event VoucherCancelled(uint256 indexed nonce);
     event CreatorWithdrawal(address indexed to, uint256 amount);
@@ -423,6 +425,7 @@ contract CreatorStore is
     function _transferOwnership(address newOwner) internal override {
         super._transferOwnership(newOwner);
         ownerEpoch += 1;
+        emit OwnerEpochBumped(ownerEpoch);
     }
 
     // ---------------------------------------------------------------------
@@ -461,7 +464,7 @@ contract CreatorStore is
         if (price != 0) usdc.safeTransferFrom(msg.sender, address(this), price);
         _mint(msg.sender, tokenId);
 
-        emit Purchased(productId, msg.sender, tokenId, price, fee, referrer, referralAmount);
+        emit Purchased(productId, msg.sender, tokenId, price, fee, referrer, referralAmount, p.version);
     }
 
     function _voucherDigest(Voucher calldata voucher) internal view returns (bytes32) {

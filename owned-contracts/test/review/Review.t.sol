@@ -134,7 +134,7 @@ contract ReviewTest is BaseTest {
         s.withdrawPlatform();
 
         address safe2 = makeAddr("safe2");
-        vm.prank(feeRecipient); // the blacklisted recipient can still propose its successor
+        vm.prank(platformOwner); // the platform Safe rotates the blacklisted recipient
         f.proposeFeeRecipient(safe2);
         vm.prank(safe2);
         f.acceptFeeRecipient();
@@ -149,11 +149,14 @@ contract ReviewTest is BaseTest {
         assertEq(b.balanceOf(safe2), (PRICE * FEE_BPS) / 10_000);
     }
 
-    /// M-2: a lost recipient key is recoverable by the factory owner; strangers cannot propose.
+    /// M-2: a lost recipient key is recoverable by the factory owner; nobody else can propose.
     function test_fix_feeRecipientRotationAccessControl() public {
         address next = makeAddr("next");
         vm.prank(stranger);
-        vm.expectRevert(StoreFactory.NotAuthorized.selector);
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, stranger));
+        factory.proposeFeeRecipient(next);
+        vm.prank(feeRecipient);
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, feeRecipient));
         factory.proposeFeeRecipient(next);
 
         vm.prank(platformOwner);
