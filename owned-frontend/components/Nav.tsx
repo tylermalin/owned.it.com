@@ -19,20 +19,24 @@ export function Nav() {
 
     return (
         <nav className="fixed top-0 w-full z-50 transition-all duration-500">
-            <div className="w-full bg-primary text-primary-foreground py-1.5 text-center px-4 relative z-50">
+            <div className="w-full bg-[var(--brand-ink)] text-white py-1.5 text-center px-4 relative z-50">
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                    Currently on Testnet — No Live Transactions
+                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--brand-pink)] animate-pulse" />
+                    Testnet beta · No live transactions
                 </p>
             </div>
+            <div className="brand-scanlines h-[3px] w-full" aria-hidden="true" />
             <div className={`px-6 transition-all duration-500 ${isScrolled ? 'pt-2' : 'pt-4'}`}>
                 <div className={`max-w-7xl mx-auto px-6 flex justify-between items-center transition-all duration-500 rounded-[2rem] ${isScrolled ? 'glass shadow-saas-lg py-2' : 'bg-transparent py-2'}`}>
                     <div className="flex items-center gap-12">
                         <Link href="/" className="flex items-center group">
-                            <div className="relative">
-                                <img src="/assets/logo.png" alt="OWNED" className="w-14 h-14 object-contain transition-all duration-500 group-hover:scale-110 group-hover:rotate-3" />
-                                <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                            </div>
+                            <img
+                                src="/assets/logo-wordmark-480.png"
+                                alt="OWNED IT"
+                                width={480}
+                                height={240}
+                                className="h-11 w-auto object-contain transition-transform duration-300 group-hover:-rotate-2 group-hover:scale-105 md:h-12"
+                            />
                         </Link>
 
                         <div className="hidden lg:flex items-center gap-10">
@@ -46,10 +50,10 @@ export function Nav() {
                                 <Link
                                     key={item.label}
                                     href={item.href}
-                                    className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-all relative group"
+                                    className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-[var(--brand-magenta)] transition-all relative group"
                                 >
                                     {item.label}
-                                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
+                                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 brand-scanlines transition-all duration-300 group-hover:w-full" />
                                 </Link>
                             ))}
                         </div>

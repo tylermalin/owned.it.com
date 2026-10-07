@@ -87,3 +87,75 @@ body {
     text-shadow: 0 0 30px rgba(var(--primary-rgb), 0.4);
   }
 }
+/* ------------------------------------------------------------------
+   OWNED IT brand layer. Colors sampled from the logo.
+   Text sits only on purple → magenta → pink (all ≥ 5:1 with white).
+   Orange and yellow are decorative: stripes and large display type.
+   ------------------------------------------------------------------ */
+:root {
+  --brand-purple: #603090;
+  --brand-magenta: #c01890;
+  --brand-pink: #d80060;
+  --brand-orange: #f04818;
+  --brand-yellow: #f0a818;
+  --brand-cyan: #1ea6dc;
+  --brand-ink: #0b0b0f;
+  --brand-cta: linear-gradient(120deg, #5b2a9b 0%, #c01890 55%, #d80060 100%);
+  --brand-spectrum: linear-gradient(115deg, #1ea6dc 0%, #603090 22%, #c01890 45%, #d80060 62%, #f04818 80%, #f0a818 100%);
+}
+
+@layer components {
+  /* Primary actions */
+  .btn-brand {
+    background-image: var(--brand-cta);
+    color: #fff;
+    box-shadow: 0 8px 24px -10px rgba(192, 24, 144, 0.55);
+    transition: box-shadow 0.25s ease, transform 0.15s ease, filter 0.25s ease;
+  }
+  .btn-brand:hover {
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25) inset, 0 0 24px rgba(217, 70, 239, 0.45), 0 10px 28px -10px rgba(216, 0, 96, 0.6);
+    filter: saturate(1.1);
+  }
+  .btn-brand:focus-visible {
+    outline: 3px solid var(--brand-cyan);
+    outline-offset: 3px;
+  }
+
+  /* Large display text only: includes orange, which needs ≥ 24px to pass contrast */
+  .text-brand-gradient {
+    background-image: linear-gradient(100deg, #603090 0%, #c01890 40%, #d80060 70%, #f04818 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: #c01890; /* fallback */
+  }
+
+  /* Sticker: echoes the logo's black keyline and hard drop shadow */
+  .brand-sticker {
+    background: var(--brand-ink);
+    color: #fff;
+    border: 1.5px solid var(--brand-ink);
+    box-shadow: 3px 3px 0 var(--brand-pink);
+    transform: rotate(-2deg);
+  }
+
+  /* Card with the logo's hard offset shadow and a faint brand edge */
+  .brand-card {
+    border: 1.5px solid var(--brand-ink);
+    box-shadow: 8px 8px 0 var(--brand-ink), 0 0 0 4px rgba(216, 0, 96, 0.06);
+  }
+
+  /* The logo's diagonal scanline fill, as a decorative band */
+  .brand-scanlines {
+    background-image:
+      repeating-linear-gradient(-30deg, rgba(255, 255, 255, 0.55) 0 2px, transparent 2px 6px),
+      var(--brand-spectrum);
+  }
+
+  .brand-scanlines-soft {
+    background-image:
+      repeating-linear-gradient(-30deg, rgba(255, 255, 255, 0.7) 0 2px, transparent 2px 5px),
+      var(--brand-spectrum);
+    opacity: 0.18;
+  }
+}
