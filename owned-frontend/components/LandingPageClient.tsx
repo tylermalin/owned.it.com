@@ -8,6 +8,7 @@ import { ScrollTriggerPopup } from '@/components/ScrollTriggerPopup';
 import { SavingsCalculator } from '@/components/SavingsCalculator';
 import { SavingsButton } from '@/components/SavingsButton';
 import { VideoModal } from '@/components/VideoModal';
+import { HeroSection } from '@/components/HeroSection';
 import { Play, ChevronRight, Star, ArrowRight, GraduationCap, FileText, Users2, Clock3, Music, MapPin, Sparkles, Link2 } from 'lucide-react';
 
 export function LandingPageClient() {
@@ -18,68 +19,10 @@ export function LandingPageClient() {
             {/* Nav */}
             <Nav />
 
-            {/* Hero Section */}
-            <main className="relative pt-64 pb-32 overflow-hidden">
-                {/* Visual Background Elements */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-primary/5 rounded-full blur-[120px] -z-10 animate-float" />
-                <div className="absolute top-[20%] right-[10%] w-64 h-64 bg-emerald-500/5 rounded-full blur-[80px] -z-10 animate-float [animation-delay:2s]" />
-
-                <div className="max-w-7xl mx-auto px-6 text-center">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 border border-primary/10">
-                        <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-                        </span>
-                        Sovereign Commerce is Here
-                    </div>
-
-                    <h1 className="text-6xl md:text-[8rem] font-black tracking-tighter text-foreground mb-12 text-balance leading-[0.85] animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-150">
-                        Build Your Store.<br />
-                        <span className="text-primary italic font-serif text-glow">Sell Anywhere.</span><br />
-                        Own Everything.
-                    </h1>
-
-                    <div className="space-y-8 mb-24 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300">
-                        <p className="text-2xl md:text-3xl text-foreground font-bold tracking-tight">The first creator commerce protocol you actually own.</p>
-                        <p className="max-w-3xl mx-auto text-xl text-muted-foreground font-medium italic leading-relaxed">
-                            Deploy your storefront smart contract on Base, accept USDC instantly, and sell directly to your audience—without platforms, permission, or deplatforming risk.
-                        </p>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-8 mb-20 animate-in fade-in slide-in-from-bottom-16 duration-1000 delay-500">
-                        <Link href="/dashboard/deploy" className="group relative inline-flex items-center gap-4 px-12 py-6 bg-primary text-primary-foreground rounded-2xl font-black uppercase tracking-[0.2em] text-sm overflow-hidden shadow-glow hover:scale-[1.05] active:scale-[0.95] transition-all">
-                            <span className="relative z-10">Join the Waitlist</span>
-                            <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
-                            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                        </Link>
-
-                        <button
-                            onClick={() => setIsVideoModalOpen(true)}
-                            className="px-12 py-6 glass text-foreground border border-border rounded-[2rem] font-black uppercase tracking-[0.25em] text-xs shadow-sm hover:bg-white transition-all w-full sm:w-auto text-center flex items-center justify-center gap-4 group"
-                        >
-                            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center group-hover:scale-110 group-hover:bg-primary/10 transition-all">
-                                <Play className="w-3.5 h-3.5 fill-current transition-colors group-hover:text-primary" />
-                            </div>
-                            Watch Demo
-                        </button>
-                    </div>
-
-                    <div
-                        onClick={() => setIsVideoModalOpen(true)}
-                        className="flex flex-col items-center gap-6 text-muted-foreground animate-bounce-slow cursor-pointer group animate-in fade-in duration-1000 delay-700"
-                    >
-                        <div className="text-[10px] font-black uppercase tracking-[0.4em] group-hover:text-primary transition-colors">Experience Sovereignty</div>
-                        <div className="w-12 h-12 rounded-full border border-border flex items-center justify-center group-hover:border-primary transition-colors">
-                            <svg className="w-5 h-5 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 8l-6 6-6-6" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </main>
+            <HeroSection />
 
             {/* How it Works / 3-Step Model */}
-            <section className="py-32 bg-white">
+            <section id="how-it-works" className="py-32 bg-white scroll-mt-28">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="text-center mb-24 space-y-4">
                         <h2 className="text-5xl md:text-6xl font-black tracking-tight italic text-foreground">How OWNED Works</h2>
