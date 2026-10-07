@@ -164,7 +164,7 @@ export function AuthButton() {
                     <button
                         type="submit"
                         disabled={isLoggingIn || !email}
-                        className="px-5 py-3 bg-primary text-primary-foreground rounded-xl text-xs font-black uppercase tracking-widest hover:scale-105 active:scale-95 disabled:opacity-50 transition-all flex items-center gap-2"
+                        className="btn-brand px-5 py-3 rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 disabled:opacity-50 flex items-center gap-2"
                     >
                         {isLoggingIn ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
                         {isLoggingIn ? 'Sending...' : 'Sign In'}
@@ -184,10 +184,10 @@ export function AuthButton() {
     return (
         <button
             onClick={() => setShowEmailInput(true)}
-            className="flex items-center gap-2.5 px-5 py-3 bg-primary text-primary-foreground rounded-2xl text-xs font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-saas shadow-primary/20"
+            className="btn-brand flex items-center gap-2.5 px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-widest active:scale-95"
         >
             <Mail className="w-4 h-4" />
-            Sign In with Email
+            <span>Sign In<span className="hidden sm:inline"> with Email</span></span>
         </button>
     );
 }
