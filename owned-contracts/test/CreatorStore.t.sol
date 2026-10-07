@@ -1,245 +1,477 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity 0.8.24;
 
-import "forge-std/Test.sol";
-import "../src/CreatorStore.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
+import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
+import {BaseTest} from "./Base.t.sol";
+import {CreatorStore} from "../src/CreatorStore.sol";
+import {MockSmartWallet} from "./mocks/MockSmartWallet.sol";
 
-// Mock USDC contract for testing
-contract MockUSDC is ERC20 {
-    constructor() ERC20("USD Coin", "USDC") {
-        _mint(msg.sender, 1000000 * 10**6); // 1M USDC with 6 decimals
+contract CreatorStoreTest is BaseTest {
+    // ------------------------------------------------------------------
+    // Catalog
+    // ------------------------------------------------------------------
+
+    function test_addProduct_assignsSequentialIds() public {
+        assertEq(_addProduct(PRICE, 0, 0), 1);
+        assertEq(_addProduct(PRICE, 0, 0), 2);
+        assertEq(store.nextProductId(), 3);
+        CreatorStore.Product memory p = store.getProduct(1);
+        assertEq(p.price, PRICE);
+        assertTrue(p.active);
+        assertEq(p.uri, "ipfs://meta");
     }
 
-    function decimals() public pure override returns (uint8) {
-        return 6;
+    function test_addProduct_onlyOwner() public {
+        vm.prank(stranger);
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, stranger));
+        store.addProduct(PRICE, 0, 0, "ipfs://x");
     }
 
-    function mint(address to, uint256 amount) external {
-        _mint(to, amount);
+    function test_addProduct_validations() public {
+        vm.startPrank(creator);
+        vm.expectRevert(CreatorStore.EmptyUri.selector);
+        store.addProduct(PRICE, 0, 0, "");
+        vm.expectRevert(CreatorStore.ReferralTooHigh.selector);
+        store.addProduct(PRICE, 0, 5_001, "ipfs://x");
+        vm.expectRevert(abi.encodeWithSelector(CreatorStore.PriceAboveCap.selector, CAP + 1, CAP));
+        store.addProduct(CAP + 1, 0, 0, "ipfs://x");
+        store.addProduct(CAP, 0, 5_000, "ipfs://x"); // edges allowed
+        vm.stopPrank();
     }
-}
 
-contract CreatorStoreTest is Test {
-    CreatorStore public store;
-    MockUSDC public usdc;
-    
-    address public creator = address(0x1);
-    address public platform = address(0x2);
-    address public buyer = address(0x3);
-    
-    uint256 constant PRODUCT_PRICE = 50 * 10**6; // 50 USDC
-    uint256 constant PRODUCT_ID = 1;
-    string constant IPFS_HASH = "QmTestHash123";
-    uint256 constant MAX_SUPPLY = 100;
+    function test_updateProduct_changesFuturePriceOnly() public {
+        uint256 id = _addProduct(PRICE, 0, 0);
+        uint256 t1 = _buy(buyer, id, address(0));
 
-    function setUp() public {
-        // Deploy mock USDC
-        usdc = new MockUSDC();
-        
-        // Deploy CreatorStore as creator
         vm.prank(creator);
-        store = new CreatorStore(
-            address(usdc),
-            platform,
-            "OWNED Store",
-            "OWNED"
+        store.updateProduct(id, 80e6, 0, 0, "ipfs://v2");
+
+        assertEq(store.getProduct(id).price, 80e6);
+        assertEq(store.tokenURI(t1), "ipfs://v2"); // receipts follow the product
+        uint256 before = usdc.balanceOf(buyer);
+        _buy(buyer, id, address(0));
+        assertEq(before - usdc.balanceOf(buyer), 80e6);
+    }
+
+    function test_updateProduct_unknownReverts() public {
+        vm.prank(creator);
+        vm.expectRevert(abi.encodeWithSelector(CreatorStore.UnknownProduct.selector, 7));
+        store.updateProduct(7, PRICE, 0, 0, "ipfs://x");
+    }
+
+    function test_updateProduct_maxSupplyCannotDropBelowSold() public {
+        uint256 id = _addProduct(PRICE, 10, 0);
+        _buy(buyer, id, address(0));
+        _buy(buyer, id, address(0));
+        vm.prank(creator);
+        vm.expectRevert(abi.encodeWithSelector(CreatorStore.MaxSupplyBelowSold.selector, 1, 2));
+        store.updateProduct(id, PRICE, 1, 0, "ipfs://x");
+        vm.prank(creator);
+        store.updateProduct(id, PRICE, 2, 0, "ipfs://x"); // equal is fine, now sold out
+        vm.startPrank(buyer);
+        usdc.approve(address(store), PRICE);
+        vm.expectRevert(abi.encodeWithSelector(CreatorStore.SoldOut.selector, id));
+        store.purchase(id, PRICE, address(0), _noPermit());
+        vm.stopPrank();
+    }
+
+    function test_setProductActive_blocksAndRestoresSales() public {
+        uint256 id = _addProduct(PRICE, 0, 0);
+        vm.prank(creator);
+        store.setProductActive(id, false);
+
+        vm.startPrank(buyer);
+        usdc.approve(address(store), PRICE);
+        vm.expectRevert(abi.encodeWithSelector(CreatorStore.ProductInactive.selector, id));
+        store.purchase(id, PRICE, address(0), _noPermit());
+        vm.stopPrank();
+
+        vm.prank(creator);
+        store.setProductActive(id, true);
+        _buy(buyer, id, address(0));
+    }
+
+    // ------------------------------------------------------------------
+    // Purchases
+    // ------------------------------------------------------------------
+
+    function test_purchase_splitsAndMints() public {
+        uint256 id = _addProduct(PRICE, 0, 0);
+        uint256 tokenId = _buy(buyer, id, address(0));
+
+        assertEq(tokenId, 1);
+        assertEq(store.ownerOf(tokenId), buyer);
+        assertEq(store.productOf(tokenId), id);
+        assertEq(store.tokenURI(tokenId), "ipfs://meta");
+        assertEq(store.getProduct(id).sold, 1);
+
+        uint256 fee = (PRICE * FEE_BPS) / 10_000; // $1.50
+        assertEq(store.platformBalance(), fee);
+        assertEq(store.creatorBalance(), PRICE - fee);
+        assertEq(usdc.balanceOf(address(store)), PRICE);
+    }
+
+    function test_purchase_unknownProductReverts() public {
+        vm.startPrank(buyer);
+        vm.expectRevert(abi.encodeWithSelector(CreatorStore.UnknownProduct.selector, 0));
+        store.purchase(0, PRICE, address(0), _noPermit());
+        vm.expectRevert(abi.encodeWithSelector(CreatorStore.UnknownProduct.selector, 1));
+        store.purchase(1, PRICE, address(0), _noPermit());
+        vm.stopPrank();
+    }
+
+    function test_purchase_maxPriceProtectsBuyer() public {
+        uint256 id = _addProduct(PRICE, 0, 0);
+        vm.prank(buyer);
+        usdc.approve(address(store), type(uint256).max);
+
+        vm.prank(creator);
+        store.updateProduct(id, 90e6, 0, 0, "ipfs://x"); // price raised after buyer approved
+
+        vm.prank(buyer);
+        vm.expectRevert(abi.encodeWithSelector(CreatorStore.PriceAboveMax.selector, 90e6, PRICE));
+        store.purchase(id, PRICE, address(0), _noPermit());
+    }
+
+    function test_purchase_respectsMaxSupply() public {
+        uint256 id = _addProduct(PRICE, 1, 0);
+        _buy(buyer, id, address(0));
+        vm.startPrank(buyer);
+        usdc.approve(address(store), PRICE);
+        vm.expectRevert(abi.encodeWithSelector(CreatorStore.SoldOut.selector, id));
+        store.purchase(id, PRICE, address(0), _noPermit());
+        vm.stopPrank();
+    }
+
+    function test_purchase_insufficientAllowanceReverts() public {
+        uint256 id = _addProduct(PRICE, 0, 0);
+        vm.startPrank(buyer);
+        usdc.approve(address(store), PRICE - 1);
+        vm.expectRevert(
+            abi.encodeWithSelector(IERC20Errors.ERC20InsufficientAllowance.selector, address(store), PRICE - 1, PRICE)
         );
-        
-        // Give buyer some USDC
-        usdc.mint(buyer, 1000 * 10**6); // 1000 USDC
+        store.purchase(id, PRICE, address(0), _noPermit());
+        vm.stopPrank();
+        assertEq(store.getProduct(id).sold, 0);
     }
 
-    function testAddProduct() public {
-        vm.prank(creator);
-        
-        vm.expectEmit(true, false, false, true);
-        emit CreatorStore.ProductAdded(PRODUCT_ID, PRODUCT_PRICE, IPFS_HASH, MAX_SUPPLY);
-        
-        store.addProduct(PRODUCT_ID, PRODUCT_PRICE, IPFS_HASH, MAX_SUPPLY);
-        
-        CreatorStore.Product memory product = store.getProduct(PRODUCT_ID);
-        assertEq(product.price, PRODUCT_PRICE);
-        assertEq(product.ipfsHash, IPFS_HASH);
-        assertEq(product.maxSupply, MAX_SUPPLY);
-        assertEq(product.sold, 0);
-        assertTrue(product.active);
+    function test_purchase_freeProductNeedsNoFunds() public {
+        uint256 id = _addProduct(0, 0, 0);
+        vm.prank(stranger); // holds no USDC
+        uint256 tokenId = store.purchase(id, 0, address(0), _noPermit());
+        assertEq(store.ownerOf(tokenId), stranger);
+        assertEq(store.creatorBalance(), 0);
+        assertEq(store.platformBalance(), 0);
     }
 
-    function testPurchase() public {
-        // Add product
-        vm.prank(creator);
-        store.addProduct(PRODUCT_ID, PRODUCT_PRICE, IPFS_HASH, MAX_SUPPLY);
-        
-        // Buyer approves USDC spending
+    function test_purchase_withPermitInOneTransaction() public {
+        uint256 id = _addProduct(PRICE, 0, 0);
+        CreatorStore.Permit memory p = _permit(buyerKey, buyer, PRICE, block.timestamp + 1 hours);
+        assertEq(usdc.allowance(buyer, address(store)), 0);
         vm.prank(buyer);
-        usdc.approve(address(store), PRODUCT_PRICE);
-        
-        // Calculate expected split
-        uint256 platformFee = (PRODUCT_PRICE * 300) / 10000; // 3%
-        uint256 creatorAmount = PRODUCT_PRICE - platformFee;
-        
-        // Purchase product
-        vm.prank(buyer);
-        vm.expectEmit(true, true, false, true);
-        emit CreatorStore.ProductPurchased(PRODUCT_ID, buyer, 1, PRODUCT_PRICE);
-        
-        store.purchaseProduct(PRODUCT_ID);
-        
-        // Verify NFT minted to buyer
-        assertEq(store.ownerOf(1), buyer);
-        assertEq(store.getProductIdForToken(1), PRODUCT_ID);
-        
-        // Verify balances
-        assertEq(store.getCreatorBalance(), creatorAmount);
-        assertEq(store.getPlatformBalance(), platformFee);
-        
-        // Verify product sold count
-        CreatorStore.Product memory product = store.getProduct(PRODUCT_ID);
-        assertEq(product.sold, 1);
+        uint256 tokenId = store.purchase(id, PRICE, address(0), p);
+        assertEq(store.ownerOf(tokenId), buyer);
     }
 
-    function testPurchaseSoldOut() public {
-        // Add product with maxSupply = 1
-        vm.prank(creator);
-        store.addProduct(PRODUCT_ID, PRODUCT_PRICE, IPFS_HASH, 1);
-        
-        // First purchase (should succeed)
+    function test_purchase_frontRunPermitStillSucceeds() public {
+        uint256 id = _addProduct(PRICE, 0, 0);
+        CreatorStore.Permit memory p = _permit(buyerKey, buyer, PRICE, block.timestamp + 1 hours);
+        // attacker submits the same permit first
+        usdc.permit(buyer, address(store), p.value, p.deadline, p.v, p.r, p.s);
         vm.prank(buyer);
-        usdc.approve(address(store), PRODUCT_PRICE * 2);
-        vm.prank(buyer);
-        store.purchaseProduct(PRODUCT_ID);
-        
-        // Second purchase (should fail - sold out)
-        vm.prank(buyer);
-        vm.expectRevert("Product sold out");
-        store.purchaseProduct(PRODUCT_ID);
+        store.purchase(id, PRICE, address(0), p);
+        assertEq(store.balanceOf(buyer), 1);
     }
 
-    function testWithdrawCreator() public {
-        // Add and purchase product
+    function test_pause_blocksPurchasesButNotWithdrawals() public {
+        uint256 id = _addProduct(PRICE, 0, 0);
+        _buy(buyer, id, address(0));
+
         vm.prank(creator);
-        store.addProduct(PRODUCT_ID, PRODUCT_PRICE, IPFS_HASH, MAX_SUPPLY);
-        
-        vm.prank(buyer);
-        usdc.approve(address(store), PRODUCT_PRICE);
-        vm.prank(buyer);
-        store.purchaseProduct(PRODUCT_ID);
-        
-        uint256 creatorBalanceBefore = usdc.balanceOf(creator);
-        uint256 expectedAmount = store.getCreatorBalance();
-        
-        // Creator withdraws
+        store.pause();
+
+        vm.startPrank(buyer);
+        usdc.approve(address(store), PRICE);
+        vm.expectRevert(Pausable.EnforcedPause.selector);
+        store.purchase(id, PRICE, address(0), _noPermit());
+        vm.stopPrank();
+
         vm.prank(creator);
-        vm.expectEmit(true, false, false, true);
-        emit CreatorStore.CreatorWithdrawal(creator, expectedAmount);
-        
-        store.withdrawCreatorFunds();
-        
-        // Verify USDC transferred
-        assertEq(usdc.balanceOf(creator), creatorBalanceBefore + expectedAmount);
-        assertEq(store.getCreatorBalance(), 0);
+        store.withdrawCreator(creator);
+        vm.prank(feeRecipient);
+        store.withdrawPlatform();
+
+        vm.prank(stranger);
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, stranger));
+        store.unpause();
     }
 
-    function testWithdrawPlatform() public {
-        // Add and purchase product
-        vm.prank(creator);
-        store.addProduct(PRODUCT_ID, PRODUCT_PRICE, IPFS_HASH, MAX_SUPPLY);
-        
-        vm.prank(buyer);
-        usdc.approve(address(store), PRODUCT_PRICE);
-        vm.prank(buyer);
-        store.purchaseProduct(PRODUCT_ID);
-        
-        uint256 platformBalanceBefore = usdc.balanceOf(platform);
-        uint256 expectedAmount = store.getPlatformBalance();
-        
-        // Platform withdraws
-        vm.prank(platform);
-        vm.expectEmit(true, false, false, true);
-        emit CreatorStore.PlatformWithdrawal(platform, expectedAmount);
-        
-        store.withdrawPlatformFees();
-        
-        // Verify USDC transferred
-        assertEq(usdc.balanceOf(platform), platformBalanceBefore + expectedAmount);
-        assertEq(store.getPlatformBalance(), 0);
+    // ------------------------------------------------------------------
+    // Referrals
+    // ------------------------------------------------------------------
+
+    function test_referral_paidWhenValid() public {
+        uint256 id = _addProduct(PRICE, 0, 2_000); // 20%
+        _buy(buyer, id, referrer);
+        uint256 fee = (PRICE * FEE_BPS) / 10_000;
+        uint256 ref = (PRICE * 2_000) / 10_000;
+        assertEq(store.referralBalance(referrer), ref);
+        assertEq(store.creatorBalance(), PRICE - fee - ref);
+
+        vm.prank(referrer);
+        store.withdrawReferral(referrer);
+        assertEq(usdc.balanceOf(referrer), ref);
+        assertEq(store.referralBalance(referrer), 0);
     }
 
-    function testUnauthorizedWithdraw() public {
-        // Add and purchase product
-        vm.prank(creator);
-        store.addProduct(PRODUCT_ID, PRODUCT_PRICE, IPFS_HASH, MAX_SUPPLY);
-        
-        vm.prank(buyer);
-        usdc.approve(address(store), PRODUCT_PRICE);
-        vm.prank(buyer);
-        store.purchaseProduct(PRODUCT_ID);
-        
-        // Non-owner tries to withdraw creator funds
-        vm.prank(buyer);
-        vm.expectRevert();
-        store.withdrawCreatorFunds();
-        
-        // Non-platform tries to withdraw platform fees
-        vm.prank(buyer);
-        vm.expectRevert("Only platform can withdraw fees");
-        store.withdrawPlatformFees();
+    function test_referral_ignoredForSelfOwnerZeroOrDisabled() public {
+        uint256 withRef = _addProduct(PRICE, 0, 2_000);
+        uint256 noRef = _addProduct(PRICE, 0, 0);
+        _buy(buyer, withRef, buyer); // self
+        _buy(buyer, withRef, creator); // store owner
+        _buy(buyer, withRef, address(0)); // none
+        _buy(buyer, noRef, referrer); // product pays no referrals
+        assertEq(store.referralBalance(buyer), 0);
+        assertEq(store.referralBalance(creator), 0);
+        assertEq(store.referralBalance(referrer), 0);
+        uint256 fee = (PRICE * FEE_BPS) / 10_000;
+        assertEq(store.creatorBalance(), 4 * (PRICE - fee));
     }
 
-    function testInsufficientApproval() public {
-        // Add product
-        vm.prank(creator);
-        store.addProduct(PRODUCT_ID, PRODUCT_PRICE, IPFS_HASH, MAX_SUPPLY);
-        
-        // Buyer doesn't approve (or approves insufficient amount)
-        vm.prank(buyer);
-        usdc.approve(address(store), PRODUCT_PRICE - 1);
-        
-        // Purchase should fail
-        vm.prank(buyer);
-        vm.expectRevert();
-        store.purchaseProduct(PRODUCT_ID);
+    // ------------------------------------------------------------------
+    // Vouchers
+    // ------------------------------------------------------------------
+
+    function _voucher(uint256 id, uint256 price, address who, uint256 nonce)
+        internal
+        view
+        returns (CreatorStore.Voucher memory)
+    {
+        return CreatorStore.Voucher({
+            productId: id, price: price, buyer: who, expiry: uint64(block.timestamp + 1 days), nonce: nonce
+        });
     }
 
-    function testTokenURI() public {
-        // Add product
-        vm.prank(creator);
-        store.addProduct(PRODUCT_ID, PRODUCT_PRICE, IPFS_HASH, MAX_SUPPLY);
-        
-        // Purchase product
-        vm.prank(buyer);
-        usdc.approve(address(store), PRODUCT_PRICE);
-        vm.prank(buyer);
-        store.purchaseProduct(PRODUCT_ID);
-        
-        // Verify tokenURI
-        string memory expectedURI = string(abi.encodePacked("https://ipfs.io/ipfs/", IPFS_HASH));
-        assertEq(store.tokenURI(1), expectedURI);
+    function test_voucher_discountedPurchase() public {
+        uint256 id = _addProduct(PRICE, 0, 0);
+        CreatorStore.Voucher memory v = _voucher(id, 40e6, address(0), 1);
+        bytes memory sig = _signVoucher(creatorKey, v);
+
+        vm.startPrank(buyer);
+        usdc.approve(address(store), 40e6);
+        uint256 before = usdc.balanceOf(buyer);
+        store.purchaseWithVoucher(v, sig, address(0), _noPermit());
+        vm.stopPrank();
+
+        assertEq(before - usdc.balanceOf(buyer), 40e6);
+        assertTrue(store.voucherNonceUsed(1));
+        assertEq(store.platformBalance(), (uint256(40e6) * FEE_BPS) / 10_000);
     }
 
-    function testProductDoesNotExist() public {
-        // Try to purchase non-existent product
-        vm.prank(buyer);
-        vm.expectRevert("Product does not exist or is inactive");
-        store.purchaseProduct(999);
+    function test_voucher_freeGift() public {
+        uint256 id = _addProduct(PRICE, 0, 0);
+        CreatorStore.Voucher memory v = _voucher(id, 0, stranger, 2);
+        bytes memory sig = _signVoucher(creatorKey, v);
+        vm.prank(stranger);
+        uint256 tokenId = store.purchaseWithVoucher(v, sig, address(0), _noPermit());
+        assertEq(store.ownerOf(tokenId), stranger);
     }
 
-    function testAddProductOnlyOwner() public {
-        // Non-owner tries to add product
-        vm.prank(buyer);
-        vm.expectRevert();
-        store.addProduct(PRODUCT_ID, PRODUCT_PRICE, IPFS_HASH, MAX_SUPPLY);
+    function test_voucher_cannotBeReused() public {
+        uint256 id = _addProduct(PRICE, 0, 0);
+        CreatorStore.Voucher memory v = _voucher(id, 10e6, address(0), 3);
+        bytes memory sig = _signVoucher(creatorKey, v);
+        vm.startPrank(buyer);
+        usdc.approve(address(store), 20e6);
+        store.purchaseWithVoucher(v, sig, address(0), _noPermit());
+        vm.expectRevert(abi.encodeWithSelector(CreatorStore.VoucherUsed.selector, 3));
+        store.purchaseWithVoucher(v, sig, address(0), _noPermit());
+        vm.stopPrank();
     }
 
-    function testDuplicateProductId() public {
-        // Add product
+    function test_voucher_rejections() public {
+        uint256 id = _addProduct(PRICE, 0, 0);
+
+        // signed by someone other than the owner
+        CreatorStore.Voucher memory v = _voucher(id, 10e6, address(0), 4);
+        bytes memory bad = _signVoucher(buyerKey, v);
+        vm.prank(buyer);
+        vm.expectRevert(CreatorStore.VoucherInvalidSignature.selector);
+        store.purchaseWithVoucher(v, bad, address(0), _noPermit());
+
+        // tampered price
+        bytes memory good = _signVoucher(creatorKey, v);
+        v.price = 1;
+        vm.prank(buyer);
+        vm.expectRevert(CreatorStore.VoucherInvalidSignature.selector);
+        store.purchaseWithVoucher(v, good, address(0), _noPermit());
+
+        // wrong buyer
+        CreatorStore.Voucher memory v2 = _voucher(id, 10e6, stranger, 5);
+        bytes memory sig2 = _signVoucher(creatorKey, v2);
+        vm.prank(buyer);
+        vm.expectRevert(CreatorStore.VoucherWrongBuyer.selector);
+        store.purchaseWithVoucher(v2, sig2, address(0), _noPermit());
+
+        // expired
+        CreatorStore.Voucher memory v3 = _voucher(id, 10e6, address(0), 6);
+        bytes memory sig3 = _signVoucher(creatorKey, v3);
+        vm.warp(block.timestamp + 2 days);
+        vm.prank(buyer);
+        vm.expectRevert(CreatorStore.VoucherExpired.selector);
+        store.purchaseWithVoucher(v3, sig3, address(0), _noPermit());
+    }
+
+    function test_voucher_cannotExceedListPrice() public {
+        uint256 id = _addProduct(PRICE, 0, 0);
+        CreatorStore.Voucher memory v = _voucher(id, PRICE + 1, address(0), 7);
+        bytes memory sig = _signVoucher(creatorKey, v);
+        vm.prank(buyer);
+        vm.expectRevert(CreatorStore.VoucherAboveListPrice.selector);
+        store.purchaseWithVoucher(v, sig, address(0), _noPermit());
+    }
+
+    function test_voucher_cancelled() public {
+        uint256 id = _addProduct(PRICE, 0, 0);
+        CreatorStore.Voucher memory v = _voucher(id, 10e6, address(0), 8);
+        bytes memory sig = _signVoucher(creatorKey, v);
         vm.prank(creator);
-        store.addProduct(PRODUCT_ID, PRODUCT_PRICE, IPFS_HASH, MAX_SUPPLY);
-        
-        // Try to add product with same ID (should fail)
+        store.cancelVoucher(8);
+        vm.prank(buyer);
+        vm.expectRevert(abi.encodeWithSelector(CreatorStore.VoucherUsed.selector, 8));
+        store.purchaseWithVoucher(v, sig, address(0), _noPermit());
+    }
+
+    function test_voucher_smartWalletOwner() public {
+        // creator moves the store to a smart wallet (ERC-1271), then signs as its signer
+        MockSmartWallet wallet = new MockSmartWallet(creator);
         vm.prank(creator);
-        vm.expectRevert("Product ID already exists");
-        store.addProduct(PRODUCT_ID, PRODUCT_PRICE * 2, "QmDifferentHash", MAX_SUPPLY * 2);
+        store.transferOwnership(address(wallet));
+        vm.prank(creator);
+        wallet.execute(address(store), abi.encodeCall(store.acceptOwnership, ()));
+        assertEq(store.owner(), address(wallet));
+
+        vm.prank(creator);
+        bytes memory ret = wallet.execute(
+            address(store), abi.encodeCall(store.addProduct, (PRICE, 0, 0, "ipfs://sw"))
+        );
+        uint256 id = abi.decode(ret, (uint256));
+
+        CreatorStore.Voucher memory v = _voucher(id, 5e6, address(0), 9);
+        bytes memory sig = _signVoucher(creatorKey, v);
+        vm.startPrank(buyer);
+        usdc.approve(address(store), 5e6);
+        store.purchaseWithVoucher(v, sig, address(0), _noPermit());
+        vm.stopPrank();
+        assertEq(store.balanceOf(buyer), 1);
+    }
+
+    // ------------------------------------------------------------------
+    // Withdrawals and ownership
+    // ------------------------------------------------------------------
+
+    function test_withdrawCreator() public {
+        uint256 id = _addProduct(PRICE, 0, 0);
+        _buy(buyer, id, address(0));
+        uint256 owed = store.creatorBalance();
+
+        address payout = makeAddr("payout");
+        vm.prank(creator);
+        store.withdrawCreator(payout);
+        assertEq(usdc.balanceOf(payout), owed);
+        assertEq(store.creatorBalance(), 0);
+
+        vm.prank(creator);
+        vm.expectRevert(CreatorStore.NothingToWithdraw.selector);
+        store.withdrawCreator(payout);
+        vm.prank(creator);
+        vm.expectRevert(CreatorStore.ZeroAddress.selector);
+        store.withdrawCreator(address(0));
+    }
+
+    function test_withdrawCreator_onlyOwner_platformCannotTouch() public {
+        uint256 id = _addProduct(PRICE, 0, 0);
+        _buy(buyer, id, address(0));
+        address[3] memory others = [feeRecipient, platformOwner, address(factory)];
+        for (uint256 i; i < others.length; i++) {
+            vm.prank(others[i]);
+            vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, others[i]));
+            store.withdrawCreator(others[i]);
+        }
+    }
+
+    function test_withdrawPlatform_onlyFeeRecipient() public {
+        uint256 id = _addProduct(PRICE, 0, 0);
+        _buy(buyer, id, address(0));
+        vm.prank(creator);
+        vm.expectRevert(CreatorStore.NotFeeRecipient.selector);
+        store.withdrawPlatform();
+
+        vm.prank(feeRecipient);
+        store.withdrawPlatform();
+        assertEq(usdc.balanceOf(feeRecipient), (PRICE * FEE_BPS) / 10_000);
+    }
+
+    function test_renounceDisabled() public {
+        vm.prank(creator);
+        vm.expectRevert(CreatorStore.RenounceDisabled.selector);
+        store.renounceOwnership();
+    }
+
+    function test_ownershipTransferIsTwoStep() public {
+        uint256 id = _addProduct(PRICE, 0, 0);
+        _buy(buyer, id, address(0));
+        address newOwner = makeAddr("newOwner");
+        vm.prank(creator);
+        store.transferOwnership(newOwner);
+        assertEq(store.owner(), creator); // not yet
+
+        vm.prank(newOwner);
+        store.acceptOwnership();
+        assertEq(store.owner(), newOwner);
+
+        vm.prank(newOwner);
+        store.withdrawCreator(newOwner);
+        assertGt(usdc.balanceOf(newOwner), 0);
+    }
+
+    // ------------------------------------------------------------------
+    // Fuzz
+    // ------------------------------------------------------------------
+
+    function testFuzz_split_sumsToPrice(uint256 price, uint16 referralBps) public {
+        price = bound(price, 0, CAP);
+        referralBps = uint16(bound(referralBps, 0, 5_000));
+        uint256 id = _addProduct(price, 0, referralBps);
+
+        vm.startPrank(buyer);
+        usdc.approve(address(store), price);
+        store.purchase(id, price, referrer, _noPermit());
+        vm.stopPrank();
+
+        uint256 fee = (price * FEE_BPS) / 10_000;
+        uint256 ref = (price * referralBps) / 10_000;
+        assertEq(store.platformBalance(), fee);
+        assertEq(store.referralBalance(referrer), ref);
+        assertEq(store.creatorBalance(), price - fee - ref);
+        assertEq(store.platformBalance() + store.referralBalance(referrer) + store.creatorBalance(), price);
+        assertEq(usdc.balanceOf(address(store)), price);
+    }
+
+    function testFuzz_onlyOwnerCanManage(address caller) public {
+        vm.assume(caller != creator);
+        uint256 id = _addProduct(PRICE, 0, 0);
+        vm.startPrank(caller);
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, caller));
+        store.updateProduct(id, 1, 0, 0, "ipfs://x");
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, caller));
+        store.setProductActive(id, false);
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, caller));
+        store.pause();
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, caller));
+        store.cancelVoucher(1);
+        vm.stopPrank();
     }
 }

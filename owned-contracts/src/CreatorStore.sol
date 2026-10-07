@@ -1,227 +1,399 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity 0.8.24;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import {Ownable2StepUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import {EIP712Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
+import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 
-/**
- * @title CreatorStore
- * @notice Crypto-native creator commerce contract for OWNED platform
- * @dev Each creator deploys their own permissionless store instance
- * 
- * WHY 3% FEE: Platform sustainability without subscriptions. Creators keep 97%.
- * WHY NFTs: Onchain proof of purchase, composable, portable, censorship-resistant.
- * WHY USDC: Stable value, widely held, low friction for crypto-native users.
- */
-contract CreatorStore is ERC721, Ownable, ReentrancyGuard {
+interface IStoreFactory {
+    function priceCap() external view returns (uint256);
+}
+
+/// @title CreatorStore (v2)
+/// @notice One store per creator, deployed as a minimal clone by StoreFactory.
+///         The creator owns the store. The platform fee is fixed at creation and
+///         cannot be changed by anyone. Every purchase mints an ERC-721 receipt.
+/// @dev    Funds are accounted with pull-based balances. Invariant:
+///         usdc.balanceOf(this) >= creatorBalance + platformBalance + sum(referralBalance).
+///         The platform has no power over a store beyond collecting its fee.
+contract CreatorStore is
+    Initializable,
+    ERC721Upgradeable,
+    Ownable2StepUpgradeable,
+    PausableUpgradeable,
+    EIP712Upgradeable,
+    ReentrancyGuardTransient
+{
     using SafeERC20 for IERC20;
 
+    // ---------------------------------------------------------------------
     // Constants
-    uint256 public constant PLATFORM_FEE_BASIS_POINTS = 300; // 3%
-    uint256 public constant BASIS_POINTS_DIVISOR = 10000;
+    // ---------------------------------------------------------------------
 
-    // USDC contract
-    IERC20 public immutable usdcToken;
-    
-    // Platform fee address
-    address public immutable platformFeeAddress;
+    uint256 public constant BPS = 10_000;
+    uint16 public constant MAX_FEE_BPS = 1_000; // 10% hard ceiling, checked at init
+    uint16 public constant MAX_REFERRAL_BPS = 5_000; // 50% of a sale
 
-    // Product structure
+    bytes32 public constant VOUCHER_TYPEHASH =
+        keccak256("Voucher(uint256 productId,uint256 price,address buyer,uint64 expiry,uint256 nonce)");
+
+    // ---------------------------------------------------------------------
+    // Types
+    // ---------------------------------------------------------------------
+
     struct Product {
-        uint256 price;        // Price in USDC (6 decimals)
-        string ipfsHash;      // IPFS hash for product metadata
-        uint256 maxSupply;    // Maximum supply (0 = unlimited)
-        uint256 sold;         // Number sold
-        bool active;          // Product is active
+        uint256 price; // USDC, 6 decimals. 0 = free claim.
+        uint64 maxSupply; // 0 = unlimited
+        uint64 sold;
+        uint16 referralBps; // share of price paid to a referrer, 0 = no referrals
+        bool active;
+        string uri; // public metadata URI (title, description, image). Never the deliverable.
     }
 
-    // State variables
-    mapping(uint256 => Product) public products;
-    mapping(uint256 => uint256) public tokenIdToProductId;
-    uint256 public nextTokenId = 1;
-    
-    // Balances
+    /// @notice A creator-signed price override for one product. `buyer == address(0)` means anyone.
+    struct Voucher {
+        uint256 productId;
+        uint256 price;
+        address buyer;
+        uint64 expiry;
+        uint256 nonce;
+    }
+
+    /// @notice Optional EIP-2612 permit. Pass deadline == 0 to skip and rely on an existing allowance.
+    struct Permit {
+        uint256 value;
+        uint256 deadline;
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+    }
+
+    // ---------------------------------------------------------------------
+    // Storage
+    // ---------------------------------------------------------------------
+
+    IERC20 public usdc;
+    address public factory;
+    address public feeRecipient;
+    uint16 public feeBps;
+
+    uint256 public nextProductId; // first product id is 1
+    uint256 public nextTokenId; // first token id is 1
+
+    mapping(uint256 productId => Product) private _products;
+    mapping(uint256 tokenId => uint256 productId) public productOf;
+
     uint256 public creatorBalance;
     uint256 public platformBalance;
+    mapping(address referrer => uint256) public referralBalance;
 
+    mapping(uint256 nonce => bool) public voucherNonceUsed;
+
+    // ---------------------------------------------------------------------
     // Events
-    event ProductAdded(
-        uint256 indexed productId,
-        uint256 price,
-        string ipfsHash,
-        uint256 maxSupply
-    );
-    
-    event ProductPurchased(
+    // ---------------------------------------------------------------------
+
+    event ProductAdded(uint256 indexed productId, uint256 price, uint64 maxSupply, uint16 referralBps, string uri);
+    event ProductUpdated(uint256 indexed productId, uint256 price, uint64 maxSupply, uint16 referralBps, string uri);
+    event ProductActiveSet(uint256 indexed productId, bool active);
+    event Purchased(
         uint256 indexed productId,
         address indexed buyer,
-        uint256 tokenId,
-        uint256 price
+        uint256 indexed tokenId,
+        uint256 price,
+        uint256 platformFee,
+        address referrer,
+        uint256 referralAmount
     );
-    
-    event CreatorWithdrawal(address indexed creator, uint256 amount);
-    event PlatformWithdrawal(address indexed platform, uint256 amount);
+    event VoucherRedeemed(uint256 indexed nonce, uint256 indexed productId, address indexed buyer, uint256 price);
+    event VoucherCancelled(uint256 indexed nonce);
+    event CreatorWithdrawal(address indexed to, uint256 amount);
+    event PlatformWithdrawal(address indexed to, uint256 amount);
+    event ReferralWithdrawal(address indexed referrer, address indexed to, uint256 amount);
 
-    /**
-     * @notice Initialize a new creator store
-     * @param _usdcAddress USDC token contract address
-     * @param _platformFeeAddress Address to receive platform fees
-     * @param _storeName Name for the store's NFTs
-     * @param _storeSymbol Symbol for the store's NFTs
-     */
-    constructor(
-        address _usdcAddress,
-        address _platformFeeAddress,
-        string memory _storeName,
-        string memory _storeSymbol
-    ) ERC721(_storeName, _storeSymbol) Ownable(msg.sender) {
-        require(_usdcAddress != address(0), "Invalid USDC address");
-        require(_platformFeeAddress != address(0), "Invalid platform fee address");
-        
-        usdcToken = IERC20(_usdcAddress);
-        platformFeeAddress = _platformFeeAddress;
+    // ---------------------------------------------------------------------
+    // Errors
+    // ---------------------------------------------------------------------
+
+    error ZeroAddress();
+    error FeeTooHigh();
+    error ReferralTooHigh();
+    error PriceAboveCap(uint256 price, uint256 cap);
+    error EmptyUri();
+    error UnknownProduct(uint256 productId);
+    error ProductInactive(uint256 productId);
+    error SoldOut(uint256 productId);
+    error MaxSupplyBelowSold(uint64 maxSupply, uint64 sold);
+    error PriceAboveMax(uint256 price, uint256 maxPrice);
+    error VoucherExpired();
+    error VoucherWrongBuyer();
+    error VoucherUsed(uint256 nonce);
+    error VoucherInvalidSignature();
+    error VoucherAboveListPrice();
+    error NothingToWithdraw();
+    error NotFeeRecipient();
+    error RenounceDisabled();
+
+    // ---------------------------------------------------------------------
+    // Init
+    // ---------------------------------------------------------------------
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
     }
 
-    /**
-     * @notice Add a new product to the store
-     * @param _productId Unique product identifier
-     * @param _priceInUSDC Price in USDC (with 6 decimals, e.g., 50000000 = 50 USDC)
-     * @param _ipfsHash IPFS hash for product metadata/content
-     * @param _maxSupply Maximum supply (0 for unlimited)
-     */
-    function addProduct(
-        uint256 _productId,
-        uint256 _priceInUSDC,
-        string memory _ipfsHash,
-        uint256 _maxSupply
-    ) external onlyOwner {
-        require(_priceInUSDC > 0, "Price must be greater than 0");
-        require(bytes(_ipfsHash).length > 0, "IPFS hash required");
-        require(!products[_productId].active, "Product ID already exists");
-        
-        products[_productId] = Product({
-            price: _priceInUSDC,
-            ipfsHash: _ipfsHash,
-            maxSupply: _maxSupply,
+    /// @notice Called once by the factory right after cloning.
+    function initialize(
+        address owner_,
+        IERC20 usdc_,
+        address feeRecipient_,
+        uint16 feeBps_,
+        string calldata name_,
+        string calldata symbol_
+    ) external initializer {
+        if (owner_ == address(0) || address(usdc_) == address(0) || feeRecipient_ == address(0)) revert ZeroAddress();
+        if (feeBps_ > MAX_FEE_BPS) revert FeeTooHigh();
+
+        __ERC721_init(name_, symbol_);
+        __Ownable_init(owner_);
+        __Pausable_init();
+        __EIP712_init("OWNED CreatorStore", "2");
+
+        usdc = usdc_;
+        factory = msg.sender;
+        feeRecipient = feeRecipient_;
+        feeBps = feeBps_;
+        nextProductId = 1;
+        nextTokenId = 1;
+    }
+
+    // ---------------------------------------------------------------------
+    // Creator: catalog
+    // ---------------------------------------------------------------------
+
+    function addProduct(uint256 price, uint64 maxSupply, uint16 referralBps, string calldata uri)
+        external
+        onlyOwner
+        returns (uint256 productId)
+    {
+        _checkProductParams(price, referralBps, uri);
+        productId = nextProductId++;
+        _products[productId] = Product({
+            price: price,
+            maxSupply: maxSupply,
             sold: 0,
-            active: true
+            referralBps: referralBps,
+            active: true,
+            uri: uri
         });
-
-        emit ProductAdded(_productId, _priceInUSDC, _ipfsHash, _maxSupply);
+        emit ProductAdded(productId, price, maxSupply, referralBps, uri);
     }
 
-    /**
-     * @notice Purchase a product with USDC, receive NFT as proof
-     * @param _productId Product to purchase
-     */
-    function purchaseProduct(uint256 _productId) external nonReentrant {
-        Product storage product = products[_productId];
-        
-        require(product.active, "Product does not exist or is inactive");
-        require(
-            product.maxSupply == 0 || product.sold < product.maxSupply,
-            "Product sold out"
+    /// @notice Changes apply to future purchases only. Existing receipts keep pointing at this product.
+    function updateProduct(uint256 productId, uint256 price, uint64 maxSupply, uint16 referralBps, string calldata uri)
+        external
+        onlyOwner
+    {
+        Product storage p = _existing(productId);
+        _checkProductParams(price, referralBps, uri);
+        if (maxSupply != 0 && maxSupply < p.sold) revert MaxSupplyBelowSold(maxSupply, p.sold);
+        p.price = price;
+        p.maxSupply = maxSupply;
+        p.referralBps = referralBps;
+        p.uri = uri;
+        emit ProductUpdated(productId, price, maxSupply, referralBps, uri);
+    }
+
+    function setProductActive(uint256 productId, bool active) external onlyOwner {
+        _existing(productId).active = active;
+        emit ProductActiveSet(productId, active);
+    }
+
+    /// @notice Stops all new purchases. Withdrawals keep working.
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    function unpause() external onlyOwner {
+        _unpause();
+    }
+
+    function cancelVoucher(uint256 nonce) external onlyOwner {
+        if (voucherNonceUsed[nonce]) revert VoucherUsed(nonce);
+        voucherNonceUsed[nonce] = true;
+        emit VoucherCancelled(nonce);
+    }
+
+    // ---------------------------------------------------------------------
+    // Buyers
+    // ---------------------------------------------------------------------
+
+    /// @param maxPrice Reverts if the list price is above this. Protects buyers from a price change
+    ///        landing between their signature and their transaction.
+    /// @param referrer Optional. Ignored if it is the buyer, the store owner, or the product pays no referrals.
+    function purchase(uint256 productId, uint256 maxPrice, address referrer, Permit calldata permit)
+        external
+        nonReentrant
+        whenNotPaused
+        returns (uint256 tokenId)
+    {
+        uint256 price = _existing(productId).price;
+        if (price > maxPrice) revert PriceAboveMax(price, maxPrice);
+        _maybePermit(permit);
+        tokenId = _purchase(productId, price, referrer);
+    }
+
+    /// @notice Buy at a price the store owner signed. Used for discounts, gifts (price 0) and private offers.
+    function purchaseWithVoucher(
+        Voucher calldata voucher,
+        bytes calldata signature,
+        address referrer,
+        Permit calldata permit
+    ) external nonReentrant whenNotPaused returns (uint256 tokenId) {
+        if (voucher.expiry < block.timestamp) revert VoucherExpired();
+        if (voucher.buyer != address(0) && voucher.buyer != msg.sender) revert VoucherWrongBuyer();
+        if (voucherNonceUsed[voucher.nonce]) revert VoucherUsed(voucher.nonce);
+        if (voucher.price > _existing(voucher.productId).price) revert VoucherAboveListPrice();
+
+        bytes32 digest = _hashTypedDataV4(
+            keccak256(
+                abi.encode(
+                    VOUCHER_TYPEHASH, voucher.productId, voucher.price, voucher.buyer, voucher.expiry, voucher.nonce
+                )
+            )
         );
+        if (!SignatureChecker.isValidSignatureNow(owner(), digest, signature)) revert VoucherInvalidSignature();
 
-        uint256 price = product.price;
-        
-        // Calculate fee split: 97% creator, 3% platform
-        uint256 platformFee = (price * PLATFORM_FEE_BASIS_POINTS) / BASIS_POINTS_DIVISOR;
-        uint256 creatorAmount = price - platformFee;
+        voucherNonceUsed[voucher.nonce] = true;
+        emit VoucherRedeemed(voucher.nonce, voucher.productId, msg.sender, voucher.price);
 
-        // Update balances BEFORE external calls (checks-effects-interactions)
-        creatorBalance += creatorAmount;
-        platformBalance += platformFee;
-        product.sold += 1;
-
-        // Mint NFT to buyer
-        uint256 tokenId = nextTokenId;
-        nextTokenId += 1;
-        tokenIdToProductId[tokenId] = _productId;
-        _safeMint(msg.sender, tokenId);
-
-        // Transfer USDC from buyer (must have approved this contract first)
-        usdcToken.safeTransferFrom(msg.sender, address(this), price);
-
-        emit ProductPurchased(_productId, msg.sender, tokenId, price);
+        _maybePermit(permit);
+        tokenId = _purchase(voucher.productId, voucher.price, referrer);
     }
 
-    /**
-     * @notice Creator withdraws their accumulated balance
-     */
-    function withdrawCreatorFunds() external onlyOwner nonReentrant {
+    // ---------------------------------------------------------------------
+    // Withdrawals (never paused)
+    // ---------------------------------------------------------------------
+
+    function withdrawCreator(address to) external onlyOwner nonReentrant {
+        if (to == address(0)) revert ZeroAddress();
         uint256 amount = creatorBalance;
-        require(amount > 0, "No funds to withdraw");
-
+        if (amount == 0) revert NothingToWithdraw();
         creatorBalance = 0;
-        usdcToken.safeTransfer(owner(), amount);
-
-        emit CreatorWithdrawal(owner(), amount);
+        usdc.safeTransfer(to, amount);
+        emit CreatorWithdrawal(to, amount);
     }
 
-    /**
-     * @notice Platform withdraws accumulated fees
-     */
-    function withdrawPlatformFees() external nonReentrant {
-        require(msg.sender == platformFeeAddress, "Only platform can withdraw fees");
-        
+    function withdrawPlatform() external nonReentrant {
+        if (msg.sender != feeRecipient) revert NotFeeRecipient();
         uint256 amount = platformBalance;
-        require(amount > 0, "No fees to withdraw");
-
+        if (amount == 0) revert NothingToWithdraw();
         platformBalance = 0;
-        usdcToken.safeTransfer(platformFeeAddress, amount);
-
-        emit PlatformWithdrawal(platformFeeAddress, amount);
+        usdc.safeTransfer(feeRecipient, amount);
+        emit PlatformWithdrawal(feeRecipient, amount);
     }
 
-    /**
-     * @notice Get product details
-     * @param _productId Product ID to query
-     * @return Product struct
-     */
-    function getProduct(uint256 _productId) external view returns (Product memory) {
-        return products[_productId];
+    function withdrawReferral(address to) external nonReentrant {
+        if (to == address(0)) revert ZeroAddress();
+        uint256 amount = referralBalance[msg.sender];
+        if (amount == 0) revert NothingToWithdraw();
+        referralBalance[msg.sender] = 0;
+        usdc.safeTransfer(to, amount);
+        emit ReferralWithdrawal(msg.sender, to, amount);
     }
 
-    /**
-     * @notice Get product ID for a given token
-     * @param _tokenId Token ID to query
-     * @return Product ID
-     */
-    function getProductIdForToken(uint256 _tokenId) external view returns (uint256) {
-        return tokenIdToProductId[_tokenId];
+    // ---------------------------------------------------------------------
+    // Views
+    // ---------------------------------------------------------------------
+
+    function getProduct(uint256 productId) external view returns (Product memory) {
+        return _products[productId];
     }
 
-    /**
-     * @notice Get creator's withdrawable balance
-     * @return Balance in USDC
-     */
-    function getCreatorBalance() external view returns (uint256) {
-        return creatorBalance;
+    function tokenURI(uint256 tokenId) public view override returns (string memory) {
+        _requireOwned(tokenId);
+        return _products[productOf[tokenId]].uri;
     }
 
-    /**
-     * @notice Get platform's withdrawable balance
-     * @return Balance in USDC
-     */
-    function getPlatformBalance() external view returns (uint256) {
-        return platformBalance;
+    /// @notice EIP-712 digest a creator signs to issue a voucher. Exposed for frontends and tests.
+    function voucherDigest(Voucher calldata voucher) external view returns (bytes32) {
+        return _hashTypedDataV4(
+            keccak256(
+                abi.encode(
+                    VOUCHER_TYPEHASH, voucher.productId, voucher.price, voucher.buyer, voucher.expiry, voucher.nonce
+                )
+            )
+        );
     }
 
-    /**
-     * @notice Returns IPFS gateway URL for token metadata
-     * @param _tokenId Token ID
-     * @return IPFS gateway URL
-     */
-    function tokenURI(uint256 _tokenId) public view override returns (string memory) {
-        _requireOwned(_tokenId);
-        
-        uint256 productId = tokenIdToProductId[_tokenId];
-        Product memory product = products[productId];
-        
-        return string(abi.encodePacked("https://ipfs.io/ipfs/", product.ipfsHash));
+    // ---------------------------------------------------------------------
+    // Ownership
+    // ---------------------------------------------------------------------
+
+    /// @dev Renouncing would strand the creator balance forever.
+    function renounceOwnership() public pure override {
+        revert RenounceDisabled();
+    }
+
+    // ---------------------------------------------------------------------
+    // Internal
+    // ---------------------------------------------------------------------
+
+    function _purchase(uint256 productId, uint256 price, address referrer) internal returns (uint256 tokenId) {
+        Product storage p = _products[productId];
+        if (!p.active) revert ProductInactive(productId);
+        if (p.maxSupply != 0 && p.sold >= p.maxSupply) revert SoldOut(productId);
+
+        // Effects
+        p.sold += 1;
+
+        uint256 fee = (price * feeBps) / BPS;
+        uint256 referralAmount;
+        if (p.referralBps != 0 && referrer != address(0) && referrer != msg.sender && referrer != owner()) {
+            referralAmount = (price * p.referralBps) / BPS;
+            referralBalance[referrer] += referralAmount;
+        } else {
+            referrer = address(0);
+        }
+        platformBalance += fee;
+        creatorBalance += price - fee - referralAmount;
+
+        tokenId = nextTokenId++;
+        productOf[tokenId] = productId;
+
+        // Interactions: take payment first, then mint. _mint does not call the receiver.
+        if (price != 0) usdc.safeTransferFrom(msg.sender, address(this), price);
+        _mint(msg.sender, tokenId);
+
+        emit Purchased(productId, msg.sender, tokenId, price, fee, referrer, referralAmount);
+    }
+
+    /// @dev A failed permit is ignored on purpose: someone may have front-run the same permit.
+    ///      If the allowance is still short, transferFrom reverts with a clear error.
+    function _maybePermit(Permit calldata permit) internal {
+        if (permit.deadline == 0) return;
+        try IERC20Permit(address(usdc)).permit(
+            msg.sender, address(this), permit.value, permit.deadline, permit.v, permit.r, permit.s
+        ) {} catch {}
+    }
+
+    function _existing(uint256 productId) internal view returns (Product storage p) {
+        if (productId == 0 || productId >= nextProductId) revert UnknownProduct(productId);
+        p = _products[productId];
+    }
+
+    function _checkProductParams(uint256 price, uint16 referralBps, string calldata uri) internal view {
+        if (bytes(uri).length == 0) revert EmptyUri();
+        if (referralBps > MAX_REFERRAL_BPS) revert ReferralTooHigh();
+        uint256 cap = IStoreFactory(factory).priceCap();
+        if (price > cap) revert PriceAboveCap(price, cap);
     }
 }

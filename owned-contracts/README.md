@@ -1,68 +1,56 @@
-# OWNED Contracts
+# OWNED Contracts (v2)
 
-Crypto-native creator commerce contracts.
+Every creator gets their own store contract. Only the creator can list, change prices, or withdraw. OWNED's 3% is fixed when the store is created and can never be raised.
 
-## Stack
-
-- Solidity 0.8.20+
-- Foundry
-- OpenZeppelin
-- Base (L2)
+**Status: unaudited. Testnet only until an independent review is complete.**
 
 ## Contracts
 
-- `CreatorStore.sol` - Individual creator storefronts
-- `StoreFactory.sol` - Deploy new stores (coming in Phase 2)
+| Contract | Role |
+| --- | --- |
+| `StoreFactory` | Deploys a `CreatorStore` clone (EIP-1167) per creator. Holds fixed config: USDC, fee recipient, fee. Its owner can only raise the per-product price cap. |
+| `CreatorStore` | One per creator. Products, USDC checkout, ERC-721 receipts, creator-signed discount vouchers, per-product referrals, pull-based withdrawals. |
+| `legacy/CreatorStoreV1` | The original single shared store, deployed on Base Sepolia at `0x2CfE077af112B9F6e6Ed39e327D3d31c840401BD`. Kept for reference only. |
 
-## Setup
+## How money moves
 
-1. Install dependencies (already done via Foundry):
+1. Buyer calls `purchase` (optionally with an EIP-2612 permit, so one signature is enough).
+2. The store pulls USDC first, then mints the receipt.
+3. The price splits into three balances: platform fee, optional referral, creator remainder.
+4. Each party withdraws their own balance. Nobody can withdraw anyone else's.
 
-   ```bash
-   forge install
-   ```
+Purchases can be paused by the creator. Withdrawals can never be paused.
 
-2. Copy `.env.example` to `.env` and fill in your values:
+## Trust model
 
-   ```bash
-   cp .env.example .env
-   ```
+| Actor | Can | Cannot |
+| --- | --- | --- |
+| Creator (store owner) | Add, update, deactivate products. Sign vouchers. Pause sales. Withdraw creator balance. Transfer ownership (two-step). | Renounce ownership. Change the fee. Touch platform or referral balances. |
+| OWNED fee recipient | Withdraw the platform balance of any store. | Anything else in a store. |
+| Factory owner | Raise the price cap for all stores. | Lower the cap, change fees, or touch funds. |
+| Buyer | Purchase with a `maxPrice` guard against price changes. | Buy inactive, sold-out or paused products. |
 
-3. Build contracts:
+## Limits until a full audit
 
-   ```bash
-   forge build
-   ```
+- Per-product price cap: $500 (`StoreFactory.priceCap`).
+- Fee hard ceiling: 10% (`CreatorStore.MAX_FEE_BPS`). Factory default is 3%.
+- Referral ceiling: 50% of a sale.
 
-4. Run tests:
-
-   ```bash
-   forge test -vvv
-   ```
-
-## Deployment
-
-Deploy to Base Sepolia:
+## Develop
 
 ```bash
-source .env
-forge script script/Deploy.s.sol --rpc-url $BASE_SEPOLIA_RPC_URL --broadcast --verify
+forge build
+forge test            # unit, fuzz (1,000 runs), invariant (256 x 64)
+forge test --mc StoreInvariantTest -vv
 ```
 
-## Architecture
+## Deploy
 
-**CreatorStore.sol** - Each creator deploys their own permissionless store instance:
+```bash
+cp .env.example .env   # fill in addresses
+cast wallet import owned-deployer --interactive
+source .env
+forge script script/DeployFactory.s.sol --rpc-url base_sepolia --broadcast --verify --account owned-deployer
+```
 
-- Add products (USDC pricing, IPFS metadata, supply limits)
-- Buyers pay USDC → receive ERC-721 NFT as proof of purchase
-- 3% platform fee (97% to creator, 3% to platform)
-- Censorship-resistant, onchain ownership
-
-## Brand Principles
-
-OWNED: Stack sats, not subscriptions.
-
-- Monetization first, audience second
-- Onchain payments (USDC, ETH, SOL)
-- Censorship-resistant (permissionless smart contracts)
-- One fee: 3% per sale, enforced by the contract (no subscription)
+Record the factory address and deploy block in `deployments/`. The indexer starts from that block.
