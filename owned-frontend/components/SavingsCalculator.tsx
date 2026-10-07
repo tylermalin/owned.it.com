@@ -16,7 +16,7 @@ export function SavingsCalculator() {
     const annualSavings = monthlySavings * 12;
 
     return (
-        <div id="savings-calculator" className="py-24 bg-slate-900 border-y border-white/5 relative overflow-hidden mt-[50px]">
+        <div id="savings-calculator" className="py-16 md:py-20 bg-[var(--brand-ink)] border-y border-white/5 relative overflow-hidden mt-[50px]">
             {/* Background Glow */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/20 rounded-full blur-[120px] pointer-events-none" />
 
@@ -24,22 +24,22 @@ export function SavingsCalculator() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
                     <div className="space-y-10">
                         <div className="space-y-6">
-                            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-[0.3em] rounded-full border border-primary/20">
+                            <div className="inline-flex items-center gap-2 brand-sticker rounded-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.15em]">
                                 <Sparkles className="w-3 h-3" /> Stop Overpaying
                             </div>
-                            <h2 className="text-5xl lg:text-6xl font-black text-white leading-tight tracking-tight">
-                                Save thousands in <span className="text-primary italic">platform fees</span>.
+                            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight tracking-tight">
+                                Save thousands in <span className="text-brand-gradient-light">platform fees</span>.
                             </h2>
                             <p className="text-xl text-slate-400 font-medium leading-relaxed max-w-xl">
                                 Gumroad and Shopify take up to 10% of your revenue. We take 3% (flat). Use the calculator to see the difference.
                             </p>
                         </div>
 
-                        <div className="space-y-12 bg-white/5 backdrop-blur-xl p-10 rounded-[3rem] border border-white/10">
+                        <div className="space-y-12 bg-white/5 backdrop-blur-xl p-6 md:p-10 rounded-3xl border border-white/10">
                             <div className="space-y-6">
                                 <div className="flex justify-between items-center px-2">
                                     <label className="text-xs font-black uppercase tracking-widest text-slate-400">Monthly Revenue</label>
-                                    <span className="text-2xl font-black text-primary italic">${monthlyRevenue.toLocaleString()}</span>
+                                    <span className="text-2xl font-black text-white">${monthlyRevenue.toLocaleString()}</span>
                                 </div>
                                 <input
                                     type="range"
@@ -59,7 +59,7 @@ export function SavingsCalculator() {
                             <div className="space-y-6">
                                 <div className="flex justify-between items-center px-2">
                                     <label className="text-xs font-black uppercase tracking-widest text-slate-400">Avg. Product Price</label>
-                                    <span className="text-2xl font-black text-primary italic">${avgOrderValue}</span>
+                                    <span className="text-2xl font-black text-white">${avgOrderValue}</span>
                                 </div>
                                 <input
                                     type="range"
@@ -79,10 +79,12 @@ export function SavingsCalculator() {
                     </div>
 
                     <div className="relative">
-                        <div className="bg-white rounded-[4rem] p-12 lg:p-16 space-y-12 shadow-saas-lg border border-border">
+                        <div className="bg-white rounded-[2rem] overflow-hidden shadow-saas-lg border border-border">
+                            <div className="brand-scanlines h-2.5" aria-hidden="true" />
+                            <div className="p-8 md:p-12 lg:p-16 space-y-12">
                             <div className="text-center space-y-2">
-                                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-muted-foreground">Your Annual Savings</h3>
-                                <p className="text-7xl lg:text-8xl font-black text-primary tracking-tighter italic">
+                                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Your Annual Savings</h3>
+                                <p className="text-6xl md:text-7xl lg:text-8xl font-black text-brand-gradient tracking-tighter break-words">
                                     ${annualSavings.toLocaleString()}
                                 </p>
                             </div>
@@ -110,9 +112,10 @@ export function SavingsCalculator() {
                             </div>
 
                             <div className="pt-6">
-                                <button className="w-full py-6 bg-slate-950 text-white rounded-3xl font-black uppercase tracking-[0.3em] text-sm shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all">
+                                <button className="btn-brand w-full rounded-xl px-6 h-12 inline-flex items-center justify-center gap-2 text-xs font-black uppercase tracking-[0.12em]">
                                     Keep Your Profits →
                                 </button>
+                            </div>
                             </div>
                         </div>
                     </div>

@@ -38,11 +38,12 @@ export function AssetDetails({ isOpen, onClose, asset, metadata }: AssetDetailsP
                 onClick={onClose}
             />
 
-            <div className="relative w-full max-w-4xl max-h-[90vh] bg-white rounded-[3rem] shadow-2xl border border-white/20 overflow-hidden flex flex-col pointer-events-auto animate-in zoom-in-95 duration-300">
+            <div className="relative w-full max-w-4xl max-h-[90vh] bg-white rounded-[2rem] shadow-2xl border border-white/20 overflow-hidden flex flex-col pointer-events-auto animate-in zoom-in-95 duration-300">
+                <div className="brand-scanlines h-2 shrink-0" aria-hidden="true" />
                 {/* Header */}
-                <div className="px-8 py-6 border-b border-border bg-slate-50 flex items-center justify-between shrink-0">
+                <div className="px-6 md:px-8 py-6 border-b border-border bg-slate-50 flex items-center justify-between gap-4 shrink-0">
                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center border border-border shadow-sm">
+                        <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center border border-border shadow-sm shrink-0">
                             <span className="text-xl">
                                 {metadata.productType === 'course' ? '🎓' :
                                     metadata.productType === 'merch' ? '👕' :
@@ -57,17 +58,17 @@ export function AssetDetails({ isOpen, onClose, asset, metadata }: AssetDetailsP
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-3 bg-white hover:bg-slate-100 rounded-2xl border border-border transition-all text-muted-foreground hover:text-foreground"
+                        className="p-3 bg-white hover:bg-slate-100 rounded-xl border border-border transition-all text-muted-foreground hover:text-foreground"
                     >
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-8 md:p-12 space-y-12">
+                <div className="flex-1 overflow-y-auto p-6 md:p-12 space-y-12">
                     {/* Hero Section */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                        <div className="aspect-square rounded-[2rem] overflow-hidden border border-border shadow-saas">
+                        <div className="aspect-square rounded-3xl overflow-hidden border border-border shadow-saas">
                             {image ? (
                                 <img src={image} alt={title} className="w-full h-full object-cover" />
                             ) : (
@@ -109,7 +110,7 @@ export function AssetDetails({ isOpen, onClose, asset, metadata }: AssetDetailsP
                                 </div>
                                 <div className="space-y-3">
                                     {metadata.curriculum.modules?.map((mod: any, i: number) => (
-                                        <div key={i} className="bg-white border border-border rounded-2xl overflow-hidden shadow-sm">
+                                        <div key={i} className="bg-white border border-border rounded-xl overflow-hidden shadow-sm">
                                             <button
                                                 onClick={() => setExpandedModule(expandedModule === i ? null : i)}
                                                 className="w-full px-6 py-4 flex items-center justify-between hover:bg-slate-50 transition-all"
@@ -144,21 +145,21 @@ export function AssetDetails({ isOpen, onClose, asset, metadata }: AssetDetailsP
                         )}
 
                         {metadata.productType === 'community' && (
-                            <div className="p-10 bg-indigo-600 rounded-[3rem] text-white space-y-6 shadow-xl relative overflow-hidden">
+                            <div className="p-6 md:p-10 bg-[var(--brand-ink)] rounded-3xl text-white space-y-6 shadow-xl relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-10 opacity-10">
                                     <MessageSquare className="w-64 h-64" />
                                 </div>
                                 <div className="relative space-y-4">
                                     <h3 className="text-3xl font-black tracking-tight">Join the Inner Circle</h3>
-                                    <p className="text-indigo-100 max-w-md leading-relaxed font-medium">
+                                    <p className="text-slate-300 max-w-md leading-relaxed font-medium">
                                         Your membership NFT has been verified. You now have full access to our private community and governance channels.
                                     </p>
                                     <div className="pt-4 flex flex-wrap gap-4">
-                                        <a href={metadata.community?.discordUrl || '#'} target="_blank" className="px-8 py-4 bg-white text-indigo-600 rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 transition-all shadow-lg flex items-center gap-3">
+                                        <a href={metadata.community?.discordUrl || '#'} target="_blank" className="btn-brand rounded-xl px-6 h-12 inline-flex items-center justify-center gap-2 text-xs font-black uppercase tracking-[0.12em]">
                                             <MessageSquare className="w-4 h-4" />
                                             ENTER DISCORD
                                         </a>
-                                        <div className="px-6 py-4 bg-indigo-500/30 backdrop-blur-sm border border-indigo-400/30 rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center gap-3">
+                                        <div className="px-6 h-12 bg-white/10 border border-white/20 rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center gap-3">
                                             <Globe className="w-3 h-3" />
                                             PRIVATE PORTAL ACTIVE
                                         </div>
@@ -168,9 +169,9 @@ export function AssetDetails({ isOpen, onClose, asset, metadata }: AssetDetailsP
                         )}
 
                         {(metadata.productType === 'coaching' || metadata.productType === 'consulting') && (
-                            <div className="p-8 bg-emerald-50 border border-emerald-100 rounded-[2.5rem] space-y-6 shadow-sm">
+                            <div className="p-6 md:p-8 bg-emerald-50 border border-emerald-100 rounded-3xl space-y-6 shadow-sm">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center border border-emerald-100 shadow-sm">
+                                    <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center border border-emerald-100 shadow-sm">
                                         <Calendar className="w-6 h-6 text-emerald-500" />
                                     </div>
                                     <div>
@@ -179,27 +180,27 @@ export function AssetDetails({ isOpen, onClose, asset, metadata }: AssetDetailsP
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="bg-white p-6 rounded-2xl border border-emerald-100 shadow-sm space-y-2">
+                                    <div className="bg-white p-6 rounded-xl border border-emerald-100 shadow-sm space-y-2">
                                         <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">Scheduled For</p>
                                         <p className="font-bold text-lg">Next Available Session</p>
-                                        <p className="text-xs text-muted-foreground font-medium italic">Check your email for the calendar invite.</p>
+                                        <p className="text-xs text-muted-foreground font-medium">Check your email for the calendar invite.</p>
                                     </div>
-                                    <div className="bg-white p-6 rounded-2xl border border-emerald-100 shadow-sm space-y-2">
+                                    <div className="bg-white p-6 rounded-xl border border-emerald-100 shadow-sm space-y-2">
                                         <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">Access Link</p>
-                                        <a href={metadata.consulting?.meetingUrl || '#'} target="_blank" className="inline-flex items-center gap-2 text-primary font-bold hover:underline">
+                                        <a href={metadata.consulting?.meetingUrl || '#'} target="_blank" className="inline-flex items-center gap-2 text-primary font-bold link-draw pb-0.5 hover:text-foreground">
                                             Open Meeting Room <ExternalLink className="w-3 h-3" />
                                         </a>
-                                        <p className="text-xs text-muted-foreground font-medium italic">Join 5 mins before start.</p>
+                                        <p className="text-xs text-muted-foreground font-medium">Join 5 mins before start.</p>
                                     </div>
                                 </div>
                             </div>
                         )}
 
                         {metadata.productType === 'merch' && (
-                            <div className="bg-slate-50 p-8 rounded-[2.5rem] border border-border space-y-6">
-                                <div className="flex items-center justify-between">
+                            <div className="bg-slate-50 p-6 md:p-8 rounded-3xl border border-border space-y-6">
+                                <div className="flex flex-wrap items-center justify-between gap-3">
                                     <h3 className="text-xl font-extrabold tracking-tight">Order Details</h3>
-                                    <div className="px-4 py-1.5 bg-indigo-100 text-indigo-700 text-[10px] font-black uppercase tracking-widest rounded-full">
+                                    <div className="brand-sticker rounded-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.15em]">
                                         Ready for Fulfillment
                                     </div>
                                 </div>
@@ -226,7 +227,7 @@ export function AssetDetails({ isOpen, onClose, asset, metadata }: AssetDetailsP
                 </div>
 
                 {/* Footer Actions */}
-                <div className="px-10 py-8 border-t border-border bg-slate-50 flex items-center justify-between shrink-0">
+                <div className="px-6 md:px-10 py-6 md:py-8 border-t border-border bg-slate-50 flex items-center justify-between gap-4 shrink-0">
                     <button
                         onClick={onClose}
                         className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors"
@@ -238,7 +239,7 @@ export function AssetDetails({ isOpen, onClose, asset, metadata }: AssetDetailsP
                             <a
                                 href={metadata.redirectUrl}
                                 target="_blank"
-                                className="px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 active:scale-95 transition-all shadow-saas shadow-primary/20 flex items-center gap-3"
+                                className="btn-brand rounded-xl px-6 h-12 inline-flex items-center justify-center gap-2 text-xs font-black uppercase tracking-[0.12em]"
                             >
                                 <ExternalLink className="w-4 h-4" />
                                 GO TO CONTENT
@@ -247,7 +248,7 @@ export function AssetDetails({ isOpen, onClose, asset, metadata }: AssetDetailsP
                             <a
                                 href={`https://ipfs.io/ipfs/${metadata.digitalFileHash}`}
                                 target="_blank"
-                                className="px-8 py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 active:scale-95 transition-all shadow-saas shadow-emerald-500/20 flex items-center gap-3"
+                                className="btn-brand rounded-xl px-6 h-12 inline-flex items-center justify-center gap-2 text-xs font-black uppercase tracking-[0.12em]"
                             >
                                 <Download className="w-4 h-4" />
                                 DOWNLOAD ASSET

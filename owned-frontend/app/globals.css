@@ -5,7 +5,7 @@
 :root {
   --background: #ffffff;
   --foreground: #0f172a;
-  --primary: #0061ff;
+  --primary: #c01890;
   --primary-foreground: #ffffff;
   --muted: #f8fafc;
   --muted-foreground: #64748b;
@@ -13,7 +13,7 @@
   --accent-foreground: #0f172a;
   --border: #e2e8f0;
   --input: #e2e8f0;
-  --ring: #0061ff;
+  --ring: #c01890;
 
   --radius: 1.5rem;
   --radius-xl: 2.5rem;
@@ -26,7 +26,7 @@
   --glass-bg: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(255, 255, 255, 0.3);
 
-  --primary-rgb: 0, 97, 255;
+  --primary-rgb: 192, 24, 144;
 }
 
 .dark {
@@ -50,6 +50,21 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+::selection {
+  background: rgba(192, 24, 144, 0.18);
+}
+
+/* One focus style everywhere: visible, on-brand, keyboard only */
+:focus-visible {
+  outline: 2.5px solid var(--brand-cyan, #1ea6dc);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 @layer utilities {
@@ -130,6 +145,15 @@ body {
     color: #c01890; /* fallback */
   }
 
+  /* Same idea for dark (ink) backgrounds: starts at pink so every stop clears contrast on #0b0b0f */
+  .text-brand-gradient-light {
+    background-image: linear-gradient(100deg, #ff4fa3 0%, #ff6a3d 55%, #ffc23d 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: #ff6a9e; /* fallback */
+  }
+
   /* Sticker: echoes the logo's black keyline and hard drop shadow */
   .brand-sticker {
     background: var(--brand-ink);
@@ -158,4 +182,114 @@ body {
       var(--brand-spectrum);
     opacity: 0.18;
   }
+}
+
+/* ------------------------------------------------------------------
+   Interaction and motion. Everything here is disabled or reduced
+   under prefers-reduced-motion.
+   ------------------------------------------------------------------ */
+:root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@layer components {
+  /* Secondary action: white sticker with ink keyline, presses on click */
+  .btn-secondary {
+    background: #fff;
+    color: var(--brand-ink);
+    border: 1.5px solid var(--brand-ink);
+    box-shadow: 3px 3px 0 var(--brand-ink);
+    transition: transform 0.15s var(--ease-out), box-shadow 0.15s var(--ease-out), background 0.2s ease;
+  }
+  .btn-secondary:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--brand-magenta);
+  }
+  .btn-secondary:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 var(--brand-ink);
+  }
+
+  .btn-brand:active {
+    transform: scale(0.98);
+  }
+
+  /* Small uppercase label above headings */
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--brand-magenta);
+  }
+
+  /* Cards that respond to the pointer */
+  .card-lift {
+    transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out), border-color 0.25s ease;
+  }
+  .card-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 40px -18px rgba(11, 11, 15, 0.25), 0 0 0 1px rgba(192, 24, 144, 0.12);
+  }
+
+  /* Sticker cards: the offset shadow grows on hover, like lifting a sticker */
+  .brand-card-hover {
+    transition: transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
+  }
+  .brand-card-hover:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 10px 10px 0 var(--brand-ink), 0 0 0 4px rgba(216, 0, 96, 0.08);
+  }
+
+  /* Underline that draws in with the logo's scanline spectrum */
+  .link-draw {
+    background-image: var(--brand-spectrum);
+    background-size: 0% 2px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.3s var(--ease-out), color 0.2s ease;
+  }
+  .link-draw:hover,
+  .link-draw[aria-current='page'] {
+    background-size: 100% 2px;
+  }
+}
+
+/* Reveal on scroll. The attribute is added by JavaScript, so content is
+   never hidden when scripts fail to load. */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+[data-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* Page enter */
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.page-enter {
+  animation: page-enter 0.45s var(--ease-out) both;
+}
+
+@keyframes menu-in {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+.menu-in {
+  animation: menu-in 0.22s var(--ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  [data-reveal] { opacity: 1; transform: none; transition: none; }
+  .page-enter, .menu-in { animation: none; }
+  .card-lift:hover, .brand-card-hover:hover, .btn-secondary:hover { transform: none; }
+  .animate-float, .animate-bounce-slow, .animate-ping, .animate-pulse { animation: none !important; }
 }

@@ -34,7 +34,7 @@ export function ProductList({ onEdit }: ProductListProps) {
         return (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl">
                 {[1, 2].map(id => (
-                    <div key={id} className="bg-white border border-border p-8 rounded-4xl shadow-sm animate-pulse space-y-6">
+                    <div key={id} className="rounded-3xl border border-border bg-white p-6 md:p-8 animate-pulse space-y-6">
                         <div className="h-40 bg-slate-50 rounded-3xl" />
                         <div className="space-y-3">
                             <div className="h-6 bg-slate-50 rounded-full w-3/4" />
@@ -52,8 +52,8 @@ export function ProductList({ onEdit }: ProductListProps) {
                 <ProductCardItem key={id} productId={id} onEdit={onEdit} />
             ))}
             {productIds.length === 0 && (
-                <div className="col-span-full py-12 text-center bg-slate-50 rounded-4xl border border-dashed border-border">
-                    <p className="text-muted-foreground font-medium italic">No products launched yet. Launch your first product above.</p>
+                <div className="col-span-full py-12 text-center bg-slate-50 rounded-3xl border border-dashed border-border">
+                    <p className="text-muted-foreground font-medium">No products launched yet. Launch your first product above.</p>
                 </div>
             )}
         </div>
@@ -91,7 +91,7 @@ function ProductCardItem({ productId, onEdit }: { productId: number; onEdit?: (i
 
     if (isLoading) {
         return (
-            <div className="bg-white border border-border p-8 rounded-4xl shadow-sm animate-pulse space-y-6">
+            <div className="rounded-3xl border border-border bg-white p-6 md:p-8 animate-pulse space-y-6">
                 <div className="h-40 bg-slate-50 rounded-3xl" />
                 <div className="space-y-3">
                     <div className="h-6 bg-slate-50 rounded-full w-3/4" />
@@ -124,9 +124,9 @@ function ProductCardItem({ productId, onEdit }: { productId: number; onEdit?: (i
     const supply = maxSupply > BigInt(0) ? maxSupply.toString() : '∞';
 
     return (
-        <div className="group bg-white border border-border p-8 rounded-4xl shadow-sm hover:shadow-saas hover:border-primary/30 transition-all flex flex-col space-y-6">
+        <div className="group rounded-3xl border border-border bg-white p-6 md:p-8 card-lift flex flex-col space-y-6">
             <div className="flex justify-between items-start">
-                <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center font-black text-primary italic shadow-sm">
+                <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center font-black text-primary shadow-sm">
                     {productId}
                 </div>
                 <div className="flex items-center gap-4">
@@ -161,7 +161,7 @@ function ProductCardItem({ productId, onEdit }: { productId: number; onEdit?: (i
             )}
 
             {product && (product as any).isTest && (
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary border border-primary/20 rounded-xl w-fit">
+                <div className="brand-sticker flex items-center gap-2 rounded-md px-2.5 py-1 w-fit">
                     <span className="text-[10px] font-black uppercase tracking-widest">🧪 Test Product (Local)</span>
                 </div>
             )}
@@ -169,7 +169,7 @@ function ProductCardItem({ productId, onEdit }: { productId: number; onEdit?: (i
             <div className="space-y-4">
                 <div className="space-y-1">
                     <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-50">Value</p>
-                    <p className="text-3xl font-black italic tracking-tighter text-foreground">{formatUSDC(price)} USDC</p>
+                    <p className="text-3xl font-black tracking-tight text-foreground">{formatUSDC(price)} USDC</p>
                 </div>
 
                 <div className="space-y-4 pt-4 border-t border-border border-dashed">
@@ -184,7 +184,7 @@ function ProductCardItem({ productId, onEdit }: { productId: number; onEdit?: (i
                 <Link
                     href={`/products/${productId}/checkout`}
                     target="_blank"
-                    className="block w-full text-center py-4 bg-slate-50 text-foreground text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-primary hover:text-white transition-all border border-border shadow-sm"
+                    className="btn-secondary w-full rounded-xl px-6 h-12 inline-flex items-center justify-center gap-2 text-xs font-black uppercase tracking-[0.12em]"
                 >
                     View Storefront
                 </Link>

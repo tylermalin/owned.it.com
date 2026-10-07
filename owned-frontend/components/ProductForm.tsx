@@ -542,7 +542,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                 <button
                     onClick={handleBack}
                     type="button"
-                    className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white border border-border shadow-sm hover:shadow-saas hover:border-primary/30 transition-all text-muted-foreground"
+                    className="w-12 h-12 flex items-center justify-center rounded-xl bg-white border border-border shadow-sm hover:shadow-saas hover:border-primary/30 transition-all text-muted-foreground"
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7"></path></svg>
                 </button>
@@ -602,7 +602,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                         <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-primary text-primary-foreground text-sm font-black shadow-saas">2</span>
                         <h4 className="font-bold uppercase tracking-widest text-xs text-muted-foreground">Visual Asset</h4>
                     </div>
-                    <div className="p-16 border-2 border-dashed border-border bg-white rounded-4xl text-center relative group hover:border-primary transition-colors">
+                    <div className="p-8 md:p-16 border-2 border-dashed border-border bg-white rounded-3xl text-center relative group hover:border-primary transition-colors">
                         {imageFile ? (
                             <div className="absolute inset-4 rounded-3xl overflow-hidden shadow-saas">
                                 <div className="absolute inset-0 bg-primary/10 backdrop-blur-sm flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -619,7 +619,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                 <div className="p-5 bg-slate-50 rounded-3xl text-3xl group-hover:scale-110 transition-transform">🖼️</div>
                                 <div className="space-y-2">
                                     <p className="text-lg font-bold">Drop your product cover here</p>
-                                    <p className="text-sm text-muted-foreground font-medium italic">Recommended: 1200x630px · JPG, PNG, WEBP</p>
+                                    <p className="text-sm text-muted-foreground font-medium">Recommended: 1200x630px · JPG, PNG, WEBP</p>
                                 </div>
                             </div>
                         )}
@@ -640,7 +640,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                         <h4 className="font-bold uppercase tracking-widest text-xs text-muted-foreground">Product Details</h4>
                     </div>
 
-                    <div className="space-y-8 bg-white border border-border p-10 rounded-4xl shadow-sm">
+                    <div className="space-y-8 bg-white border border-border p-6 md:p-10 rounded-3xl shadow-sm">
                         <div className="space-y-2">
                             <label htmlFor="productName" className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">
                                 Product Title *
@@ -651,7 +651,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                     id="productName"
                                     value={productName}
                                     onChange={(e) => setProductName(e.target.value.slice(0, 50))}
-                                    className="w-full px-5 py-4 bg-slate-50 border border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-bold text-xl transition-all"
+                                    className="w-full px-5 py-4 bg-slate-50 border border-border rounded-xl focus:border-[var(--brand-magenta)] focus:outline-none focus:ring-2 focus:ring-[rgba(192,24,144,0.25)] font-bold text-xl transition-all"
                                     placeholder="Get My [Template/eBook/Course] Now!"
                                     required
                                     disabled={isLoading}
@@ -669,7 +669,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                 id="subtitle"
                                 value={subtitle}
                                 onChange={(e) => setSubtitle(e.target.value.slice(0, 100))}
-                                className="w-full px-5 py-4 bg-slate-50 border border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-medium text-lg transition-all"
+                                className="w-full px-5 py-4 bg-slate-50 border border-border rounded-xl focus:border-[var(--brand-magenta)] focus:outline-none focus:ring-2 focus:ring-[rgba(192,24,144,0.25)] font-medium text-lg transition-all"
                                 placeholder="We will deliver this file right to your inbox"
                                 disabled={isLoading}
                             />
@@ -698,7 +698,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                     id="bottomTitle"
                                     value={bottomTitle}
                                     onChange={(e) => setBottomTitle(e.target.value)}
-                                    className="w-full px-5 py-4 bg-slate-50 border border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-bold text-lg transition-all"
+                                    className="w-full px-5 py-4 bg-slate-50 border border-border rounded-xl focus:border-[var(--brand-magenta)] focus:outline-none focus:ring-2 focus:ring-[rgba(192,24,144,0.25)] font-bold text-lg transition-all"
                                     placeholder="Secure Your Access"
                                     required
                                     disabled={isLoading}
@@ -714,7 +714,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                     id="callToAction"
                                     value={callToAction}
                                     onChange={(e) => setCallToAction(e.target.value.slice(0, 30))}
-                                    className="w-full px-5 py-4 bg-slate-50 border border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-black uppercase tracking-widest transition-all"
+                                    className="w-full px-5 py-4 bg-slate-50 border border-border rounded-xl focus:border-[var(--brand-magenta)] focus:outline-none focus:ring-2 focus:ring-[rgba(192,24,144,0.25)] font-black uppercase tracking-widest transition-all"
                                     placeholder="PURCHASE"
                                     required
                                     disabled={isLoading}
@@ -768,7 +768,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                                 setNewInfoField('');
                                                 setIsAddingInfoField(false);
                                             }}
-                                            className="px-3 py-2 bg-primary text-primary-foreground text-xs font-bold rounded-xl hover:bg-primary/90 transition-colors"
+                                            className="btn-brand px-3 h-9 inline-flex items-center justify-center text-xs font-bold rounded-xl"
                                         >
                                             Add
                                         </button>
@@ -793,7 +793,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                     </button>
                                 )}
                             </div>
-                            <p className="text-[10px] text-muted-foreground italic">These fields will be requested during checkout and stored on IPFS.</p>
+                            <p className="text-[10px] text-muted-foreground">These fields will be requested during checkout and stored on IPFS.</p>
                         </div>
                     </div>
                 </div>
@@ -805,7 +805,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                         <h4 className="font-bold uppercase tracking-widest text-xs text-muted-foreground">Pricing</h4>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 bg-white border border-border p-10 rounded-4xl shadow-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 bg-white border border-border p-6 md:p-10 rounded-3xl shadow-sm">
                         <div className="space-y-2">
                             <label htmlFor="price" className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">
                                 Original Price (USDC)
@@ -817,7 +817,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                     id="price"
                                     value={price}
                                     onChange={(e) => setPrice(e.target.value)}
-                                    className="w-full pl-10 pr-5 py-5 bg-slate-50 border border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-black text-2xl italic tracking-tight transition-all"
+                                    className="w-full pl-10 pr-5 py-5 bg-slate-50 border border-border rounded-xl focus:border-[var(--brand-magenta)] focus:outline-none focus:ring-2 focus:ring-[rgba(192,24,144,0.25)] font-black text-2xl tracking-tight transition-all"
                                     placeholder="97.00"
                                     required
                                     disabled={isLoading}
@@ -835,7 +835,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                     id="discountPrice"
                                     value={discountPrice}
                                     onChange={(e) => setDiscountPrice(e.target.value)}
-                                    className="w-full pl-10 pr-5 py-5 bg-white border-2 border-primary rounded-2xl focus:outline-none focus:ring-4 focus:ring-primary/10 font-black text-2xl italic tracking-tight transition-all"
+                                    className="w-full pl-10 pr-5 py-5 bg-white border-2 border-primary rounded-xl focus:border-[var(--brand-magenta)] focus:outline-none focus:ring-2 focus:ring-[rgba(192,24,144,0.25)] font-black text-2xl tracking-tight transition-all"
                                     placeholder="0 for FREE"
                                     disabled={isLoading}
                                 />
@@ -851,7 +851,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                 id="maxSupply"
                                 value={maxSupply}
                                 onChange={(e) => setMaxSupply(e.target.value)}
-                                className="w-full px-5 py-5 bg-slate-50 border border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-bold text-xl transition-all"
+                                className="w-full px-5 py-5 bg-slate-50 border border-border rounded-xl focus:border-[var(--brand-magenta)] focus:outline-none focus:ring-2 focus:ring-[rgba(192,24,144,0.25)] font-bold text-xl transition-all"
                                 placeholder="0"
                                 disabled={isLoading}
                             />
@@ -866,7 +866,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                         <h4 className="font-bold uppercase tracking-widest text-xs text-muted-foreground">Affiliate & Resale</h4>
                     </div>
 
-                    <div className="bg-white border border-border p-10 rounded-4xl shadow-sm space-y-8">
+                    <div className="bg-white border border-border p-6 md:p-10 rounded-3xl shadow-sm space-y-8">
                         {/* Allow Affiliates */}
                         <div className="flex items-center justify-between">
                             <div className="space-y-1">
@@ -889,7 +889,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                     <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                                         Commission Rate
                                     </label>
-                                    <span className="text-2xl font-black italic text-primary tracking-tight">{affiliatePercent}%</span>
+                                    <span className="text-2xl font-black text-primary tracking-tight">{affiliatePercent}%</span>
                                 </div>
                                 <input
                                     type="range"
@@ -905,7 +905,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                     <span>25%</span>
                                     <span>50%</span>
                                 </div>
-                                <p className="text-xs text-muted-foreground italic">
+                                <p className="text-xs text-muted-foreground">
                                     Affiliates earn {affiliatePercent}% (${price ? (parseFloat(price) * affiliatePercent / 100).toFixed(2) : '0.00'}) per sale they generate.
                                 </p>
                             </div>
@@ -930,7 +930,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
 
                         {bundleEnabled && (
                             <div className="space-y-4 pl-1">
-                                <p className="text-xs text-muted-foreground italic">
+                                <p className="text-xs text-muted-foreground">
                                     Other creators can include this product in their bundles. They'll pay the affiliate commission rate above per sale.
                                 </p>
                                 <div className="space-y-2">
@@ -943,16 +943,16 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                             type="text"
                                             value={wholesalePrice}
                                             onChange={(e) => setWholesalePrice(e.target.value)}
-                                            className="w-full pl-9 pr-4 py-3 bg-slate-50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-bold text-lg transition-all"
+                                            className="w-full pl-9 pr-4 py-3 bg-slate-50 border border-border rounded-xl focus:border-[var(--brand-magenta)] focus:outline-none focus:ring-2 focus:ring-[rgba(192,24,144,0.25)] font-bold text-lg transition-all"
                                             placeholder={price ? (parseFloat(price) * 0.7).toFixed(2) : '0.00'}
                                             disabled={isLoading}
                                         />
                                     </div>
-                                    <p className="text-[10px] text-muted-foreground italic">
+                                    <p className="text-[10px] text-muted-foreground">
                                         Optional. Leave blank to use the full retail price. This is the price affiliates pay you when including this product in a bundle.
                                     </p>
                                 </div>
-                                <p className="text-[10px] text-muted-foreground italic mt-2">
+                                <p className="text-[10px] text-muted-foreground mt-2">
                                     Leave blank to offer the discount indefinitely, or set a limit to create urgency.
                                 </p>
                             </div>
@@ -967,7 +967,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                         <h4 className="font-bold uppercase tracking-widest text-xs text-muted-foreground">Community Testimonials</h4>
                     </div>
 
-                    <div className="bg-white border border-border p-10 rounded-4xl shadow-sm space-y-8">
+                    <div className="bg-white border border-border p-6 md:p-10 rounded-3xl shadow-sm space-y-8">
                         {/* Allow Testimonial Discount */}
                         <div className="flex items-center justify-between">
                             <div className="space-y-1">
@@ -990,7 +990,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                     <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                                         Discount Rate
                                     </label>
-                                    <span className="text-2xl font-black italic text-primary tracking-tight">{testimonialDiscountPercent}%</span>
+                                    <span className="text-2xl font-black text-primary tracking-tight">{testimonialDiscountPercent}%</span>
                                 </div>
                                 <input
                                     type="range"
@@ -1006,7 +1006,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                     <span>25%</span>
                                     <span>50%</span>
                                 </div>
-                                <p className="text-xs text-muted-foreground italic mb-6">
+                                <p className="text-xs text-muted-foreground mb-6">
                                     Buyers save {testimonialDiscountPercent}% upfront. They agree to provide a high-quality community testimonial later.
                                 </p>
 
@@ -1035,10 +1035,10 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                 {productType === 'digital' && (
                     <div className="space-y-8">
                         <div className="flex items-center gap-4">
-                            <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-blue-500 text-white text-sm font-black shadow-saas">💻</span>
+                            <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-primary text-primary-foreground text-sm font-black shadow-saas">💻</span>
                             <h4 className="font-bold uppercase tracking-widest text-xs text-muted-foreground">Digital Asset</h4>
                         </div>
-                        <div className="bg-white border border-border rounded-4xl p-8 space-y-8">
+                        <div className="bg-white border border-border rounded-3xl p-8 space-y-8">
 
                             <div className="space-y-4">
                                 <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Upload File</label>
@@ -1060,7 +1060,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                             <div className="p-4 bg-white rounded-2xl shadow-sm group-hover:scale-110 transition-transform text-2xl">📥</div>
                                             <div className="space-y-1">
                                                 <p className="text-sm font-bold text-foreground">Click or Drag to Upload File</p>
-                                                <p className="text-[11px] text-muted-foreground font-medium italic">Max 100MB (PDF, ZIP, MP4, etc.)</p>
+                                                <p className="text-[11px] text-muted-foreground font-medium">Max 100MB (PDF, ZIP, MP4, etc.)</p>
                                             </div>
                                         </div>
                                     )}
@@ -1085,9 +1085,9 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                     value={redirectUrl}
                                     onChange={(e) => setRedirectUrl(e.target.value)}
                                     placeholder="https://google.com/drive/..."
-                                    className="w-full px-5 py-4 bg-slate-50 border border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 font-medium"
+                                    className="w-full px-5 py-4 bg-slate-50 border border-border rounded-xl focus:border-[var(--brand-magenta)] focus:outline-none focus:ring-2 focus:ring-[rgba(192,24,144,0.25)] font-medium"
                                 />
-                                <p className="text-[10px] text-muted-foreground italic">If you provide a link instead of uploading a file, buyers will be redirected here after purchase.</p>
+                                <p className="text-[10px] text-muted-foreground">If you provide a link instead of uploading a file, buyers will be redirected here after purchase.</p>
                             </div>
 
                         </div>
@@ -1101,14 +1101,14 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                             <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-emerald-500 text-white text-sm font-black shadow-saas">📅</span>
                             <h4 className="font-bold uppercase tracking-widest text-xs text-muted-foreground">Availability Schedule</h4>
                         </div>
-                        <div className="bg-white border border-border rounded-4xl p-8 space-y-6">
+                        <div className="bg-white border border-border rounded-3xl p-8 space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Timezone</label>
                                     <select
                                         value={availTimezone}
                                         onChange={e => setAvailTimezone(e.target.value)}
-                                        className="w-full px-4 py-3 bg-slate-50 border border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 font-medium"
+                                        className="w-full px-4 py-3 bg-slate-50 border border-border rounded-xl focus:border-[var(--brand-magenta)] focus:outline-none focus:ring-2 focus:ring-[rgba(192,24,144,0.25)] font-medium"
                                     >
                                         {['America/Los_Angeles', 'America/Denver', 'America/Chicago', 'America/New_York', 'America/Sao_Paulo', 'Europe/London', 'Europe/Paris', 'Europe/Berlin', 'Asia/Dubai', 'Asia/Kolkata', 'Asia/Tokyo', 'Australia/Sydney'].map(tz => (
                                             <option key={tz} value={tz}>{tz.replace('_', ' ')}</option>
@@ -1120,7 +1120,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                     <select
                                         value={sessionDuration}
                                         onChange={e => setSessionDuration(parseInt(e.target.value))}
-                                        className="w-full px-4 py-3 bg-slate-50 border border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 font-medium"
+                                        className="w-full px-4 py-3 bg-slate-50 border border-border rounded-xl focus:border-[var(--brand-magenta)] focus:outline-none focus:ring-2 focus:ring-[rgba(192,24,144,0.25)] font-medium"
                                     >
                                         {[15, 30, 45, 60, 90, 120].map(m => (
                                             <option key={m} value={m}>{m} minutes</option>
@@ -1170,9 +1170,9 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                     value={meetingUrl}
                                     onChange={(e) => setMeetingUrl(e.target.value)}
                                     placeholder="e.g. https://zoom.us/j/123456789 or https://meet.google.com/abc-defg-hij"
-                                    className="w-full px-5 py-4 bg-slate-50 border border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-medium transition-all"
+                                    className="w-full px-5 py-4 bg-slate-50 border border-border rounded-xl focus:border-[var(--brand-magenta)] focus:outline-none focus:ring-2 focus:ring-[rgba(192,24,144,0.25)] font-medium transition-all"
                                 />
-                                <p className="text-[10px] text-muted-foreground italic">
+                                <p className="text-[10px] text-muted-foreground">
                                     Buyers will receive this link natively on checkout and in their calendar invite after purchasing a session.
                                 </p>
                             </div>
@@ -1185,13 +1185,13 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                     <div className="space-y-8">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
-                                <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-violet-500 text-white text-sm font-black shadow-saas">🎓</span>
+                                <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-primary text-primary-foreground text-sm font-black shadow-saas">🎓</span>
                                 <h4 className="font-bold uppercase tracking-widest text-xs text-muted-foreground">Course Curriculum</h4>
                             </div>
                             <button
                                 type="button"
                                 onClick={() => setCurriculum([...curriculum, { title: `Module ${curriculum.length + 1}`, lessons: [] }])}
-                                className="px-4 py-2 bg-primary text-primary-foreground rounded-xl text-xs font-black uppercase tracking-widest hover:scale-105 transition-all"
+                                className="btn-brand px-4 h-10 inline-flex items-center justify-center rounded-xl text-xs font-black uppercase tracking-[0.12em]"
                             >+ Add Module</button>
                         </div>
                         <div className="space-y-4">
@@ -1252,10 +1252,10 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                 {productType === 'community' && (
                     <div className="space-y-8">
                         <div className="flex items-center gap-4">
-                            <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-indigo-500 text-white text-sm font-black shadow-saas">🤝</span>
+                            <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-primary text-primary-foreground text-sm font-black shadow-saas">🤝</span>
                             <h4 className="font-bold uppercase tracking-widest text-xs text-muted-foreground">NFT Community Access</h4>
                         </div>
-                        <div className="bg-white border border-border rounded-4xl p-8 space-y-6">
+                        <div className="bg-white border border-border rounded-3xl p-8 space-y-6">
                             <div className="space-y-2">
                                 <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Discord Invite URL</label>
                                 <input
@@ -1263,18 +1263,18 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                     value={discordInviteUrl}
                                     onChange={e => setDiscordInviteUrl(e.target.value)}
                                     placeholder="https://discord.gg/your-server"
-                                    className="w-full px-5 py-4 bg-slate-50 border border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 font-medium"
+                                    className="w-full px-5 py-4 bg-slate-50 border border-border rounded-xl focus:border-[var(--brand-magenta)] focus:outline-none focus:ring-2 focus:ring-[rgba(192,24,144,0.25)] font-medium"
                                 />
                             </div>
-                            <div className="p-5 bg-indigo-50 border border-indigo-200 rounded-2xl space-y-3">
-                                <p className="text-xs font-black uppercase tracking-widest text-indigo-700">🔐 How NFT Gating Works</p>
-                                <ol className="text-sm text-indigo-800 space-y-1.5 list-decimal list-inside">
+                            <div className="p-5 bg-primary/5 border border-primary/20 rounded-xl space-y-3">
+                                <p className="text-xs font-black uppercase tracking-widest text-primary">🔐 How NFT Gating Works</p>
+                                <ol className="text-sm text-foreground space-y-1.5 list-decimal list-inside">
                                     <li>Buyer purchases → an ERC-721 NFT is minted to their wallet automatically.</li>
                                     <li>Add the <strong>Collab.Land</strong> bot to your Discord server.</li>
                                     <li>In Collab.Land, create a Token Role with the contract address shown below.</li>
                                     <li>Members holding the NFT can verify and receive their Discord role.</li>
                                 </ol>
-                                <p className="text-[11px] text-indigo-600 font-mono mt-2">Contract: {process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || '(deploy to see address)'}</p>
+                                <p className="text-[11px] text-muted-foreground font-mono break-all mt-2">Contract: {process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || '(deploy to see address)'}</p>
                             </div>
                         </div>
                     </div>
@@ -1287,7 +1287,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                             <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-orange-500 text-white text-sm font-black shadow-saas">👕</span>
                             <h4 className="font-bold uppercase tracking-widest text-xs text-muted-foreground">Merch Details</h4>
                         </div>
-                        <div className="bg-white border border-border rounded-4xl p-8 space-y-8">
+                        <div className="bg-white border border-border rounded-3xl p-8 space-y-8">
                             <div className="space-y-2">
                                 <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">POD Store Link</label>
                                 <input
@@ -1295,7 +1295,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                     value={merchStoreLink}
                                     onChange={e => setMerchStoreLink(e.target.value)}
                                     placeholder="https://printful.com/my-product or spring.com/..."
-                                    className="w-full px-5 py-4 bg-slate-50 border border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 font-medium"
+                                    className="w-full px-5 py-4 bg-slate-50 border border-border rounded-xl focus:border-[var(--brand-magenta)] focus:outline-none focus:ring-2 focus:ring-[rgba(192,24,144,0.25)] font-medium"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -1303,7 +1303,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                 <select
                                     value={merchFulfillment}
                                     onChange={e => setMerchFulfillment(e.target.value)}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 font-medium"
+                                    className="w-full px-4 py-3 bg-slate-50 border border-border rounded-xl focus:border-[var(--brand-magenta)] focus:outline-none focus:ring-2 focus:ring-[rgba(192,24,144,0.25)] font-medium"
                                 >
                                     {['Printful', 'Printify', 'Spring / Teespring', 'Inkbase', 'Gelato', 'Other'].map(p => (
                                         <option key={p} value={p}>{p}</option>
@@ -1350,7 +1350,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                         </div>
                                     ))}
                                     {merchColors.length === 0 && (
-                                        <p className="text-xs text-muted-foreground italic">No colors added yet.</p>
+                                        <p className="text-xs text-muted-foreground">No colors added yet.</p>
                                     )}
                                 </div>
                             </div>
@@ -1359,7 +1359,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                 )}
 
                 {/* Submission */}
-                <div className="fixed bottom-0 left-0 right-0 md:sticky md:bottom-8 bg-white/80 backdrop-blur-xl border-t md:border border-border p-6 md:p-8 md:rounded-4xl z-[100] shadow-saas-lg md:mx-auto">
+                <div className="fixed bottom-0 left-0 right-0 md:sticky md:bottom-8 bg-white/80 backdrop-blur-xl border-t md:border border-border p-6 md:p-8 md:rounded-3xl z-[100] shadow-saas-lg md:mx-auto">
                     <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-6 md:items-center md:justify-between">
                         <div className="flex items-center gap-6">
                             <div className="hidden lg:block space-y-1">
@@ -1391,12 +1391,12 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                                     type="button"
                                     onClick={handleUploadToIPFS}
                                     disabled={isUploadingIPFS || isLoading || !productName || !productDescription || !price}
-                                    className="flex-1 md:flex-none px-10 py-5 bg-slate-100 text-slate-950 text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-slate-200 disabled:opacity-50 transition-all"
+                                    className="flex-1 md:flex-none btn-secondary rounded-xl px-6 h-12 inline-flex items-center justify-center gap-2 text-xs font-black uppercase tracking-[0.12em] disabled:opacity-50"
                                 >
                                     {isUploadingIPFS ? 'Encrypting...' : 'Secure Assets'}
                                 </button>
                             ) : (
-                                <div className="hidden md:flex items-center gap-3 px-6 py-2 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest rounded-2xl border border-emerald-500/20">
+                                <div className="hidden md:flex items-center gap-3 px-6 py-2 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest rounded-xl border border-emerald-500/20">
                                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                                     Content Secured
                                 </div>
@@ -1405,7 +1405,7 @@ export function ProductForm({ editProductId, onSuccess, onCancel }: ProductFormP
                             <button
                                 type="submit"
                                 disabled={isLoading || !ipfsHash}
-                                className="flex-1 md:flex-none md:px-12 py-5 bg-primary text-primary-foreground hover:scale-105 active:scale-95 disabled:opacity-50 transition-all font-black uppercase tracking-[0.3em] rounded-2xl text-lg shadow-saas shadow-primary/20"
+                                className="flex-1 md:flex-none btn-brand rounded-xl px-6 h-12 inline-flex items-center justify-center gap-2 text-xs font-black uppercase tracking-[0.12em] disabled:opacity-50"
                             >
                                 {isAddPending || isUpdatePending ? 'CONSENTING...' : isAddConfirming || isUpdateConfirming ? 'FINALIZING...' : editProductId ? 'UPDATE PRODUCT' : 'LAUNCH PRODUCT'}
                             </button>

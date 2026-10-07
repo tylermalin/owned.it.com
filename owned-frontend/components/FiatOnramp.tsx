@@ -37,7 +37,7 @@ export const FiatOnramp = ({ className = '', compact = false }: FiatOnrampProps)
             <button
                 onClick={handleOnramp}
                 disabled={loading}
-                className={`inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:scale-105 active:scale-95 disabled:opacity-50 transition-all shadow-sm ${className}`}
+                className={`btn-brand inline-flex items-center justify-center gap-2 px-4 h-10 rounded-xl text-xs font-black uppercase tracking-[0.12em] disabled:opacity-50 ${className}`}
             >
                 {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CreditCard className="w-3.5 h-3.5" />}
                 Buy USDC
@@ -46,9 +46,9 @@ export const FiatOnramp = ({ className = '', compact = false }: FiatOnrampProps)
     }
 
     return (
-        <div className={`bg-gradient-to-br from-violet-50 to-indigo-50 border border-violet-200/50 rounded-3xl p-6 space-y-4 ${className}`}>
+        <div className={`bg-primary/5 border border-primary/20 rounded-3xl p-6 space-y-4 ${className}`}>
             <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-sm">
+                <div className="w-10 h-10 bg-[image:var(--brand-cta)] rounded-xl flex items-center justify-center shadow-sm">
                     <CreditCard className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -60,7 +60,7 @@ export const FiatOnramp = ({ className = '', compact = false }: FiatOnrampProps)
             <button
                 onClick={handleOnramp}
                 disabled={loading}
-                className="w-full py-4 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-xs hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 transition-all shadow-saas shadow-violet-500/20 flex items-center justify-center gap-3"
+                className="btn-brand w-full rounded-xl px-6 h-12 inline-flex items-center justify-center gap-2 text-xs font-black uppercase tracking-[0.12em] disabled:opacity-50"
             >
                 {loading ? (
                     <>

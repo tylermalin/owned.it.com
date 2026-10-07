@@ -65,11 +65,11 @@ export function RecentActivity() {
     }, [publicClient]);
 
     if (isLoading) return <div className="text-sm animate-pulse">Loading activity...</div>;
-    if (error) return <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/10 p-4 border border-red-200 dark:border-red-800">{error}</div>;
-    if (activities.length === 0) return <div className="text-sm text-neutral-500 italic">No recent activity</div>;
+    if (error) return <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/10 p-4 rounded-xl border border-red-200 dark:border-red-800">{error}</div>;
+    if (activities.length === 0) return <div className="text-sm text-neutral-500">No recent activity</div>;
 
     return (
-        <div className="border border-neutral-200 dark:border-neutral-800">
+        <div className="rounded-3xl overflow-hidden border border-border bg-white">
             <div className="divide-y divide-neutral-200 dark:divide-neutral-800">
                 {activities.slice(0, 5).map((activity, i) => (
                     <div key={i} className="p-4 flex items-center justify-between hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors">
@@ -78,12 +78,12 @@ export function RecentActivity() {
                             <span className="text-xs text-neutral-500">{shortenAddress(activity.address)} bought this</span>
                         </div>
                         <div className="text-right flex flex-col">
-                            <span className="font-serif font-bold">+{formatUSDC(activity.amount)}</span>
+                            <span className="font-black text-green-600">+{formatUSDC(activity.amount)}</span>
                             <a
                                 href={`https://sepolia.basescan.org/tx/${activity.txHash}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[10px] text-neutral-400 hover:text-neutral-600 underline"
+                                className="text-[10px] font-bold text-neutral-500 hover:text-foreground link-draw pb-0.5"
                             >
                                 View Tx
                             </a>

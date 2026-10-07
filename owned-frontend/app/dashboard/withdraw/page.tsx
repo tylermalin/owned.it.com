@@ -9,9 +9,9 @@ export default function WithdrawPage() {
     return (
         <DashboardLayout>
             <div className="space-y-8">
-                <div>
-                    <h1 className="font-serif text-4xl font-bold mb-2">Withdraw Earnings</h1>
-                    <p className="text-neutral-600 dark:text-neutral-400">
+                <div className="space-y-1">
+                    <h1 className="text-2xl md:text-3xl font-black tracking-tight">Withdraw Earnings</h1>
+                    <p className="text-sm md:text-base text-muted-foreground font-medium">
                         Transfer your creator balance to your wallet
                     </p>
                 </div>
@@ -19,9 +19,9 @@ export default function WithdrawPage() {
                 <BalanceCard />
 
                 <div className="max-w-2xl">
-                    <div className="border border-neutral-200 dark:border-neutral-800 p-6 space-y-4">
-                        <h2 className="font-serif text-2xl font-bold">How It Works</h2>
-                        <ul className="space-y-2 text-neutral-600 dark:text-neutral-400">
+                    <div className="rounded-3xl border border-border bg-white p-6 md:p-8 space-y-4">
+                        <h2 className="text-xl font-black tracking-tight">How It Works</h2>
+                        <ul className="space-y-2 text-muted-foreground font-medium">
                             <li>• You receive 97% of each sale</li>
                             <li>• Platform takes 3% fee</li>
                             <li>• Withdraw anytime to your connected wallet</li>
@@ -39,12 +39,12 @@ function BalanceCard() {
 
     return (
         <div className="max-w-2xl">
-            <div className="border border-neutral-200 dark:border-neutral-800 p-8">
+            <div className="rounded-3xl border border-border bg-white p-6 md:p-8">
                 <div className="mb-6">
-                    <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">
+                    <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
                         Available Balance
                     </div>
-                    <div className="font-serif text-5xl font-bold">
+                    <div className="text-4xl md:text-5xl font-black tracking-tight">
                         {isLoading ? '...' : balance ? formatUSDC(balance as bigint) : '$0.00'}
                     </div>
                 </div>

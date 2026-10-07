@@ -5,7 +5,14 @@ import { useMagic } from '@/components/MagicProvider';
 import { Mail, LogOut, ChevronDown, Loader2, User, LayoutDashboard, Settings, Library, Package, Users, Wallet } from 'lucide-react';
 import Link from 'next/link';
 
-export function AuthButton() {
+type AuthButtonProps = {
+    /** primary: gradient. secondary: white sticker, for the header next to the main CTA. */
+    variant?: 'primary' | 'secondary';
+    /** Full width, for menus and stacked layouts. */
+    block?: boolean;
+};
+
+export function AuthButton({ variant = 'primary', block = false }: AuthButtonProps = {}) {
     const { user, isLoading, isLoggingIn, login, logout, magic } = useMagic();
 
     const [email, setEmail] = useState('');
@@ -19,9 +26,11 @@ export function AuthButton() {
             <div className="relative">
                 <button
                     onClick={() => setShowMenu(!showMenu)}
-                    className="flex items-center gap-3 px-5 py-3 bg-white border border-border rounded-2xl hover:shadow-saas transition-all group"
+                    aria-expanded={showMenu}
+                    aria-haspopup="menu"
+                    className="btn-secondary flex items-center gap-3 px-3 py-2 rounded-xl group"
                 >
-                    <div className="w-8 h-8 bg-primary/10 rounded-xl flex items-center justify-center">
+                    <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
                         <User className="w-4 h-4 text-primary" />
                     </div>
                     <div className="text-left hidden md:block">
@@ -34,7 +43,8 @@ export function AuthButton() {
                 {showMenu && (
                     <>
                         <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
-                        <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl border border-border shadow-saas-lg z-50 overflow-hidden">
+                        <div className="menu-in absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl border border-border shadow-saas-lg z-50 overflow-hidden">
+                            <div className="brand-scanlines h-1.5" aria-hidden="true" />
                             <div className="p-4 border-b border-border">
                                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Wallet Address</p>
                                 <p className="text-xs font-mono font-bold text-foreground mt-1 break-all">{user.publicAddress}</p>
@@ -55,11 +65,11 @@ export function AuthButton() {
                                             await magic?.wallet.showUI();
                                         } catch (e) { }
                                     }}
-                                    className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:shadow-saas transition-all shadow-sm"
+                                    className="btn-brand w-full flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-black uppercase tracking-[0.12em]"
                                 >
                                     <Wallet className="w-4 h-4" /> Open Magic Wallet
                                 </button>
-                                <p className="text-[9px] text-center text-muted-foreground font-medium mt-3">
+                                <p className="text-[10px] text-center text-muted-foreground font-medium mt-3">
                                     View balance, send, receive, and buy USDC
                                 </p>
                             </div>
@@ -122,7 +132,7 @@ export function AuthButton() {
     // Loading state
     if (isLoading) {
         return (
-            <div className="px-6 py-3 bg-white border border-border rounded-2xl">
+            <div className="px-5 py-2.5 bg-white border border-border rounded-xl">
                 <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
             </div>
         );
@@ -176,10 +186,10 @@ export function AuthButton() {
     return (
         <button
             onClick={() => setShowEmailInput(true)}
-            className="btn-brand flex items-center gap-2.5 px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-widest active:scale-95"
+            className={`${variant === 'primary' ? 'btn-brand' : 'btn-secondary'} ${block ? 'flex w-full justify-center h-12' : 'inline-flex'} items-center gap-2.5 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-[0.12em]`}
         >
             <Mail className="w-4 h-4" />
-            <span>Sign In<span className="hidden sm:inline"> with Email</span></span>
+            <span>Sign in</span>
         </button>
     );
 }

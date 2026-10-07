@@ -157,7 +157,7 @@ const PROOF = ['3% fee, fixed in the contract', 'No monthly fee', 'Open source o
 
 export function HeroSection() {
     return (
-        <main className="relative overflow-hidden pt-40 sm:pt-32 lg:pt-32">
+        <section className="relative overflow-hidden pt-8 sm:pt-10 lg:pt-6" data-no-reveal>
             <div className="absolute left-1/2 top-0 -z-10 h-[520px] w-[1000px] -translate-x-1/2 rounded-full bg-[rgba(192,24,144,0.06)] blur-[120px]" />
 
             <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-6 pb-8 lg:min-h-[600px] lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-16 lg:pb-8">
@@ -219,6 +219,6 @@ export function HeroSection() {
                     </a>
                 </div>
             </div>
-        </main>
+        </section>
     );
 }
