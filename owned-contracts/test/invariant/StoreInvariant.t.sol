@@ -18,6 +18,8 @@ contract StoreHandler is Test {
     uint256 public totalPaid;
     uint256 public totalWithdrawn;
     uint256 public mintedCount;
+    uint256 public totalDonated;
+    uint256 public totalSwept;
 
     constructor(CreatorStore store_, MockUSDC usdc_, address creator_, address feeRecipient_) {
         store = store_;
@@ -28,6 +30,10 @@ contract StoreHandler is Test {
             address a = makeAddr(string(abi.encodePacked("actor", vm.toString(i))));
             actors.push(a);
             usdc_.mint(a, 1_000_000e6);
+            if (i % 2 == 0) {
+                vm.prank(creator_);
+                store_.setReferrer(a, true); // half the actors are approved referrers
+            }
         }
     }
 
@@ -35,23 +41,46 @@ contract StoreHandler is Test {
         return actors.length;
     }
 
-    function addProduct(uint256 price, uint64 maxSupply, uint16 referralBps) external {
+    function addProduct(uint256 price, uint64 maxSupply, uint32 maxPerWallet, uint16 referralBps) external {
         price = bound(price, 0, 500e6);
         maxSupply = uint64(bound(maxSupply, 0, 20));
+        maxPerWallet = uint32(bound(maxPerWallet, 0, 5));
         referralBps = uint16(bound(referralBps, 0, 5_000));
         vm.prank(creator);
-        store.addProduct(price, maxSupply, referralBps, "ipfs://h");
+        store.addProduct(
+            CreatorStore.ProductInput({
+                price: price, maxSupply: maxSupply, maxPerWallet: maxPerWallet, referralBps: referralBps, uri: "ipfs://h"
+            })
+        );
+    }
+
+    /// Unsolicited USDC sent straight to the store, then swept by the creator.
+    function donateAndSweep(uint256 amount, bool sweep) external {
+        amount = bound(amount, 1, 1_000e6);
+        usdc.mint(address(store), amount);
+        totalDonated += amount;
+        if (sweep) {
+            uint256 ex = store.excessUsdc();
+            vm.prank(creator);
+            store.sweepExcess(creator);
+            totalSwept += ex;
+        }
     }
 
     function updateProduct(uint256 idSeed, uint256 price, uint16 referralBps) external {
         uint256 n = store.nextProductId();
         if (n == 1) return;
         uint256 id = bound(idSeed, 1, n - 1);
-        CreatorStore.Product memory p = store.getProduct(id);
+        CreatorStore.ProductView memory p = store.getProduct(id);
         price = bound(price, 0, 500e6);
         referralBps = uint16(bound(referralBps, 0, 5_000));
         vm.prank(creator);
-        store.updateProduct(id, price, p.maxSupply, referralBps, "ipfs://h2");
+        store.updateProduct(
+            id,
+            CreatorStore.ProductInput({
+                price: price, maxSupply: p.maxSupply, maxPerWallet: p.maxPerWallet, referralBps: referralBps, uri: "ipfs://h2"
+            })
+        );
     }
 
     function toggle(uint256 idSeed, bool active) external {
@@ -67,8 +96,9 @@ contract StoreHandler is Test {
         uint256 id = bound(idSeed, 1, n - 1);
         address buyer = actors[bound(actorSeed, 0, actors.length - 1)];
         address ref = actors[bound(refSeed, 0, actors.length - 1)];
-        CreatorStore.Product memory p = store.getProduct(id);
+        CreatorStore.ProductView memory p = store.getProduct(id);
         if (!p.active || (p.maxSupply != 0 && p.sold >= p.maxSupply)) return;
+        if (p.maxPerWallet != 0 && store.purchasedBy(id, buyer) >= p.maxPerWallet) return;
 
         vm.startPrank(buyer);
         usdc.approve(address(store), p.price);
@@ -129,14 +159,25 @@ contract StoreInvariantTest is Test {
         }
     }
 
-    /// Every dollar the store holds is owed to someone, exactly.
+    /// The running referral total always equals the sum of individual referral balances.
+    function invariant_referralTotalMatches() public view {
+        uint256 sum;
+        for (uint256 i; i < handler.actorCount(); i++) sum += store.referralBalance(handler.actors(i));
+        assertEq(store.totalReferralOwed(), sum);
+    }
+
+    /// Holdings always cover what is owed, and any surplus is exactly the unswept donations.
     function invariant_balancesMatchHoldings() public view {
-        assertEq(usdc.balanceOf(address(store)), _owedTotal());
+        assertEq(usdc.balanceOf(address(store)), _owedTotal() + store.excessUsdc());
+        assertEq(store.excessUsdc(), handler.totalDonated() - handler.totalSwept());
     }
 
     /// Money in equals money held plus money paid out.
     function invariant_conservation() public view {
-        assertEq(handler.totalPaid(), usdc.balanceOf(address(store)) + handler.totalWithdrawn());
+        assertEq(
+            handler.totalPaid() + handler.totalDonated(),
+            usdc.balanceOf(address(store)) + handler.totalWithdrawn() + handler.totalSwept()
+        );
     }
 
     /// One receipt per purchase, ids strictly sequential.

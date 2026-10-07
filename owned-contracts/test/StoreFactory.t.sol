@@ -63,13 +63,13 @@ contract StoreFactoryTest is BaseTest {
 
     function test_clone_cannotBeReinitialized() public {
         vm.expectRevert(Initializable.InvalidInitialization.selector);
-        store.initialize(stranger, usdc, stranger, 0, "x", "x");
+        store.initialize(stranger, usdc, 0, "x", "x");
     }
 
     function test_implementation_cannotBeInitialized() public {
         CreatorStore impl = CreatorStore(factory.implementation());
         vm.expectRevert(Initializable.InvalidInitialization.selector);
-        impl.initialize(stranger, usdc, stranger, 0, "x", "x");
+        impl.initialize(stranger, usdc, 0, "x", "x");
     }
 
     function test_raisePriceCap_onlyOwner() public {
@@ -92,12 +92,12 @@ contract StoreFactoryTest is BaseTest {
     function test_raisePriceCap_appliesToExistingStores() public {
         vm.prank(creator);
         vm.expectRevert(abi.encodeWithSelector(CreatorStore.PriceAboveCap.selector, CAP + 1, CAP));
-        store.addProduct(CAP + 1, 0, 0, "ipfs://x");
+        store.addProduct(_in(CAP + 1, 0, 0, 0, "ipfs://x"));
 
         vm.prank(platformOwner);
         factory.raisePriceCap(1_000e6);
 
         vm.prank(creator);
-        store.addProduct(CAP + 1, 0, 0, "ipfs://x");
+        store.addProduct(_in(CAP + 1, 0, 0, 0, "ipfs://x"));
     }
 }
