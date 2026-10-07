@@ -42,7 +42,6 @@ export function Nav() {
                         <div className="hidden lg:flex items-center gap-10">
                             {[
                                 { label: 'Marketplace', href: '/products' },
-                                { label: 'Partner Store', href: '/affiliate' },
                                 { label: 'Features', href: '/#features' },
                                 { label: 'Pricing', href: '/pricing' },
                                 { label: 'Docs', href: '/docs' }

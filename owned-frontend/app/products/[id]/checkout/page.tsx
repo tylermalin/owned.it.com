@@ -14,7 +14,6 @@ import { DEMO_METADATA } from '@/lib/demo';
 import { FormattedDescription } from '@/components/FormattedDescription';
 import { Calendar } from '@/components/Calendar';
 import { useAffiliate } from '@/components/AffiliateContext';
-import { recordAffiliateSale, getReferrer } from '@/lib/affiliateTracker';
 import {
     CheckCircle2,
     ShieldCheck,
@@ -108,19 +107,8 @@ export default function CheckoutPage() {
                 savePurchaseReceipt(magicUser.publicAddress, productId);
             }
 
-            // Record affiliate sale if there's a referrer
-            const ref = referrer || getReferrer(productId);
-            if (ref && metadata?.affiliateEnabled && metadata?.affiliatePercent) {
-                const salePrice = metadata.price ? parseFloat(metadata.price) : 0;
-                recordAffiliateSale(
-                    productId,
-                    ref,
-                    magicUser?.publicAddress || 'unknown',
-                    salePrice,
-                    metadata.affiliatePercent,
-                    metadata.name
-                );
-            }
+            // Affiliate/referral recording is disabled; it will be rebuilt on the
+            // v2 contracts where a referral share is paid onchain at purchase.
             toast.success('Purchase successful! Redirecting...');
             setTimeout(() => router.push('/dashboard/library'), 3000);
         }

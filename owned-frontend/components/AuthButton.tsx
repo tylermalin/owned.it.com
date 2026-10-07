@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMagic } from '@/components/MagicProvider';
-import { Mail, LogOut, ChevronDown, Loader2, User, LayoutDashboard, Settings, Library, Package, Users, ShoppingBag, Wallet } from 'lucide-react';
+import { Mail, LogOut, ChevronDown, Loader2, User, LayoutDashboard, Settings, Library, Package, Users, Wallet } from 'lucide-react';
 import Link from 'next/link';
 
 export function AuthButton() {
@@ -103,14 +103,6 @@ export function AuthButton() {
                                 >
                                     <Users className="w-4 h-4 text-primary" />
                                     Affiliates
-                                </Link>
-                                <Link
-                                    href="/affiliate"
-                                    onClick={() => setShowMenu(false)}
-                                    className="w-full px-3 py-2 flex items-center gap-3 text-sm font-bold text-foreground hover:bg-slate-50 rounded-xl transition-colors"
-                                >
-                                    <ShoppingBag className="w-4 h-4 text-primary" />
-                                    Partner Store
                                 </Link>
                             </div>
                             <button
