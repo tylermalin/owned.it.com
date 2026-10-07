@@ -39,7 +39,7 @@ export const SHOWCASE_DATA: Record<string, ShowcaseExample> = {
             theExample: {
                 title: 'The Example: High-Ticket Education',
                 content: 'A comprehensive video series for solopreneurs, sold as a 100-delegate NFT collection. Each token grants lifetime access to the curriculum and private community.',
-                metrics: ['$50,000 Monthly Revenue', '100% Retained Ownership', 'Zero Platform Fees']
+                metrics: ['100% Retained Ownership', 'Zero Platform Fees']
             },
             theBuild: {
                 title: 'The Build: Infrastructure',
@@ -202,7 +202,7 @@ export const SHOWCASE_DATA: Record<string, ShowcaseExample> = {
         sections: {
             theExample: {
                 title: 'The Example: Genesis Sound',
-                content: 'A digital album drop with 5 exclusive tracks and high-res cover art. Each sale builds a permanent listener relationship.',
+                content: 'A digital album drop with 5 exclusive tracks and high-res cover art. Each sale builds a lasting listener relationship.',
                 metrics: ['Perpetual Royalties', 'Zero Record Label Take', 'Direct Fan Connection']
             },
             theBuild: {

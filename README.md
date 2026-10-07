@@ -76,7 +76,7 @@ For detailed instructions on hosting the dashboard on Vercel, see the [Deploymen
 
 - **Monetization first, audience second**: Own your revenue stream.
 - **Stack sats**: Direct-to-creator payments.
-- **Capped Fee Model**: $9/mo + 3% transactions, max $109/mo total.
+- **One Fee**: 3% per sale, enforced by the contract. No subscription, no setup fee.
 
 ---
 

@@ -33,7 +33,7 @@ export default function TermsPage() {
                         <section className="space-y-4">
                             <h2 className="text-2xl font-black italic">3. Payments & Fees</h2>
                             <p className="leading-relaxed font-medium">
-                                Payments are processed in USDC on the Base network. You are responsible for ensuring sufficient balance and gas fees for transactions. OWNED IT charges a 3% platform fee on transactions, which may be capped for certain subscription tiers.
+                                Payments are processed in USDC on the Base network. You are responsible for ensuring sufficient balance and gas fees for transactions. OWNED IT charges a fixed 3% platform fee on each sale.
                             </p>
                         </section>
 

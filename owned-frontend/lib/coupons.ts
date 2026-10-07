@@ -8,15 +8,10 @@ export interface Coupon {
     applicableProductIds?: number[]; // Empty means all
 }
 
-// In a real app, this would be fetched from a DB or contract.
-export const ACTIVE_COUPONS: Coupon[] = [
-    {
-        code: 'SOVEREIGN20',
-        discountPercent: 20,
-        redemptionCount: 0,
-        maxRedemptions: 100,
-    }
-];
+// Coupons are disabled. On-chain pricing cannot currently honor a partial
+// discount without the real purchase reverting or overcharging, so no codes
+// are live. Keep this empty until discounts are enforced at the contract level.
+export const ACTIVE_COUPONS: Coupon[] = [];
 
 export interface ValidationResult {
     isValid: boolean;

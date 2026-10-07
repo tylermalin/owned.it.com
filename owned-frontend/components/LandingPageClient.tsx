@@ -103,7 +103,7 @@ export function LandingPageClient() {
                                     <span className="text-primary">•</span> You control pricing & products (no platform approval needed)
                                 </li>
                                 <li className="flex items-center gap-3 text-sm font-bold text-foreground">
-                                    <span className="text-primary">•</span> Media & metadata on IPFS (permanent storage)
+                                    <span className="text-primary">•</span> Media & metadata pinned to IPFS
                                 </li>
                             </ul>
                         </div>
@@ -137,7 +137,7 @@ export function LandingPageClient() {
                                     <span className="text-primary">•</span> Contracts are truly yours (deployed to your wallet)
                                 </li>
                                 <li className="flex items-center gap-3 text-sm font-bold text-foreground">
-                                    <span className="text-primary">•</span> Real-time settlement (USDC hits your wallet instantly)
+                                    <span className="text-primary">•</span> Onchain settlement (USDC lands in your store contract; withdraw anytime)
                                 </li>
                                 <li className="flex items-center gap-3 text-sm font-bold text-foreground">
                                     <span className="text-primary">•</span> Censorship resistant (code doesn't have policies)
@@ -163,7 +163,7 @@ export function LandingPageClient() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             {[
                                 { h: "No account freezes", p: "Smart contracts don't have lock buttons." },
-                                { h: "No payment holds", p: "USDC settles directly to your wallet." },
+                                { h: "No payment holds", p: "USDC settles onchain into your store contract." },
                                 { h: "No deplatforming", p: "Sovereign code cannot be deleted." },
                                 { h: "No subscription traps", p: "Own it once, use it forever." }
                             ].map((item, i) => (

@@ -114,7 +114,7 @@ export default function ProductDetailPage() {
                         {/* The Example */}
                         <section className="space-y-12 bg-white p-12 md:p-24 rounded-[4rem] border border-border shadow-saas">
                             <div className="flex items-center gap-4 text-primary font-black uppercase tracking-[0.3em] text-[10px]">
-                                <ShieldCheck className="w-4 h-4" /> The Case Study
+                                <ShieldCheck className="w-4 h-4" /> Example (hypothetical)
                             </div>
                             <div className="space-y-8">
                                 <h2 className="text-4xl md:text-5xl font-black tracking-tight italic">

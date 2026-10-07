@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, MessageSquare, ShieldCheck, Globe, Zap } from 'lucide-react';
+import { ArrowLeft, MessageSquare, ShieldCheck, Globe, Zap, Loader2, Check } from 'lucide-react';
 import { AuthButton } from '@/components/AuthButton';
+import toast from 'react-hot-toast';
 
 export default function ContactPage() {
     const [formData, setFormData] = useState({
@@ -12,6 +13,43 @@ export default function ContactPage() {
         org: '',
         message: ''
     });
+    // Honeypot — hidden from real users; bots that fill it are dropped server-side.
+    const [company, setCompany] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isDone, setIsDone] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!formData.email) {
+            toast.error('Please enter your email.');
+            return;
+        }
+        setIsSubmitting(true);
+        try {
+            const res = await fetch('/api/waitlist', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    source: 'contact',
+                    name: formData.name,
+                    email: formData.email,
+                    org: formData.org,
+                    message: formData.message,
+                    company,
+                }),
+            });
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error || 'Could not send your inquiry.');
+            }
+            setIsDone(true);
+            toast.success("Thanks — we've got your inquiry and we'll be in touch.");
+        } catch (err: any) {
+            toast.error(err?.message || 'Something went wrong. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-white flex flex-col font-sans">
@@ -84,8 +122,27 @@ export default function ContactPage() {
 
                     {/* Form Side */}
                     <div className="space-y-10 py-4">
+                        {isDone ? (
+                            <div className="h-full flex flex-col items-center justify-center text-center space-y-6 py-12">
+                                <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center">
+                                    <Check className="w-8 h-8 text-emerald-600" strokeWidth={3} />
+                                </div>
+                                <div className="space-y-2">
+                                    <h2 className="text-3xl font-black tracking-tight">Inquiry received</h2>
+                                    <p className="text-muted-foreground font-medium max-w-sm">
+                                        Thanks for reaching out. We'll follow up at the email you provided.
+                                    </p>
+                                </div>
+                            </div>
+                        ) : (
+                        <>
                         <h2 className="text-3xl font-black tracking-tight">Tell us about your project</h2>
-                        <form className="space-y-8">
+                        <form className="space-y-8" onSubmit={handleSubmit}>
+                            {/* Honeypot — off-screen, excluded from tab order and a11y tree. */}
+                            <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, overflow: 'hidden' }}>
+                                <label htmlFor="ct-company">Company (leave this empty)</label>
+                                <input id="ct-company" type="text" name="company" tabIndex={-1} autoComplete="off" value={company} onChange={(e) => setCompany(e.target.value)} />
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Full Name</label>
@@ -132,12 +189,15 @@ export default function ContactPage() {
                             </div>
 
                             <button
-                                type="button"
-                                className="w-full py-6 bg-foreground text-background rounded-3xl font-black uppercase tracking-[0.3em] text-sm shadow-saas hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+                                type="submit"
+                                disabled={!formData.email || isSubmitting}
+                                className="w-full py-6 bg-foreground text-background rounded-3xl font-black uppercase tracking-[0.3em] text-sm shadow-saas hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-40 disabled:scale-100"
                             >
-                                <MessageSquare className="w-4 h-4" /> Send Inquiry
+                                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageSquare className="w-4 h-4" />} Send Inquiry
                             </button>
                         </form>
+                        </>
+                        )}
                     </div>
                 </div>
             </main>

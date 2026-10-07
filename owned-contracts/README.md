@@ -65,4 +65,4 @@ OWNED: Stack sats, not subscriptions.
 - Monetization first, audience second
 - Onchain payments (USDC, ETH, SOL)
 - Censorship-resistant (permissionless smart contracts)
-- Capped fee model: $9/mo + 3% transactions, max $109/mo total
+- One fee: 3% per sale, enforced by the contract (no subscription)

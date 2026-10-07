@@ -17,6 +17,9 @@ export function WaitlistForm({
 }: WaitlistFormProps) {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
+    // Honeypot: real users never see or fill this. Bots that autofill every
+    // field will, and the server drops those submissions.
+    const [company, setCompany] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isDone, setIsDone] = useState(false);
 
@@ -28,7 +31,7 @@ export function WaitlistForm({
             const res = await fetch('/api/waitlist', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, source }),
+                body: JSON.stringify({ name, email, source, company }),
             });
             if (!res.ok) {
                 const data = await res.json().catch(() => ({}));
@@ -62,6 +65,20 @@ export function WaitlistForm({
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Honeypot — visually hidden, off-screen, excluded from tab order and a11y tree. */}
+            <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, overflow: 'hidden' }}>
+                <label htmlFor="wl-company">Company (leave this empty)</label>
+                <input
+                    id="wl-company"
+                    type="text"
+                    name="company"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={company}
+                    onChange={(e) => setCompany(e.target.value)}
+                />
+            </div>
+
             <div className="space-y-2">
                 <h2 className="text-3xl font-black tracking-tight italic">{heading}</h2>
                 <p className="text-base text-muted-foreground font-medium">{subheading}</p>

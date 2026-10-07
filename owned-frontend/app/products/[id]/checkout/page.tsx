@@ -547,34 +547,7 @@ export default function CheckoutPage() {
                                     </div>
                                 ))}
 
-                                <div className="space-y-2 pt-4 border-t border-border border-dashed">
-                                    <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Coupon Code</label>
-                                    <div className="flex gap-2">
-                                        <input
-                                            type="text"
-                                            className={`flex-1 px-6 py-4 bg-white border ${couponValidation?.isValid ? 'border-emerald-500' : couponValidation?.error ? 'border-red-500' : 'border-border'} rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 font-medium transition-all`}
-                                            placeholder="Enter coupon code..."
-                                            value={couponCode}
-                                            onChange={(e) => {
-                                                setCouponCode(e.target.value);
-                                                setCouponValidation(null);
-                                            }}
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={handleApplyCoupon}
-                                            className="px-6 bg-slate-900 text-white font-bold rounded-2xl hover:bg-primary transition-all text-xs uppercase tracking-widest"
-                                        >
-                                            Apply
-                                        </button>
-                                    </div>
-                                    {couponValidation?.error && (
-                                        <p className="text-[10px] font-bold text-red-500 ml-1 uppercase">{couponValidation.error}</p>
-                                    )}
-                                    {couponValidation?.isValid && (
-                                        <p className="text-[10px] font-bold text-emerald-600 ml-1 uppercase">Coupon applied successfully!</p>
-                                    )}
-                                </div>
+                                {/* Coupon field hidden: discounts are disabled until enforced on-chain. */}
 
                                 {metadata?.productType === 'merch' && metadata.merch && (
                                     <div className="space-y-6 pt-4">
@@ -672,7 +645,7 @@ export default function CheckoutPage() {
                             <div className="text-xs font-black uppercase tracking-widest">AES Encrypted</div>
                         </div>
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] text-center max-w-sm leading-relaxed">
-                            This transaction is recorded permanently. Your access key is minted as a blockchain-verified Proof NFT.
+                            This transaction is recorded onchain. Your access key is minted as a blockchain-verified Proof NFT.
                         </p>
                     </div>
                 </div>

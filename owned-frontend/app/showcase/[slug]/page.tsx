@@ -92,7 +92,7 @@ export default function ShowcaseDetailPage() {
                 {/* The Example */}
                 <section className="space-y-12 bg-white p-12 md:p-24 rounded-[4rem] border border-border shadow-saas">
                     <div className="flex items-center gap-4 text-primary font-black uppercase tracking-[0.3em] text-[10px]">
-                        <Star className="w-4 h-4 fill-current" /> The Case Study
+                        <Star className="w-4 h-4 fill-current" /> Example (hypothetical)
                     </div>
                     <div className="space-y-8">
                         <h2 className="text-4xl md:text-5xl font-black tracking-tight italic underline decoration-primary/20 underline-offset-8">

@@ -16,20 +16,33 @@ const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 // instead of falsely telling the visitor they're on the list.
 const DEFAULT_FORMSPREE_ID = 'mvzvlkva';
 export async function POST(req: NextRequest) {
-    let body: { email?: string; name?: string; source?: string };
+    let body: { email?: string; name?: string; source?: string; company?: string; org?: string; message?: string };
     try {
         body = await req.json();
     } catch {
         return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
     }
 
+    // Honeypot: the `company` field is hidden from real users. If it's filled,
+    // silently accept (200) without forwarding so bots can't tell they failed.
+    if ((body.company || '').trim() !== '') {
+        return NextResponse.json({ ok: true });
+    }
+
     const email = (body.email || '').trim();
     const name = (body.name || '').trim();
     const source = (body.source || 'general').trim();
+    const org = (body.org || '').trim();
+    const message = (body.message || '').trim();
 
     if (!EMAIL_RE.test(email)) {
         return NextResponse.json({ error: 'A valid email is required' }, { status: 400 });
     }
+
+    // Only forward the optional fields that are actually present.
+    const extra: Record<string, string> = {};
+    if (org) extra.org = org;
+    if (message) extra.message = message;
 
     // Explicit env sinks take precedence; Formspree (env override or default) is the fallback.
     const webhookUrl = process.env.WAITLIST_WEBHOOK_URL;
@@ -42,10 +55,11 @@ export async function POST(req: NextRequest) {
             const r = await fetch(webhookUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, name, source, at: new Date().toISOString() }),
+                body: JSON.stringify({ email, name, source, ...extra, at: new Date().toISOString() }),
             });
             if (!r.ok) throw new Error(`Webhook responded ${r.status}`);
         } else if (resendKey && notifyEmail) {
+            const extraLines = Object.entries(extra).map(([k, v]) => `${k[0].toUpperCase()}${k.slice(1)}: ${v}`).join('\n');
             const r = await fetch('https://api.resend.com/emails', {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
@@ -54,7 +68,7 @@ export async function POST(req: NextRequest) {
                     to: [notifyEmail],
                     reply_to: email,
                     subject: `New waitlist signup (${source})`,
-                    text: `Name: ${name || '—'}\nEmail: ${email}\nSource: ${source}`,
+                    text: `Name: ${name || '—'}\nEmail: ${email}\nSource: ${source}${extraLines ? '\n' + extraLines : ''}`,
                 }),
             });
             if (!r.ok) throw new Error(`Resend responded ${r.status}`);
@@ -62,7 +76,7 @@ export async function POST(req: NextRequest) {
             const r = await fetch(`https://formspree.io/f/${formspreeId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-                body: JSON.stringify({ email, name, source }),
+                body: JSON.stringify({ email, name, source, ...extra }),
             });
             if (!r.ok) throw new Error(`Formspree responded ${r.status}`);
         } else {

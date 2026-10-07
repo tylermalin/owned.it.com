@@ -25,7 +25,7 @@ You MUST add the following variables in the Vercel dashboard:
 | `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | *Your WalletConnect ID* |
 | `NEXT_PUBLIC_CONTRACT_ADDRESS` | `0x2CfE077af112B9F6e6Ed39e327D3d31c840401BD` |
 | `NEXT_PUBLIC_CHAIN_ID` | `84532` (Base Sepolia) |
-| `NEXT_PUBLIC_PINATA_JWT` | *Your Pinata JWT* |
+| `PINATA_JWT` | *Your Pinata JWT (server-only — never `NEXT_PUBLIC_`)* |
 
 > [!TIP]
 > You can find these values in your local `owned-frontend/.env.local` file.
